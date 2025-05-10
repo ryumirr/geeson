@@ -1,1 +1,5 @@
 rootProject.name = 'geeson'
+
+include 'storage'
+include 'storage:rdb'
+include 'storage:rdb:order-db'
