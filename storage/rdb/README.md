@@ -14,6 +14,8 @@
 
 ## 주문 도메인(order_db)
 
+테이블 DDL 스크립트는 따로 정리하겠습니다.
+
 ### 테이블 리스트
 
 | 테이블 이름                      | 설명             |
@@ -35,5 +37,21 @@
 | **order\_notifications**    | 주문 상태 알림       |
 | **transaction\_logs**       | 결제 트랜잭션 기록     |
 
-테이블 DDL 스크립트는 따로 정리하겠습니다.
+## 주문 도메인(order_db)
 
+| 테이블 이름                      | 설명                 |
+| --------------------------- | ------------------ |
+| **products**                | 상품 기본 정보           |
+| **warehouses**              | 창고 정보              |
+| **inventory**               | 재고 기본 정보           |
+| **inventory\_items**        | 개별 상품의 물리적 재고      |
+| **inventory\_reservations** | 주문 시 재고 예약         |
+| **stock\_movements**        | 재고 입출고 내역          |
+| **suppliers**               | 공급자 정보             |
+| **purchase\_orders**        | 입고 주문 (공급자로부터의 구매) |
+| **inventory\_audit\_logs**  | 재고 감사 로그 (추적성)     |
+| **inventory\_adjustments**  | 수동 재고 조정           |
+| **reorder\_levels**         | 자동 재주문 설정          |
+| **batch\_lots**             | 배치 관리 (유통기한 포함)    |
+| **inventory\_transactions** | 재고 변동 트랜잭션 로그      |
+| **stock\_alerts**           | 재고 부족 알림           |
