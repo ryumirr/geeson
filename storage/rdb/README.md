@@ -55,3 +55,42 @@
 | **batch\_lots**             | 배치 관리 (유통기한 포함)    |
 | **inventory\_transactions** | 재고 변동 트랜잭션 로그      |
 | **stock\_alerts**           | 재고 부족 알림           |
+
+
+## 결제 도메인
+
+| 테이블 이름                       | 설명                      |
+| ---------------------------- | ----------------------- |
+| **payments**                 | 결제 요청 정보 (주문 1건당 1개)    |
+| **payment\_methods**         | 사용된 결제 수단 정보            |
+| **payment\_status\_history** | 결제 상태 변경 이력             |
+| **payment\_gateways**        | 외부 결제대행(PG)사 정보         |
+| **transactions**             | 결제 트랜잭션 기록 (실제 승인/취소 등) |
+| **refunds**                  | 환불 처리 내역                |
+| **billing\_keys**            | 정기결제/자동결제용 토큰화된 카드 정보   |
+| **payment\_errors**          | 결제 실패 로그                |
+| **settlements**              | 정산 대상 내역 (가맹점 정산용)      |
+| **receipts**                 | 전자 영수증 발행 정보            |
+| **payment\_audit\_logs**     | 결제 도메인 감사 로그 (옵션)       |
+
+
+## 상품 도메인
+
+| 테이블 이름                      | 설명                            |
+| --------------------------- | ----------------------------- |
+| **products**                | 상품 기본 정보                      |
+| **product\_details**        | 상품의 상세 설명 (이미지, 스펙 등)         |
+| **product\_categories**     | 상품 분류 정보                      |
+| **product\_category\_map**  | 상품-카테고리 매핑 (N\:M)             |
+| **product\_prices**         | 가격 정보 (할인가 포함)                |
+| **product\_options**        | 옵션 그룹 (예: 색상, 사이즈 등)          |
+| **product\_option\_values** | 옵션 항목 (예: 블랙, M)              |
+| **product\_variants**       | 옵션 조합으로 구성된 실제 판매 상품 (SKU 단위) |
+| **product\_images**         | 상품 이미지 정보                     |
+| **brands**                  | 브랜드 정보                        |
+| **tags**                    | 태그 (검색 및 필터용)                 |
+| **product\_tag\_map**       | 상품-태그 매핑 테이블                  |
+| **product\_reviews**        | 사용자 후기                        |
+| **product\_qna**            | 사용자 질문 및 답변                   |
+| **product\_visibility**     | 상품 노출 여부 및 상태 관리              |
+| **product\_audit\_logs**    | 상품 변경 이력 (감사 로그)              |
