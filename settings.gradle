@@ -1,3 +1,12 @@
+pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            if(requested.id.id == 'org.springframework.boot') useVersion springBootVersion as String
+            if(requested.id.id == 'io.spring.dependency-management') useVersion springDependencyManagerVersion as String
+        }
+    }
+}
+
 rootProject.name = 'geeson'
 
 include 'storage'
@@ -6,3 +15,4 @@ include 'storage:rdb:order-db'
 include 'storage:rdb:payment-db'
 include 'storage:rdb:inventory-db'
 include 'storage:rdb:product-db'
+include 'pos-app'

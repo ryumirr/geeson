@@ -1,0 +1,22 @@
+package rdb.storage.order.core.entity;
+
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "order_returns")
+public class OrderReturnJpaEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long returnId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private ProductOrderJpaEntity order;
+
+    private String reason;
+    private String status;
+    private LocalDateTime requestedAt;
+    private LocalDateTime resolvedAt;
+}
