@@ -21,5 +21,5 @@ public class PaymentJpaEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_method_id")
-    private PaymentMethodJpaEntity paymentMethod;
+    private PaymentMethod paymentMethod;
 }
