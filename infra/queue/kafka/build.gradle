@@ -7,4 +7,5 @@ dependencies {
     implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
 
     implementation project(":support:messaging")
+    implementation project(":application:app-order")
 }

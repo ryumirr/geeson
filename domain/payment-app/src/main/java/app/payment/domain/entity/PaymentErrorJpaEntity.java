@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:storage/rdb/payment-db/src/main/java/storage/rdb/payment/core/entity/PaymentErrorJpaEntity.java
-package storage.rdb.payment.core.entity;
-========
 package app.payment.domain.entity;
->>>>>>>> 075f59a46cc79b02892a5dc70f9be8f1ed6351d8:domain/payment-app/src/main/java/app/payment/domain/entity/PaymentErrorJpaEntity.java
 
 import jakarta.persistence.*;
 

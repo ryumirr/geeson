@@ -47,7 +47,7 @@ include(
 
 include(
     'application',
-    'application:app-consumer'
+    'application:app-order'
 )
 
 include(
