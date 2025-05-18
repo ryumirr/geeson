@@ -18,20 +18,24 @@ include(
 )
 
 include(
-    'application',
-    'application:inventory-app',
-    'application:order-app',
-    'application:payment-app',
-    'application:product-app',
+    'domain',
+    'domain:inventory-app',
+    'domain:order-app',
+    'domain:payment-app',
+    'domain:product-app',
 )
 
 include (
-    'storage',
-    'storage:rdb',
-    'storage:rdb:order-db',
-    'storage:rdb:payment-db',
-    'storage:rdb:inventory-db',
-    'storage:rdb:product-db'
+    'infra',
+
+    'infra:rdb',
+    'infra:rdb:order-db',
+    'infra:rdb:payment-db',
+    'infra:rdb:inventory-db',
+    'infra:rdb:product-db',
+
+    'infra:queue',
+    'infra:queue:kafka',
 )
 
 include(
@@ -40,6 +44,18 @@ include(
     'module:file',
     'module:enum'
 )
+
+include(
+    'application',
+    'application:app-consumer'
+)
+
+include(
+    'support',
+    'support:messaging',
+    'support:logging'
+)
+
 
 include(
     'commander'

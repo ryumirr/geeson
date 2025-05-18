@@ -1,4 +1,5 @@
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'application:inventory-app'
+    implementation project(':domain:inventory-app')
+    implementation project(":infra:rdb:inventory-db")
 }
