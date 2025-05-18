@@ -1,0 +1,14 @@
+spring:
+  cloud:
+  # 아직(?) 사용하는 게 없으므로 false
+    config:
+      enabled: false
+  sql:
+    init:
+      schema-locations: classpath*:infra/rdb/ddl-script/inventory.sql
+      # data-locations: classpath*:infra/rdb/ddl-script/data.sql
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+logging.level.org.springframework: INFO
