@@ -9,10 +9,54 @@ pluginManagement {
 
 rootProject.name = 'geeson'
 
-include 'storage'
-include 'storage:rdb'
-include 'storage:rdb:order-db'
-include 'storage:rdb:payment-db'
-include 'storage:rdb:inventory-db'
-include 'storage:rdb:product-db'
-include 'pos-app'
+include(
+    'api',
+    'api:inventory-api',
+    'api:order-api',
+    'api:payment-api',
+    'api:product-api',
+)
+
+include(
+    'domain',
+    'domain:inventory-app',
+    'domain:order-app',
+    'domain:payment-app',
+    'domain:product-app',
+)
+
+include (
+    'infra',
+
+    'infra:rdb',
+    'infra:rdb:order-db',
+    'infra:rdb:payment-db',
+    'infra:rdb:inventory-db',
+    'infra:rdb:product-db',
+
+    'infra:queue',
+    'infra:queue:kafka',
+)
+
+include(
+    'module',
+    'module:client',
+    'module:file',
+    'module:enum'
+)
+
+include(
+    'application',
+    'application:app-consumer'
+)
+
+include(
+    'support',
+    'support:messaging',
+    'support:logging'
+)
+
+
+include(
+    'commander'
+)
