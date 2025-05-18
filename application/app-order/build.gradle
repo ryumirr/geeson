@@ -4,8 +4,6 @@ dependencies {
     implementation project(":domain:payment-app")
     implementation project(":domain:product-app")
 
-    implementation project(":infra:queue:kafka")
-
     implementation 'org.springframework.kafka:spring-kafka'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 }
