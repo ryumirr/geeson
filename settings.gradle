@@ -1,8 +1,62 @@
+pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            if(requested.id.id == 'org.springframework.boot') useVersion springBootVersion as String
+            if(requested.id.id == 'io.spring.dependency-management') useVersion springDependencyManagerVersion as String
+        }
+    }
+}
+
 rootProject.name = 'geeson'
 
-include 'storage'
-include 'storage:rdb'
-include 'storage:rdb:order-db'
-include 'storage:rdb:payment-db'
-include 'storage:rdb:inventory-db'
-include 'storage:rdb:product-db'
+include(
+    'api',
+    'api:inventory-api',
+    'api:order-api',
+    'api:payment-api',
+    'api:product-api',
+)
+
+include(
+    'domain',
+    'domain:inventory-app',
+    'domain:order-app',
+    'domain:payment-app',
+    'domain:product-app',
+)
+
+include (
+    'infra',
+
+    'infra:rdb',
+    'infra:rdb:order-db',
+    'infra:rdb:payment-db',
+    'infra:rdb:inventory-db',
+    'infra:rdb:product-db',
+
+    'infra:queue',
+    'infra:queue:kafka',
+)
+
+include(
+    'module',
+    'module:client',
+    'module:file',
+    'module:enum'
+)
+
+include(
+    'application',
+    'application:app-order'
+)
+
+include(
+    'support',
+    'support:messaging',
+    'support:logging'
+)
+
+
+include(
+    'commander'
+)
