@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CMD Chat UI</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: black;
+            color: #00ff00;
+            font-family: monospace;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        #chat-box {
+            flex-grow: 1;
+            padding: 10px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        #input-container {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #00ff00;
+        }
+
+        #prompt {
+            margin-right: 5px;
+        }
+
+        #cmd-input {
+            background-color: black;
+            color: #00ff00;
+            border: none;
+            outline: none;
+            font-family: monospace;
+            width: 100%;
+        }
+
+        #cmd-input:focus {
+            border-bottom: 1px solid #00ff00;
+        }
+    </style>
+</head>
+<body>
+
+<div id="chat-box">
+    > Welcome to the CMD Chat
+</div>
+
+<div id="input-container">
+    <div id="prompt">&gt;</div>
+    <input type="text" id="cmd-input" autocomplete="off" />
+</div>
+
+<script>
+    const chatBox = document.getElementById('chat-box');
+    const cmdInput = document.getElementById('cmd-input');
+
+    function appendLine(text, isUser = false) {
+        const line = isUser ? `> ${text}` : text;
+        chatBox.innerText += `\n${line}`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    cmdInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            const input = cmdInput.value.trim();
+            if (!input) return;
+
+            appendLine(input, true);
+            cmdInput.value = '';
+
+            fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: input })
+            })
+                .then(res => res.json())
+                .then(data => appendLine(data.reply || '(no response)'))
+                .catch(err => appendLine('Error: ' + err.message));
+        }
+    });
+
+    // 입력창 항상 focus 유지
+    function keepFocus() {
+        if (document.activeElement !== cmdInput) {
+            cmdInput.focus();
+        }
+    }
+
+    setInterval(keepFocus, 100);
+    window.onload = () => cmdInput.focus();
+</script>
+
+</body>
+</html>
