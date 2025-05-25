@@ -1,24 +1,25 @@
 CREATE TABLE payments (
-                          payment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                          order_id BIGINT NOT NULL,
-                          amount DECIMAL(10, 2) NOT NULL,
-                          currency VARCHAR(10) DEFAULT 'KRW',
-                          status VARCHAR(50) DEFAULT 'PENDING', -- PENDING, COMPLETED, FAILED, CANCELLED
-                          payment_method_id BIGINT,
-                          requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                          completed_at TIMESTAMP,
-                          FOREIGN KEY (payment_method_id) REFERENCES payment_methods(method_id)
+    payment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_id BIGINT NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    currency VARCHAR(10) DEFAULT 'KRW',
+    status VARCHAR(50) DEFAULT 'PENDING', -- PENDING, COMPLETED, FAILED, CANCELLED
+    payment_method_id BIGINT,
+    requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP,
+    FOREIGN KEY (payment_method_id) REFERENCES payment_methods(method_id)
 );
 
 CREATE TABLE payment_methods (
-                                 method_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                                 customer_id BIGINT,
-                                 type VARCHAR(50) NOT NULL, -- CARD, ACCOUNT, MOBILE, PAYPAL 등
-                                 provider VARCHAR(100), -- 예: KCP, NICE, Toss
-                                 masked_number VARCHAR(50),
-                                 expiration_date DATE,
-                                 billing_key VARCHAR(255), -- 정기결제용 토큰
-                                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    method_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    customer_id BIGINT,
+    type VARCHAR(50) NOT NULL, -- CARD, ACCOUNT, MOBILE, PAYPAL 등
+    card_code VARCHAR(20) NOT NULL,
+    provider VARCHAR(100), -- 예: KCP, NICE, Toss
+    masked_number VARCHAR(50),
+    expiration_date DATE,
+    billing_key VARCHAR(255), -- 정기결제용 토큰
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE payment_status_history (

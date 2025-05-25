@@ -1,6 +1,6 @@
 package storage.rdb.product.repository;
 
-import app.product.domain.repository.ProductQnARepository;
+import domain.product.domain.repository.ProductQnARepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import storage.rdb.product.repository.adapter.SpringDataProductQnAJpaRepository;

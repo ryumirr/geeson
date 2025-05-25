@@ -1,6 +1,6 @@
 package storage.rdb.inventory.repository;
 
-import app.inventory.domain.repository.WarehouseRepository;
+import domain.inventory.domain.repository.WarehouseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import storage.rdb.inventory.repository.adapter.SpringDataWarehouseJpaRepository;
