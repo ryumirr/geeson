@@ -1,12 +1,12 @@
 package storage.rdb.payment.repository;
 
-import app.payment.domain.repository.PaymentRepository;
+import app.payment.repository.PaymentErrorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import storage.rdb.payment.repository.adapter.SpringDataPaymentErrorJpaRepository;
 
 @Repository
 @RequiredArgsConstructor
-public class PaymentErrorJpaRepository implements PaymentRepository {
+public class PaymentErrorJpaRepository implements PaymentErrorRepository {
     private final SpringDataPaymentErrorJpaRepository repository;
 }

@@ -1,4 +1,9 @@
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation project(':domain:payment-app')
+    implementation project(':api:api-commons')
+    implementation project(':application:payment-app')
+    implementation project(':domain:payment-domain')
+    implementation project(':infra:rdb:payment-db')
+    implementation project(':infra:queue:payment-kafka')
+
+    implementation project(":support:web-api")
 }

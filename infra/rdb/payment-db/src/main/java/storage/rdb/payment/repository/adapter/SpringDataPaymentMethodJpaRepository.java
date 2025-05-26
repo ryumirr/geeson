@@ -1,7 +1,11 @@
 package storage.rdb.payment.repository.adapter;
 
+import domain.payment.domain.entity.PaymentMethodJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface SpringDataPaymentMethodJpaRepository extends JpaRepository<SpringDataPaymentMethodJpaRepository, Long> {
+import java.util.List;
+
+public interface SpringDataPaymentMethodJpaRepository extends JpaRepository<PaymentMethodJpaEntity, Long> {
+    List<PaymentMethodJpaEntity> findAllByCustomerId(Long customerId);
 }
 

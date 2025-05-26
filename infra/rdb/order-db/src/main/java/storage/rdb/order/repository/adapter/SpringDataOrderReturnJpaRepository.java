@@ -1,6 +1,7 @@
 package storage.rdb.order.repository.adapter;
 
+import domain.order.domain.entity.OrderReturnJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface SpringDataOrderReturnJpaRepository extends JpaRepository<SpringDataOrderReturnJpaRepository, Long> {
+public interface SpringDataOrderReturnJpaRepository extends JpaRepository<OrderReturnJpaEntity, Long> {
 }

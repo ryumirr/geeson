@@ -11,6 +11,7 @@ rootProject.name = 'geeson'
 
 include(
     'api',
+    'api:api-commons',
     'api:inventory-api',
     'api:order-api',
     'api:payment-api',
@@ -19,10 +20,10 @@ include(
 
 include(
     'domain',
-    'domain:inventory-app',
-    'domain:order-app',
-    'domain:payment-app',
-    'domain:product-app',
+    'domain:inventory-domain',
+    'domain:order-domain',
+    'domain:payment-domain',
+    'domain:product-domain',
 )
 
 include (
@@ -35,7 +36,12 @@ include (
     'infra:rdb:product-db',
 
     'infra:queue',
+    'infra:queue:order-kafka',
+    'infra:queue:payment-kafka',
+    'infra:queue:inventory-kafka',
+    'infra:queue:product-kafka'
     'infra:queue:kafka',
+    'infra:redis',
 )
 
 include(
@@ -47,13 +53,21 @@ include(
 
 include(
     'application',
-    'application:app-order'
+    'application:order-app',
+    'application:payment-app'
+)
+
+include(
+    'batch',
+    'batch:order-batch'
 )
 
 include(
     'support',
     'support:messaging',
-    'support:logging'
+    'support:logging',
+    'support:web-api',
+    'support:masking'
 )
 
 
