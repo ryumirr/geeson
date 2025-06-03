@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "host.order",
+      "type": "java.lang.String",
+      "description": "Description for host.order."
+  }
+] }

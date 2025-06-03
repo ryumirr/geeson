@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>CMD Chat UI</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -46,7 +47,7 @@
     </style>
 </head>
 <body>
-
+<label for="order-host"></label><input id="order-host" hidden="hidden" th:value="${orderHost}">
 <div id="chat-box">
     > Welcome to the CMD Chat
 </div>
@@ -59,6 +60,7 @@
 <script>
     const chatBox = document.getElementById('chat-box');
     const cmdInput = document.getElementById('cmd-input');
+    const orderHost = document.getElementById('order-host').value
 
     function appendLine(text, isUser = false) {
         const line = isUser ? `> ${text}` : text;
@@ -74,14 +76,62 @@
             appendLine(input, true);
             cmdInput.value = '';
 
-            fetch('/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: input })
-            })
-                .then(res => res.json())
-                .then(data => appendLine(data.reply || '(no response)'))
-                .catch(err => appendLine('Error: ' + err.message));
+            let fullCommand = input.split(" ")
+            let command = fullCommand[0]
+            let body = {}
+
+            appendLine(input, true);
+            cmdInput.value = '';
+
+            let host = ""
+            let url = ""
+            let method = ""
+
+            if(command === 'register-order') {
+                host = orderHost
+                method = 'POST'
+                url = "/api/v1/orders"
+
+                if(fullCommand.length <= 1) {
+                    appendLine("no body exist", false);
+                } else if(fullCommand.length > 1) {
+                    body = fullCommand[1]
+                }
+            }
+
+            if(command === 'show-order') {
+                host = orderHost
+                method = 'GET'
+                url = "/api/v1/orders"
+            }
+
+            console.log("full path: " + host + url)
+            console.log("body: " + body)
+
+            if(method === 'POST') {
+                fetch(host + url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                })
+                    .then(res => res.json())
+                    .then(data => appendLine(data || '(no response)'))
+                    .catch(err => appendLine('Error: ' + err.message));
+            } else if(method === 'GET') {
+                $.ajax({
+                    url: host + url,
+                    type: method,
+                    dataType: 'json',
+                    success: (data) => {
+                        appendLine(JSON.stringify(data) || '(no response)')
+                    },
+                    error: (xhr, status, error) => {
+                        appendLine('Error: ' + err)
+                    }
+                })
+            }
+
+
         }
     });
 

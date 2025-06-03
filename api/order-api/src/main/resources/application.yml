@@ -8,3 +8,6 @@ spring:
 
 api:
   version: '2025-05-25'
+
+server:
+  port: 8082
