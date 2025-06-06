@@ -21,18 +21,6 @@ CREATE TABLE shipping_addresses (
     FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
 );
 
-CREATE TABLE shipments (
-    shipment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    order_id BIGINT NOT NULL,
-    tracking_number VARCHAR(255),
-    status VARCHAR(50) DEFAULT 'PENDING',
-    shipped_date TIMESTAMP,
-    delivered_date TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (order_id) REFERENCES orders(order_id)
-);
-
 CREATE TABLE payments_request (
     payment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     order_id BIGINT NOT NULL,
@@ -57,6 +45,18 @@ CREATE TABLE orders (
     FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
     FOREIGN KEY (shipping_address_id) REFERENCES shipping_addresses(address_id),
     FOREIGN KEY (payment_id) REFERENCES payments_request(payment_id)
+);
+
+CREATE TABLE shipments (
+                           shipment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                           order_id BIGINT NOT NULL,
+                           tracking_number VARCHAR(255),
+                           status VARCHAR(50) DEFAULT 'PENDING',
+                           shipped_date TIMESTAMP,
+                           delivered_date TIMESTAMP,
+                           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                           FOREIGN KEY (order_id) REFERENCES orders(order_id)
 );
 
 CREATE TABLE order_items (

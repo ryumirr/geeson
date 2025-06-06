@@ -35,3 +35,8 @@ out/
 
 ### VS Code ###
 .vscode/
+
+/order-build.bat
+/payment-build.bat
+/commander-build.bat
+logs

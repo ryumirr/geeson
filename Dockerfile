@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM amazoncorretto:21-alpine
+FROM amazoncorretto:21
 
 # 앱 작업 디렉토리 설정
 WORKDIR /app
@@ -12,4 +12,4 @@ COPY ${JAR_FILE} app.jar
 EXPOSE 8080
 
 # 앱 실행
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=stage"]
