@@ -4,5 +4,11 @@
       "name": "host.order",
       "type": "java.lang.String",
       "description": "Description for host.order."
-  }
-] }
+    },
+    {
+      "name": "host.payment",
+      "type": "java.lang.String",
+      "description": "Description for host.payment."
+    }
+  ]
+}

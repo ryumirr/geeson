@@ -61,7 +61,7 @@ public class PaymentApp {
         transactionRepository.save(
             TransactionJpaEntity.builder()
                 .gateway(pg)
-                .transactionId(command.transactionId())
+                .pgTransactionId(command.transactionId())
                 .payment(payment)
                 .transactionType("PAYMENT")
                 .amount(payment.getAmount())

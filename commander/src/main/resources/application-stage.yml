@@ -7,4 +7,4 @@ spring:
     cache: false
 
 host:
-  order: http://localhost:8082
+  order: http://order-api:8080

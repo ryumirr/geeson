@@ -42,6 +42,7 @@ public class ProductOrderJpaEntity {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<OrderItemJpaEntity> orderItems = new ArrayList<>();
 
     public void addOrderItem(OrderItemJpaEntity item) {

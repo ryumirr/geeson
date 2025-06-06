@@ -17,7 +17,8 @@ import java.time.LocalDateTime;
 @Builder
 public class TransactionJpaEntity {
     @Id
-    private String transactionId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long transactionId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id")

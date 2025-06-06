@@ -49,18 +49,40 @@
 <body>
 <label for="order-host"></label><input id="order-host" hidden="hidden" th:value="${orderHost}">
 <div id="chat-box">
-    > Welcome to the CMD Chat
+    > Welcome to the CMD Chat Version 0.0.1
 </div>
 
 <div id="input-container">
     <div id="prompt">&gt;</div>
     <input type="text" id="cmd-input" autocomplete="off" />
+
+    <!-- Modal -->
+    <div id="cmd-modal" style="display: none; position: fixed; top: 20%; left: 50%; transform: translateX(-50%);
+     background-color: black; border: 1px solid #00ff00; padding: 20px; color: #00ff00; font-family: monospace; z-index: 1000;">
+        <div style="margin-bottom: 10px;">
+            <label>Method:</label>
+            <input type="text" id="modal-method" value="GET" style="width: 100%; background-color: black; color: #00ff00;">
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label>URL:</label>
+            <input type="text" id="modal-url" style="width: 100%; background-color: black; color: #00ff00;">
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label>Body (JSON):</label>
+            <textarea id="modal-body" rows="6" style="width: 100%; background-color: black; color: #00ff00;"></textarea>
+        </div>
+        <div style="text-align: right;">
+            <button id="modal-submit" style="background-color: black; color: #00ff00; border: 1px solid #00ff00;">Submit</button>
+            <button id="modal-cancel" style="background-color: black; color: #00ff00; border: 1px solid #00ff00;">Cancel</button>
+        </div>
+    </div>
 </div>
 
 <script>
     const chatBox = document.getElementById('chat-box');
     const cmdInput = document.getElementById('cmd-input');
-    const orderHost = document.getElementById('order-host').value
+    const orderHost = document.getElementById('order-host').value;
+    let currentCommand = "";
 
     function appendLine(text, isUser = false) {
         const line = isUser ? `> ${text}` : text;
@@ -75,69 +97,79 @@
 
             appendLine(input, true);
             cmdInput.value = '';
+            currentCommand = input;
 
-            let fullCommand = input.split(" ")
-            let command = fullCommand[0]
-            let body = {}
-
-            appendLine(input, true);
-            cmdInput.value = '';
-
-            let host = ""
+            // 명령어 기반 modal 초기화
+            let command = input.split(" ")[0];
+            let method = "";
             let url = ""
-            let method = ""
 
-            if(command === 'register-order') {
-                host = orderHost
-                method = 'POST'
-                url = "/api/v1/orders"
-
-                if(fullCommand.length <= 1) {
-                    appendLine("no body exist", false);
-                } else if(fullCommand.length > 1) {
-                    body = fullCommand[1]
-                }
+            if(command === "show-order") {
+                method = "GET";
+                url =  orderHost + "/api/v1/orders"
             }
 
-            if(command === 'show-order') {
-                host = orderHost
-                method = 'GET'
-                url = "/api/v1/orders"
+            if(command === "register-order") {
+                method = "POST"
+                url = orderHost + "/api/v1/orders"
             }
 
-            console.log("full path: " + host + url)
-            console.log("body: " + body)
-
-            if(method === 'POST') {
-                fetch(host + url, {
-                    method: method,
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
-                })
-                    .then(res => res.json())
-                    .then(data => appendLine(data || '(no response)'))
-                    .catch(err => appendLine('Error: ' + err.message));
-            } else if(method === 'GET') {
-                $.ajax({
-                    url: host + url,
-                    type: method,
-                    dataType: 'json',
-                    success: (data) => {
-                        appendLine(JSON.stringify(data) || '(no response)')
-                    },
-                    error: (xhr, status, error) => {
-                        appendLine('Error: ' + err)
-                    }
-                })
+            if (command === "register-order" || command === "show-order") {
+                $('#modal-method').val(method);
+                $('#modal-url').val(url);
+                $('#modal-body').val("");
+                $('#cmd-modal').show();
+            } else {
+                appendLine("Unknown command or unsupported for modal.");
             }
-
-
         }
+    });
+
+    $('#modal-submit').on('click', function() {
+        const method = $('#modal-method').val();
+        const url = $('#modal-url').val();
+        let body = $('#modal-body').val();
+        let parsedBody = {};
+
+        try {
+            parsedBody = body ? JSON.parse(body) : {};
+        } catch (e) {
+            appendLine("Invalid JSON in body");
+            return;
+        }
+
+        $('#cmd-modal').hide();
+
+        const fullBody = JSON.stringify({
+            method: method,
+            url: url,
+            headers: [],
+            body: parsedBody,
+        })
+        console.log(fullBody)
+        $.ajax({
+            url: '/request',
+            type: 'POST',
+            dataType: 'json',
+            contentType: "application/json",
+            data: fullBody,
+            success: (data) => {
+                appendLine(JSON.stringify(data, null, 2));
+            },
+            error: (xhr, status, error) => {
+                appendLine('Error: ' + error);
+            }
+        });
+    });
+
+    $('#modal-cancel').on('click', function() {
+        $('#cmd-modal').hide();
     });
 
     // 입력창 항상 focus 유지
     function keepFocus() {
-        if (document.activeElement !== cmdInput) {
+        const modalVisible = document.getElementById('cmd-modal').style.display !== 'none';
+        if (!modalVisible && document.activeElement !== cmdInput) {
             cmdInput.focus();
         }
     }
