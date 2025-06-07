@@ -4,7 +4,7 @@ import api.order.request.RegisterCustomerReq;
 import api.order.response.RegisterCustomerRes;
 import app.order.app.CustomerRegisterApp;
 import app.order.command.CustomerRegisterCommand;
-import domain.order.domain.entity.CustomerJpaEntity;
+import domain.order.entity.CustomerJpaEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

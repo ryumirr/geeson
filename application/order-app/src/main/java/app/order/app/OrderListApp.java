@@ -1,7 +1,7 @@
 package app.order.app;
 
-import app.order.repository.ProductOrderRepository;
-import domain.order.domain.entity.ProductOrderJpaEntity;
+import domain.order.entity.ProductOrderJpaEntity;
+import domain.order.repository.ProductOrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

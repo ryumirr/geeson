@@ -6,7 +6,7 @@ import api.order.response.RegisterOrderRes;
 import app.order.app.OrderListApp;
 import app.order.app.OrderRegisterApp;
 import app.order.command.OrderRegisterCommand;
-import domain.order.domain.entity.ProductOrderJpaEntity;
+import domain.order.entity.ProductOrderJpaEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

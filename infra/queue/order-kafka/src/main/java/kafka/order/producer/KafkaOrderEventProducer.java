@@ -1,8 +1,7 @@
 package kafka.order.producer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import domain.order.domain.message.OrderEventPublisher;
+import domain.order.message.OrderEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -26,7 +25,7 @@ public class KafkaOrderEventProducer implements OrderEventPublisher {
                     log.error("failed to publish message to topic: {}", topic, ex);
                 }
             });
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

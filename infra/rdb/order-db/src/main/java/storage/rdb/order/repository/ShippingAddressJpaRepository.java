@@ -1,7 +1,7 @@
 package storage.rdb.order.repository;
 
-import app.order.repository.ShippingAddressRepository;
-import domain.order.domain.entity.ShippingAddressJpaEntity;
+import domain.order.entity.ShippingAddressJpaEntity;
+import domain.order.repository.ShippingAddressRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import storage.rdb.order.repository.adapter.SpringDataShippingAddressJpaRepository;

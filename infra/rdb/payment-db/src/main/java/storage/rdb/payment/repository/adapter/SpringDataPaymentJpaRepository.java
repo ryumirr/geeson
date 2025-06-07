@@ -1,6 +1,6 @@
 package storage.rdb.payment.repository.adapter;
 
-import domain.payment.domain.entity.PaymentJpaEntity;
+import domain.payment.entity.PaymentJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

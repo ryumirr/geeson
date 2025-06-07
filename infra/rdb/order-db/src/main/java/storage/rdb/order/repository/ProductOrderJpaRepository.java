@@ -1,7 +1,7 @@
 package storage.rdb.order.repository;
 
-import app.order.repository.ProductOrderRepository;
-import domain.order.domain.entity.ProductOrderJpaEntity;
+import domain.order.entity.ProductOrderJpaEntity;
+import domain.order.repository.ProductOrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import storage.rdb.order.repository.adapter.SpringDataProductOrderJpaRepository;

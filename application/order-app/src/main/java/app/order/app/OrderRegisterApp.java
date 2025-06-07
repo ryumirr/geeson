@@ -1,11 +1,11 @@
 package app.order.app;
 
 import app.order.command.OrderRegisterCommand;
-import app.order.repository.*;
-import domain.order.domain.entity.*;
-import domain.order.domain.message.OrderEventPublisher;
+import domain.order.entity.*;
+import domain.order.message.OrderEventPublisher;
 import app.order.exception.CustomerNotFoundException;
 import app.order.exception.ShippingAddressNotFoundException;
+import domain.order.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

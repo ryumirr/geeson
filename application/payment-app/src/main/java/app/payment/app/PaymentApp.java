@@ -1,15 +1,15 @@
 package app.payment.app;
 
 import app.payment.command.PaymentConfirmCommand;
-import app.payment.repository.PaymentGatewayRepository;
-import domain.payment.domain.entity.PaymentGatewayJpaEntity;
-import domain.payment.domain.entity.PaymentJpaEntity;
-import domain.payment.domain.entity.PaymentMethodJpaEntity;
-import domain.payment.domain.entity.TransactionJpaEntity;
-import app.payment.repository.PaymentMethodRepository;
-import app.payment.repository.PaymentRepository;
-import app.payment.repository.TransactionRepository;
+import domain.payment.entity.PaymentGatewayJpaEntity;
+import domain.payment.entity.PaymentJpaEntity;
+import domain.payment.entity.PaymentMethodJpaEntity;
+import domain.payment.entity.TransactionJpaEntity;
 import app.payment.exception.PaymentMethodNotFoundException;
+import domain.payment.repository.PaymentGatewayRepository;
+import domain.payment.repository.PaymentMethodRepository;
+import domain.payment.repository.PaymentRepository;
+import domain.payment.repository.TransactionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

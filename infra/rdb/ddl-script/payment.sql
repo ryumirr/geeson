@@ -1,13 +1,13 @@
 CREATE TABLE payment_methods (
-                                 method_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                                 customer_id BIGINT,
-                                 type VARCHAR(50) NOT NULL, -- CARD, ACCOUNT, MOBILE, PAYPAL 등
-                                 card_code VARCHAR(20) NOT NULL,
-                                 provider VARCHAR(100), -- 예: KCP, NICE, Toss
-                                 masked_number VARCHAR(50),
-                                 expiration_date DATE,
-                                 billing_key VARCHAR(255), -- 정기결제용 토큰
-                                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                                        method_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                        customer_id BIGINT,
+                                        type VARCHAR(50) NOT NULL, -- CARD, ACCOUNT, MOBILE, PAYPAL 등
+                                        card_code VARCHAR(20) NOT NULL,
+                                        provider VARCHAR(100), -- 예: KCP, NICE, Toss
+                                        masked_number VARCHAR(50),
+                                        expiration_date DATE,
+                                        billing_key VARCHAR(255), -- 정기결제용 토큰
+                                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE payments (
@@ -33,11 +33,11 @@ CREATE TABLE payment_status_history (
 );
 
 CREATE TABLE payment_gateways (
-                                  gateway_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                                  name VARCHAR(100) NOT NULL,
-                                  api_url VARCHAR(255),
-                                  vendor_code VARCHAR(50),
-                                  active BOOLEAN DEFAULT TRUE
+                                        gateway_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                        name VARCHAR(100) NOT NULL,
+                                        api_url VARCHAR(255),
+                                        vendor_code VARCHAR(50),
+                                        active BOOLEAN DEFAULT TRUE
 );
 
 CREATE TABLE transactions (
