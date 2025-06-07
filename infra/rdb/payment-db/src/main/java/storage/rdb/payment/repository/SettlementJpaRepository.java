@@ -1,6 +1,6 @@
 package storage.rdb.payment.repository;
 
-import app.payment.repository.SettlementRepository;
+import domain.payment.repository.SettlementRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import storage.rdb.payment.repository.adapter.SpringDataSettlementJpaRepository;

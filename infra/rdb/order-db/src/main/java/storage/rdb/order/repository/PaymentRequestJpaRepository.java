@@ -1,7 +1,7 @@
 package storage.rdb.order.repository;
 
-import app.order.repository.PaymentRequestRepository;
-import domain.order.domain.entity.PaymentRequestJpaEntity;
+import domain.order.entity.PaymentRequestJpaEntity;
+import domain.order.repository.PaymentRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import storage.rdb.order.repository.adapter.SpringDataPaymentRequestJpaRepository;

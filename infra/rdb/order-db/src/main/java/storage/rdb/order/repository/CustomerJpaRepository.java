@@ -1,7 +1,7 @@
 package storage.rdb.order.repository;
 
-import app.order.repository.CustomerRepository;
-import domain.order.domain.entity.CustomerJpaEntity;
+import domain.order.entity.CustomerJpaEntity;
+import domain.order.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import storage.rdb.order.repository.adapter.SpringDataCustomerJpaRepository;

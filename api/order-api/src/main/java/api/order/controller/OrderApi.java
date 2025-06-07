@@ -1,23 +1,25 @@
 package api.order.controller;
 
 import api.order.request.RegisterOrderReq;
+import api.order.response.ProductOrderRes;
 import api.order.response.RegisterOrderRes;
+import app.order.app.OrderListApp;
 import app.order.app.OrderRegisterApp;
 import app.order.command.OrderRegisterCommand;
-import domain.order.domain.entity.ProductOrderJpaEntity;
+import domain.order.entity.ProductOrderJpaEntity;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/order")
+@RequestMapping("/api/v1/orders")
 public class OrderApi {
     private final OrderRegisterApp orderRegisterApp;
+    private final OrderListApp orderListApp;
 
-    @PostMapping("/")
+    @PostMapping("")
     public RegisterOrderRes createOrder(
             @RequestBody RegisterOrderReq orderReq
     ) {
@@ -55,5 +57,36 @@ public class OrderApi {
                 productOrder.getPayment().getTransactionId()
             )
         );
+    }
+
+    @GetMapping("")
+    public List<ProductOrderRes> test(
+        @RequestParam(required = false, defaultValue = "0") int page,
+        @RequestParam(required = false, defaultValue = "10") int size
+
+    ) {
+        return orderListApp.getAllOrders(page, size)
+            .stream().map( order -> new ProductOrderRes(
+                order.getOrderId(),
+                order.getStatus(),
+                order.getShippingAddress().formatAddress(),
+                new ProductOrderRes.Customer(
+                    order.getCustomer().getCustomerId(),
+                    order.getCustomer().getName()
+                ),
+                order.getOrderItems().stream().map(item -> new ProductOrderRes.OrderItem(
+                    item.getProductId(),
+                    item.getQuantity(),
+                    item.getUnitPrice(),
+                    item.getTotalPrice()
+                )).toList(),
+                new ProductOrderRes.Payment(
+                    order.getPayment().getPaymentId(),
+                    order.getPayment().getAmount(),
+                    order.getPayment().getPaymentMethod(),
+                    order.getPayment().getPaymentStatus(),
+                    order.getPayment().getTransactionId()
+                )
+            )).toList();
     }
 }

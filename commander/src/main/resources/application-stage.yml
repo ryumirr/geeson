@@ -1,0 +1,10 @@
+spring:
+  thymeleaf:
+    prefix: classpath:/templates/
+    check-template-location: true
+    suffix: .html
+    mode: HTML
+    cache: false
+
+host:
+  order: http://order-api:8080

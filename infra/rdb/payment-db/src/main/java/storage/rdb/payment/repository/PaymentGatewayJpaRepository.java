@@ -1,7 +1,7 @@
 package storage.rdb.payment.repository;
 
-import app.payment.repository.PaymentGatewayRepository;
-import domain.payment.domain.entity.PaymentGatewayJpaEntity;
+import domain.payment.entity.PaymentGatewayJpaEntity;
+import domain.payment.repository.PaymentGatewayRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import storage.rdb.payment.repository.adapter.SpringDataPaymentGatewayJpaRepository;

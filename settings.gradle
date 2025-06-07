@@ -39,7 +39,7 @@ include (
     'infra:queue:order-kafka',
     'infra:queue:payment-kafka',
     'infra:queue:inventory-kafka',
-    'infra:queue:product-kafka'
+    'infra:queue:product-kafka',
     'infra:queue:kafka',
     'infra:redis',
 )

@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(
-        scanBasePackages = {"api.inventory", "app.inventory", "queue.kafka", "storage.rdb.inventory"}
+        scanBasePackages = {"api.inventory", "storage.rdb.inventory"}
 )
 public class InventoryApi {
     public static void main(String[] args) {
