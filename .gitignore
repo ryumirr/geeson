@@ -40,3 +40,5 @@ out/
 /payment-build.bat
 /commander-build.bat
 logs
+
+.env
