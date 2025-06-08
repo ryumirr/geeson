@@ -1,0 +1,11 @@
+dependencies {
+    implementation project(':api:api-commons')
+    implementation project(':application:order-app')
+    implementation project(':domain:order-domain')
+    implementation project(':infra:rdb:order-db')
+    implementation project(':infra:queue:order-kafka')
+    implementation project(':infra:uuid-impl')
+
+    implementation project(":support:web-api")
+    implementation project(":support:uuid")
+}

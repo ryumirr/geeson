@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CMD Chat UI</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background-color: black;
+            color: #00ff00;
+            font-family: monospace;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        #chat-box {
+            flex-grow: 1;
+            padding: 10px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        #input-container {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #00ff00;
+        }
+
+        #prompt {
+            margin-right: 5px;
+        }
+
+        #cmd-input {
+            background-color: black;
+            color: #00ff00;
+            border: none;
+            outline: none;
+            font-family: monospace;
+            width: 100%;
+        }
+
+        #cmd-input:focus {
+            border-bottom: 1px solid #00ff00;
+        }
+    </style>
+</head>
+<body>
+<label for="order-host"></label><input id="order-host" hidden="hidden" th:value="${orderHost}">
+<div id="chat-box">
+    > Welcome to the CMD Chat Version 0.0.1
+</div>
+
+<div id="input-container">
+    <div id="prompt">&gt;</div>
+    <input type="text" id="cmd-input" autocomplete="off" />
+
+    <!-- Modal -->
+    <div id="cmd-modal" style="display: none; position: fixed; top: 20%; left: 50%; transform: translateX(-50%);
+     background-color: black; border: 1px solid #00ff00; padding: 20px; color: #00ff00; font-family: monospace; z-index: 1000;">
+        <div style="margin-bottom: 10px;">
+            <label>Method:</label>
+            <input type="text" id="modal-method" value="GET" style="width: 100%; background-color: black; color: #00ff00;">
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label>URL:</label>
+            <input type="text" id="modal-url" style="width: 100%; background-color: black; color: #00ff00;">
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label>Body (JSON):</label>
+            <textarea id="modal-body" rows="6" style="width: 100%; background-color: black; color: #00ff00;"></textarea>
+        </div>
+        <div style="text-align: right;">
+            <button id="modal-submit" style="background-color: black; color: #00ff00; border: 1px solid #00ff00;">Submit</button>
+            <button id="modal-cancel" style="background-color: black; color: #00ff00; border: 1px solid #00ff00;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const chatBox = document.getElementById('chat-box');
+    const cmdInput = document.getElementById('cmd-input');
+    const orderHost = document.getElementById('order-host').value;
+    let currentCommand = "";
+
+    function appendLine(text, isUser = false) {
+        const line = isUser ? `> ${text}` : text;
+        chatBox.innerText += `\n${line}`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    cmdInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            const input = cmdInput.value.trim();
+            if (!input) return;
+
+            appendLine(input, true);
+            cmdInput.value = '';
+            currentCommand = input;
+
+            // 명령어 기반 modal 초기화
+            let command = input.split(" ")[0];
+            let method = "";
+            let url = ""
+
+            if(command === "show-order") {
+                method = "GET";
+                url =  orderHost + "/api/v1/orders"
+            }
+
+            if(command === "register-order") {
+                method = "POST"
+                url = orderHost + "/api/v1/orders"
+            }
+
+            if (command === "register-order" || command === "show-order") {
+                $('#modal-method').val(method);
+                $('#modal-url').val(url);
+                $('#modal-body').val("");
+                $('#cmd-modal').show();
+            } else {
+                appendLine("Unknown command or unsupported for modal.");
+            }
+        }
+    });
+
+    $('#modal-submit').on('click', function() {
+        const method = $('#modal-method').val();
+        const url = $('#modal-url').val();
+        let body = $('#modal-body').val();
+        let parsedBody = {};
+
+        try {
+            parsedBody = body ? JSON.parse(body) : {};
+        } catch (e) {
+            appendLine("Invalid JSON in body");
+            return;
+        }
+
+        $('#cmd-modal').hide();
+
+        const fullBody = JSON.stringify({
+            method: method,
+            url: url,
+            headers: [],
+            body: parsedBody,
+        })
+        console.log(fullBody)
+        $.ajax({
+            url: '/request',
+            type: 'POST',
+            dataType: 'json',
+            contentType: "application/json",
+            data: fullBody,
+            success: (data) => {
+                appendLine(JSON.stringify(data, null, 2));
+            },
+            error: (xhr, status, error) => {
+                appendLine('Error: ' + error);
+            }
+        });
+    });
+
+    $('#modal-cancel').on('click', function() {
+        $('#cmd-modal').hide();
+    });
+
+    // 입력창 항상 focus 유지
+    function keepFocus() {
+        const modalVisible = document.getElementById('cmd-modal').style.display !== 'none';
+        if (!modalVisible && document.activeElement !== cmdInput) {
+            cmdInput.focus();
+        }
+    }
+
+    setInterval(keepFocus, 100);
+    window.onload = () => cmdInput.focus();
+</script>
+
+</body>
+</html>

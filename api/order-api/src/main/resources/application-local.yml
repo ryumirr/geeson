@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/order_db
+    username: root
+    password: rootpass^^*
+  kafka:
+    bootstrap-servers: localhost:9092
+
+api:
+  version: '2025-05-25'
+
+uuid:
+  node-id: ${NODE_ID:0}
+
+server:
+  port: 9093

@@ -1,0 +1,9 @@
+dependencies {
+    implementation project(':api:api-commons')
+
+    implementation project(':domain:inventory-domain')
+    implementation project(":infra:rdb:inventory-db")
+    implementation project(":infra:queue:inventory-kafka")
+
+    implementation project(":support:web-api")
+}

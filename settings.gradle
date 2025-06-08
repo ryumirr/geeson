@@ -1,8 +1,78 @@
+pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            if(requested.id.id == 'org.springframework.boot') useVersion springBootVersion as String
+            if(requested.id.id == 'io.spring.dependency-management') useVersion springDependencyManagerVersion as String
+        }
+    }
+}
+
 rootProject.name = 'geeson'
 
-include 'storage'
-include 'storage:rdb'
-include 'storage:rdb:order-db'
-include 'storage:rdb:payment-db'
-include 'storage:rdb:inventory-db'
-include 'storage:rdb:product-db'
+include(
+    'api',
+    'api:api-commons',
+    'api:inventory-api',
+    'api:order-api',
+    'api:payment-api',
+    'api:product-api',
+)
+
+include(
+    'domain',
+    'domain:inventory-domain',
+    'domain:order-domain',
+    'domain:payment-domain',
+    'domain:product-domain',
+)
+
+include(
+    'infra',
+
+    'infra:rdb',
+    'infra:rdb:order-db',
+    'infra:rdb:payment-db',
+    'infra:rdb:inventory-db',
+    'infra:rdb:product-db',
+
+    'infra:queue',
+    'infra:queue:order-kafka',
+    'infra:queue:payment-kafka',
+    'infra:queue:inventory-kafka',
+    'infra:queue:product-kafka',
+    'infra:queue:kafka',
+    'infra:redis',
+    'infra:uuid-impl',
+)
+
+include(
+    'module',
+    'module:client',
+    'module:file',
+    'module:enum'
+)
+
+include(
+    'application',
+    'application:order-app',
+    'application:payment-app'
+)
+
+include(
+    'batch',
+    'batch:order-batch'
+)
+
+include(
+    'support',
+    'support:messaging',
+    'support:logging',
+    'support:web-api',
+    'support:masking',
+    'support:uuid'
+)
+
+
+include(
+    'commander'
+)
