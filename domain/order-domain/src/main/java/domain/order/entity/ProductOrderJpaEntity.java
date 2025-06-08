@@ -19,7 +19,6 @@ import java.util.List;
 @Getter
 public class ProductOrderJpaEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
 
     @ManyToOne(fetch = FetchType.LAZY)

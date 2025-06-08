@@ -14,6 +14,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import support.uuid.UuidGenerator;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -27,6 +28,7 @@ public class PaymentApp {
     private final PaymentMethodRepository paymentMethodRepository;
     private final TransactionRepository transactionRepository;
     private final PaymentGatewayRepository paymentGatewayRepository;
+    private final UuidGenerator uuidGenerator;
 
     public PaymentJpaEntity registerPayment(PaymentConfirmCommand command) {
         Optional<PaymentJpaEntity> orderPayment = paymentRepository.findByOrderId(command.orderId());
@@ -41,6 +43,7 @@ public class PaymentApp {
 
         PaymentJpaEntity payment = paymentRepository.save(
             PaymentJpaEntity.builder()
+                .paymentId(uuidGenerator.nextId())
                 .orderId(command.orderId())
                 .amount(command.amount())
                 .currency(command.currency())

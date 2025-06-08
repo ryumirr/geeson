@@ -21,17 +21,6 @@ CREATE TABLE shipping_addresses (
     FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
 );
 
-CREATE TABLE payments_request (
-    payment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    order_id BIGINT NOT NULL,
-    amount DECIMAL(10, 2) NOT NULL,
-    payment_method VARCHAR(50) NOT NULL,
-    payment_status VARCHAR(50) DEFAULT 'PENDING',
-    transaction_id VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
 CREATE TABLE orders (
     order_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     customer_id BIGINT NOT NULL,
@@ -42,9 +31,18 @@ CREATE TABLE orders (
     payment_id BIGINT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
-    FOREIGN KEY (shipping_address_id) REFERENCES shipping_addresses(address_id),
-    FOREIGN KEY (payment_id) REFERENCES payments_request(payment_id)
+    FOREIGN KEY (shipping_address_id) REFERENCES shipping_addresses(address_id)
+);
+
+CREATE TABLE payments_request (
+                                  payment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                  order_id BIGINT NOT NULL,
+                                  amount DECIMAL(10, 2) NOT NULL,
+                                  payment_method VARCHAR(50) NOT NULL,
+                                  payment_status VARCHAR(50) DEFAULT 'PENDING',
+                                  transaction_id VARCHAR(255),
+                                  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE shipments (

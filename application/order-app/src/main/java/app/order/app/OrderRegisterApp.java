@@ -10,9 +10,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import support.messaging.OrderCreatedEvent;
+import support.uuid.UuidGenerator;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,6 +27,7 @@ public class OrderRegisterApp {
     private final ShippingAddressRepository shippingAddressRepository;
     private final OrderItemRepository orderItemRepository;
     private final PaymentRequestRepository paymentRequestRepository;
+    private final UuidGenerator uuidGenerator;
 
     private final OrderEventPublisher orderEventPublisher;
 
@@ -34,7 +37,8 @@ public class OrderRegisterApp {
         ShippingAddressJpaEntity shippingAddress = shippingAddressRepository.findByShippingAddressId(command.shippingAddressId())
                 .orElseThrow(() -> new ShippingAddressNotFoundException("shipping address not found"));
 
-        ProductOrderJpaEntity ordered = productOrderRepository.save(ProductOrderJpaEntity.builder()
+        ProductOrderJpaEntity productOrderEntity = ProductOrderJpaEntity.builder()
+            .orderId(uuidGenerator.nextId())
             .customer(customer)
             .totalPrice(command.getTotalPrice())
             .status("ORDERED")
@@ -43,51 +47,51 @@ public class OrderRegisterApp {
             .payment(null)
             .createdAt(LocalDateTime.now())
             .updatedAt(LocalDateTime.now())
-            .orderItems(null)
-            .build()
-        );
+            .orderItems(new ArrayList<>())
+            .build();
 
-        List<OrderItemJpaEntity> orderItems = orderItemRepository.saveAll(
-            command.items().stream()
-                .map(item -> OrderItemJpaEntity.builder()
-                    .order(ordered)
-                    .productId(item.productId())
-                    .quantity(item.quantity())
-                    .unitPrice(BigDecimal.valueOf(item.unitPrice()))
-                    .totalPrice(command.getTotalPrice())
-                    .build()
-                ).toList()
-        );
-
-        PaymentRequestJpaEntity paymentRequest = paymentRequestRepository.save(
-            PaymentRequestJpaEntity.builder()
-                .orderId(ordered.getOrderId())
-                .order(ordered)
-                .amount(ordered.getTotalPrice())
-                .paymentMethod(String.valueOf(command.paymentMethodId()))
-                .transactionId(UUID.randomUUID().toString())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+        List<OrderItemJpaEntity> orderItemEntityList = command.items().stream()
+            .map(item -> OrderItemJpaEntity.builder()
+                .order(productOrderEntity)
+                .productId(item.productId())
+                .quantity(item.quantity())
+                .unitPrice(BigDecimal.valueOf(item.unitPrice()))
+                .totalPrice(command.getTotalPrice())
                 .build()
-        );
+            ).toList();
 
-        orderItems.forEach(v -> v.registerOrder(ordered));
-        ordered.registerPayment(paymentRequest);
+        PaymentRequestJpaEntity paymentRequestEntity = PaymentRequestJpaEntity.builder()
+            .paymentId(uuidGenerator.nextId())
+            .orderId(productOrderEntity.getOrderId())
+            .order(productOrderEntity)
+            .amount(productOrderEntity.getTotalPrice())
+            .paymentMethod(String.valueOf(command.paymentMethodId()))
+            .transactionId(UUID.randomUUID().toString())
+            .createdAt(LocalDateTime.now())
+            .updatedAt(LocalDateTime.now())
+            .build();
+
+        productOrderEntity.getOrderItems().addAll(orderItemEntityList); // 양방향 세팅
+
+        productOrderEntity.registerPayment(paymentRequestEntity); // 등록
+
+        // 이제 모두 설정된 상태로 한번에 save
+        productOrderRepository.save(productOrderEntity); // cascade 설정되어 있어야 제대로 동작
 
         orderEventPublisher.publishOrderCreated(new OrderCreatedEvent(
-            ordered.getOrderId(),
+            productOrderEntity.getOrderId(),
             customer.getCustomerId(),
-            Long.valueOf(paymentRequest.getPaymentMethod()),
-            paymentRequest.getTransactionId(),
-            ordered.getTotalPrice(),
+            Long.valueOf(paymentRequestEntity.getPaymentMethod()),
+            paymentRequestEntity.getTransactionId(),
+            productOrderEntity.getTotalPrice(),
             "KRW",
-            orderItems.stream().map(v -> new OrderCreatedEvent.OrderItem(
+            orderItemEntityList.stream().map(v -> new OrderCreatedEvent.OrderItem(
                 String.valueOf(v.getProductId()),
                 v.getQuantity(),
                 v.getUnitPrice().intValue()
             )).toList()
         ));
 
-        return ordered;
+        return productOrderEntity;
     }
 }

@@ -41,7 +41,8 @@ include(
     'infra:queue:inventory-kafka',
     'infra:queue:product-kafka',
     'infra:queue:kafka',
-    'infra:redis'
+    'infra:redis',
+    'infra:uuid-impl',
 )
 
 include(
@@ -67,7 +68,8 @@ include(
     'support:messaging',
     'support:logging',
     'support:web-api',
-    'support:masking'
+    'support:masking',
+    'support:uuid'
 )
 
 

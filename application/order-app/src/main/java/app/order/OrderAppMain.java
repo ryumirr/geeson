@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(
-    scanBasePackages = {"app.order", "domain.order"}
+    scanBasePackages = {"app.order", "domain.order", "support.uuid"}
 )
 public class OrderAppMain {
     public static void main(String[] args) {
