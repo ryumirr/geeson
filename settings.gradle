@@ -26,7 +26,7 @@ include(
     'domain:product-domain',
 )
 
-include (
+include(
     'infra',
 
     'infra:rdb',
@@ -41,7 +41,7 @@ include (
     'infra:queue:inventory-kafka',
     'infra:queue:product-kafka',
     'infra:queue:kafka',
-    'infra:redis',
+    'infra:redis'
 )
 
 include(

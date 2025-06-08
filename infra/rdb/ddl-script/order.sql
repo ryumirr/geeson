@@ -108,3 +108,30 @@ CREATE TABLE order_coupons (
     FOREIGN KEY (coupon_id) REFERENCES coupons(coupon_id)
 );
 
+CREATE TABLE idempotency_log (
+    idempotency_key VARCHAR(128) PRIMARY KEY,
+    endpoint VARCHAR(255) NOT NULL, -- 어떤 API 요청인지
+    request_hash TEXT,
+    status VARCHAR(32) NOT NULL, -- PENDING, COMPLETED, FAILED
+    response_data TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE shipping_status (
+    shipment_id VARCHAR(64) PRIMARY KEY,
+    status VARCHAR(32) NOT NULL, -- REQUESTED, SHIPPED, DELIVERED
+    tracking_number VARCHAR(64),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE dead_letter_queue (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    topic VARCHAR(255),
+    `key` VARCHAR(255),
+    payload TEXT,
+    reason VARCHAR(1000),
+    retry_count INT DEFAULT 0,
+    failed_at DATETIME,
+    next_retry_at DATETIME,
+    processed BOOLEAN DEFAULT FALSE
+);
