@@ -2,6 +2,7 @@ dependencies {
     implementation project(":domain:payment-domain")
     implementation project(":support:messaging")
     implementation project(":support:masking")
+    implementation project(":support:uuid")
 
     implementation "org.springframework.boot:spring-boot-starter-data-jpa"
     implementation 'org.springframework.kafka:spring-kafka'

@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 @Getter
 public class PaymentJpaEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long paymentId;
 
     private Long orderId;

@@ -9,5 +9,8 @@ spring:
 api:
   version: '2025-05-25'
 
+uuid:
+  node-id: ${NODE_ID:0}
+
 server:
   port: 9094

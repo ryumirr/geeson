@@ -1,10 +1,9 @@
-version: '3.8'
 # IMPORTANT: To preserve MySQL data, always use 'docker compose down' without the '-v' flag
 # Using 'docker compose down -v' will remove volumes and cause data loss
 
 services:
   mysql:
-    image: mysql:8.0.22
+    image: mysql:latest
     container_name: mysql
     ports:
       - "3306:3306"
@@ -45,6 +44,21 @@ services:
       timeout: 10s
       retries: 5
       start_period: 15s
+  redis:
+    container_name: redis
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - redis-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
   geeson-commander:
     image: jeongjin984/commander:0.0.1
     ports:
@@ -63,10 +77,13 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - api-net
       - kafka-net
       - mysql-net
+      - redis-net
     volumes:
       - ./logs:/logs
   payment-api:
@@ -76,10 +93,13 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - api-net
       - kafka-net
       - mysql-net
+      - redis-net
     volumes:
       - ./logs:/logs
 volumes:
@@ -87,10 +107,14 @@ volumes:
     driver: local
   mysql_data:
     driver: local
+  redis_data:
+    driver: local
 networks:
   kafka-net:
     driver: bridge
   api-net:
     driver: bridge
   mysql-net:
+    driver: bridge
+  redis-net:
     driver: bridge
