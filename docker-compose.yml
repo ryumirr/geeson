@@ -3,7 +3,7 @@
 
 services:
   mysql:
-    image: mysql:latest
+    image: mysql:8.0.36
     container_name: mysql
     ports:
       - "3306:3306"
@@ -102,6 +102,25 @@ services:
       - redis-net
     volumes:
       - ./logs:/logs
+  auth-api:
+    build: .
+    ports:
+      - "8087:8087"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASS=rootpassword
+      - DB_NAME=geeson_auth
+      - JWT_SECRET=your-production-secret
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
 volumes:
   kafka_data:
     driver: local
