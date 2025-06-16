@@ -8,3 +8,4 @@ spring:
 
 host:
   order: http://order-api:8080
+  auth: http://auth-api:8080

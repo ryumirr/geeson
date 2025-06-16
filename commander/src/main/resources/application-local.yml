@@ -9,6 +9,7 @@ spring:
 host:
   order: http://localhost:9093
   payment: http://localhost:9094
+  auth: http://localhost:9095
 
 server:
   port: 9090

@@ -103,9 +103,7 @@ services:
     volumes:
       - ./logs:/logs
   auth-api:
-    build: .
-    ports:
-      - "8087:8087"
+    image: jeongjin984/auth-api:0.0.1
     environment:
       - DB_HOST=db
       - DB_PORT=3306

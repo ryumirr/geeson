@@ -50,6 +50,7 @@
 <label for="order-host"></label><input id="order-host" hidden="hidden" th:value="${orderHost}">
 <div id="chat-box">
     > Welcome to the CMD Chat Version 0.0.1
+    > Type 'help' for available commands or 'logout' to exit
 </div>
 
 <div id="input-container">
@@ -114,13 +115,21 @@
                 url = orderHost + "/api/v1/orders"
             }
 
-            if (command === "register-order" || command === "show-order") {
+            if (command === "help") {
+                appendLine("Available commands:");
+                appendLine("  help - Show this help message");
+                appendLine("  logout - Log out of the application");
+                appendLine("  show-order - Show orders");
+                appendLine("  register-order - Register a new order");
+            } else if (command === "logout") {
+                window.location.href = "/auth/logout";
+            } else if (command === "register-order" || command === "show-order") {
                 $('#modal-method').val(method);
                 $('#modal-url').val(url);
                 $('#modal-body').val("");
                 $('#cmd-modal').show();
             } else {
-                appendLine("Unknown command or unsupported for modal.");
+                appendLine("Unknown command. Type 'help' for available commands.");
             }
         }
     });
