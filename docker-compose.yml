@@ -105,12 +105,13 @@ services:
   auth-api:
     image: jeongjin984/auth-api:0.0.1
     environment:
-      - DB_HOST=db
+      - PORT=8080
+      - DB_HOST=mysql
       - DB_PORT=3306
       - DB_USER=root
-      - DB_PASS=rootpassword
-      - DB_NAME=geeson_auth
-      - JWT_SECRET=your-production-secret
+      - DB_PASS=rootpass^^*
+      - DB_NAME=user_db
+      - JWT_SECRET=change-me-in-production
     depends_on:
       mysql:
         condition: service_healthy
@@ -118,7 +119,13 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    restart: unless-stopped
+    networks:
+      - api-net
+      - kafka-net
+      - mysql-net
+      - redis-net
+    volumes:
+      - ./logs:/app/logs
 volumes:
   kafka_data:
     driver: local
