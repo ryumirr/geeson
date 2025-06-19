@@ -3,7 +3,7 @@
 
 services:
   mysql:
-    image: mysql:latest
+    image: mysql:8.0.36
     container_name: mysql
     ports:
       - "3306:3306"
@@ -102,6 +102,30 @@ services:
       - redis-net
     volumes:
       - ./logs:/logs
+  auth-api:
+    image: jeongjin984/auth-api:0.0.1
+    environment:
+      - PORT=8080
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASS=rootpass^^*
+      - DB_NAME=user_db
+      - JWT_SECRET=change-me-in-production
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - api-net
+      - kafka-net
+      - mysql-net
+      - redis-net
+    volumes:
+      - ./logs:/app/logs
 volumes:
   kafka_data:
     driver: local
