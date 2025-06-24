@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
-import app.order.repository.DeadLetterRepository;
+import domain.order.repository.DeadLetterRepository;
 import domain.order.domain.entity.DeadLetterMessageJpaEntity;
 
 @Service
