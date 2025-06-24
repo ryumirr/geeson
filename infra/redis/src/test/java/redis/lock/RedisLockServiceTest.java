@@ -50,8 +50,9 @@ public class RedisLockServiceTest {
     void testSingleLockConcurrency() throws Exception {
         when(mockClient.getLock("lock:testKey")).thenReturn(mockLock);
         when(mockLock.tryLock(3, 5, TimeUnit.SECONDS)).thenReturn(true);
+        when(mockLock.isHeldByCurrentThread()).thenReturn(true);
 
-        RedisLockService redisLockService = new RedisLockService(mockClient);
+        RedisLockService redisLockService = new RedisLockService(new RedissonConfig(), mockClient);
         redisLockService.doSomethingWithLock("testKey", 3, 5);
 
         // Lock풀렸나 확인
@@ -69,7 +70,7 @@ public class RedisLockServiceTest {
     void testGetLockConcurrency(int threadCount, int waitTime, int leaseTime, boolean returnVal) throws InterruptedException {
         executor = Executors.newFixedThreadPool(threadCount);
         CountDownLatch latch = new CountDownLatch(threadCount);
-        RedisLockService redisLockService = new RedisLockService(mockClient);
+        RedisLockService redisLockService = new RedisLockService(new RedissonConfig(), mockClient);
         // 여러 스레드 간의 공유 불변 상태 관리
         AtomicBoolean lockAcquired = new AtomicBoolean(false);
         
