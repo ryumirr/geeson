@@ -55,7 +55,8 @@ include(
 include(
     'application',
     'application:order-app',
-    'application:payment-app'
+    'application:payment-app',
+    'application:inventory-app'
 )
 
 include(
