@@ -1,10 +1,16 @@
 package domain.order.domain.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.AccessLevel;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "dead_letter_queue")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DeadLetterMessageJpaEntity {
 
     @Id
@@ -12,52 +18,63 @@ public class DeadLetterMessageJpaEntity {
     private Long id;
 
     private String topic;
-
-    @Column(name = "`key`")
     private String key;
-
-    @Lob
     private String payload;
-
-    @Column(length = 1000)
     private String reason;
-
     private int retryCount;
-
     private LocalDateTime failedAt;
-
     private LocalDateTime nextRetryAt;
-
     private boolean processed;
 
-    // 기본 생성자 (JPA 필수)
-    public DeadLetterMessageJpaEntity() {}
+    // 명시적 생성자
+    private DeadLetterMessageJpaEntity(
+            String topic,
+            String key,
+            String payload,
+            String reason,
+            int retryCount,
+            LocalDateTime failedAt,
+            LocalDateTime nextRetryAt,
+            boolean processed) {
+        this.topic = topic;
+        this.key = key;
+        this.payload = payload;
+        this.reason = reason;
+        this.retryCount = retryCount;
+        this.failedAt = failedAt;
+        this.nextRetryAt = nextRetryAt;
+        this.processed = processed;
+    }
 
-    // Getter & Setter
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public static DeadLetterMessageJpaEntity create(
+            String topic,
+            String key,
+            String payload,
+            String reason,
+            int retryCount,
+            LocalDateTime failedAt,
+            LocalDateTime nextRetryAt) {
+        return new DeadLetterMessageJpaEntity(
+                topic,
+                key,
+                payload,
+                reason,
+                retryCount,
+                failedAt,
+                nextRetryAt,
+                false // processed: 기본값
+        );
+    }
 
-    public String getTopic() { return topic; }
-    public void setTopic(String topic) { this.topic = topic; }
+    public void markProcessed() {
+        this.processed = true;
+    }
 
-    public String getKey() { return key; }
-    public void setKey(String key) { this.key = key; }
+    public void increaseRetryCount() {
+        this.retryCount++;
+    }
 
-    public String getPayload() { return payload; }
-    public void setPayload(String payload) { this.payload = payload; }
-
-    public String getReason() { return reason; }
-    public void setReason(String reason) { this.reason = reason; }
-
-    public int getRetryCount() { return retryCount; }
-    public void setRetryCount(int retryCount) { this.retryCount = retryCount; }
-
-    public LocalDateTime getFailedAt() { return failedAt; }
-    public void setFailedAt(LocalDateTime failedAt) { this.failedAt = failedAt; }
-
-    public LocalDateTime getNextRetryAt() { return nextRetryAt; }
-    public void setNextRetryAt(LocalDateTime nextRetryAt) { this.nextRetryAt = nextRetryAt; }
-
-    public boolean isProcessed() { return processed; }
-    public void setProcessed(boolean processed) { this.processed = processed; }
+    public void updateNextRetryAt(LocalDateTime nextRetryAt) {
+        this.nextRetryAt = nextRetryAt;
+    }
 }
