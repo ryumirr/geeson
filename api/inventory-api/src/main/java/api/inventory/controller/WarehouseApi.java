@@ -1,6 +1,6 @@
 package api.inventory.controller;
 
-import domain.inventory.service.WarehouseService;
+import app.inventory.app.WarehouseRegisterApp;
 import jakarta.validation.Valid;
 import domain.inventory.domain.entity.WarehouseJpaEntity;
 import api.inventory.request.RegisterWarehousesReq;
@@ -19,28 +19,27 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WarehouseApi {
 
-    private final WarehouseService warehouseService;
+    private final WarehouseRegisterApp warehouseRegisterApp;
 
     @PostMapping
     public RegisterWarehouseRes register(@RequestBody @Valid RegisterWarehousesReq req) {
-        WarehouseJpaEntity warehouse = warehouseService.register(req.toOneEntity());
+        WarehouseJpaEntity warehouse = warehouseRegisterApp.register(req.toOneEntity());
         return RegisterWarehouseRes.from(warehouse);
     }
 
     @GetMapping
     public List<RegisterWarehouseRes> list() {
-        return warehouseService.findAll().stream()
+        return warehouseRegisterApp.findAll().stream()
                 .map(RegisterWarehouseRes::from)
                 .toList();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (!warehouseService.existsById(id)) {
+        if (!warehouseRegisterApp.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Warehouse not found");
         }
-        warehouseService.deleteById(id);
+        warehouseRegisterApp.deleteById(id);
         return ResponseEntity.ok().build();
     }
-
 }
