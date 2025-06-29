@@ -10,14 +10,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class WarehouseRegisterApp {
+public class WarehouseListApp {
     private final WarehouseRepository warehouseRepo;
 
-    public WarehouseJpaEntity register(WarehouseJpaEntity entity) {
-        return warehouseRepo.save(entity);
+    public boolean existsById(Long id) {
+        return warehouseRepo.existsById(id);
+    }
+    public List<WarehouseJpaEntity> findAll() {
+        return warehouseRepo.findAll();
     }
 
-    public List<WarehouseJpaEntity> registerAll(List<WarehouseJpaEntity> entities) {
-        return warehouseRepo.saveAll(entities);
-    }
 }
