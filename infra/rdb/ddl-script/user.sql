@@ -1,3 +1,7 @@
+CREATE DATABASE user_db;
+
+USE user_db;
+
 CREATE TABLE users (
                        id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                        username        VARCHAR(100) NOT NULL UNIQUE,
@@ -9,4 +13,22 @@ CREATE TABLE users (
                        mfa_enabled     BOOLEAN DEFAULT FALSE,
                        created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
                        updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+INSERT INTO users (
+    username,
+    email,
+    password_hash,
+    status,
+    email_verified,
+    phone_number,
+    mfa_enabled
+) VALUES (
+    'test',
+    'test@example.com',
+    'test', -- bcrypt hash for 'test'
+    'ACTIVE',
+    FALSE,
+    '010-1234-5678',
+    FALSE
 );

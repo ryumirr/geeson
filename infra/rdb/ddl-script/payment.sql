@@ -1,3 +1,7 @@
+CREATE DATABASE payment_db;
+
+USE payment_db;
+
 CREATE TABLE payment_methods (
                                          method_id BIGINT AUTO_INCREMENT PRIMARY KEY,
                                          customer_id BIGINT,

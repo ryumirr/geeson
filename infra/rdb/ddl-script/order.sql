@@ -1,3 +1,7 @@
+CREATE DATABASE order_db;
+
+USE order_db;
+
 CREATE TABLE customers (
     customer_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -132,4 +136,20 @@ CREATE TABLE dead_letter_queue (
     failed_at DATETIME,
     next_retry_at DATETIME,
     processed BOOLEAN DEFAULT FALSE
+);
+
+INSERT INTO inventory_db.warehouses (
+    warehouse_id,
+    name,
+    location,
+    capacity,
+    created_at,
+    updated_at
+) VALUES (
+    1,
+    'ware-name',
+    'tokyo',
+    100,
+    '2025-07-02 11:28:25',
+    '2025-07-02 11:28:25'
 );

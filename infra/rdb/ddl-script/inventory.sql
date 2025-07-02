@@ -1,3 +1,7 @@
+CREATE DATABASE inventory_db;
+
+USE inventory_db;
+
 CREATE TABLE products (
     product_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -56,13 +60,16 @@ CREATE TABLE inventory_reservations (
 );
 
 CREATE TABLE stock_movements (
-    movement_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    inventory_id BIGINT NOT NULL,
-    movement_type ENUM('IN', 'OUT', 'TRANSFER') NOT NULL,
-    quantity INT NOT NULL,
-    movement_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    description TEXT,
-    FOREIGN KEY (inventory_id) REFERENCES inventory(inventory_id)
+  movement_id BIGINT NOT NULL AUTO_INCREMENT,
+  inventory_id BIGINT NOT NULL,
+  movement_type ENUM('IN','OUT','TRANSFER') NOT NULL,
+  quantity INT NOT NULL,
+  movement_date TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  description TEXT,
+  reference_id VARCHAR(128) NOT NULL,
+  PRIMARY KEY (movement_id),
+  UNIQUE KEY uq_reference_id (reference_id),
+  KEY inventory_id (inventory_id)
 );
 
 CREATE TABLE suppliers (
@@ -103,4 +110,28 @@ CREATE TABLE inventory_adjustments (
     reason TEXT,
     adjusted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (inventory_id) REFERENCES inventory(inventory_id)
+);
+
+INSERT INTO inventory_db.inventory (
+    inventory_id,
+    product_id,
+    warehouse_id,
+    total_quantity,
+    reserved_quantity,
+    available_quantity,
+    reorder_level,
+    reorder_quantity,
+    created_at,
+    updated_at
+) VALUES (
+    1,
+    1,
+    1,
+    100,
+    2,
+    98,
+    0,
+    0,
+    '2025-07-02 11:28:31',
+    '2025-07-02 11:28:31'
 );
