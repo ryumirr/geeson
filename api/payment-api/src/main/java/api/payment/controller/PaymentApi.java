@@ -88,13 +88,13 @@ public class PaymentApi {
 
         PaymentJpaEntity payment = paymentApp.registerPayment(
             new PaymentConfirmCommand(
-                paymentRegisterReq.customerId(),
-                paymentRegisterReq.orderId(),
+                String.valueOf(paymentRegisterReq.customerId()),
+                String.valueOf(paymentRegisterReq.orderId()),
                 "test_" + UUID.randomUUID(),
                 paymentRegisterReq.amount(),
                 paymentRegisterReq.currency(),
                 res.status(),
-                paymentMethodId,
+                String.valueOf(paymentMethodId),
                 new PaymentConfirmCommand.PGConfirmInfo(
                     "TOSS",
                     "test_" + UUID.randomUUID(),

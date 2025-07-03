@@ -1,0 +1,66 @@
+topics:
+  # 주문 생성
+  - name: ord-ord-req-succ-event
+    partitions: 1
+    replicationFactor: 1
+
+  # 결제 요청
+  - name: ord-pay-req-cmd
+    partitions: 1
+    replicationFactor: 1
+
+  - name: ord-pay-req-succ-evt
+    partitions: 1
+    replicationFactor: 1
+
+  - name: ord-pay-req-fail-evt
+    partitions: 1
+    replicationFactor: 1
+
+  # 재고 차감
+  - name: ord-inv-dec-cmd
+    partitions: 1
+    replicationFactor: 1
+
+  - name: ord-inv-dec-succ-evt
+    partitions: 1
+    replicationFactor: 1
+
+  - name: ord-inv-dec-fail-evt
+    partitions: 1
+    replicationFactor: 1
+
+  # 결제 보상 (재고 문제 )
+  - name: ord-pay-inv-comp-req
+    partitions: 1
+    replicationFactor: 1
+
+  - name: ord-pay-inv-comp-succ-evt
+    partitions: 1
+    replicationFactor: 1
+
+  - name: ord-pay-inv-comp-fail-evt
+    partitions: 1
+    replicationFactor: 1
+
+  # 재고 보상 ( 재고 부분 차감 문제 )
+  - name: ord-inv-inv-comp-req
+    partitions: 1
+    replicationFactor: 1
+
+  - name: ord-inv-inv-comp-succ-evt
+    partitions: 1
+    replicationFactor: 1
+
+  - name: ord-inv-inv-comp-fail-evt
+    partitions: 1
+    replicationFactor: 1
+
+  # Saga 최종 상태
+  - name: ord-saga-done-evt
+    partitions: 1
+    replicationFactor: 1
+
+  - name: ord-saga-fail-evt
+    partitions: 1
+    replicationFactor: 1

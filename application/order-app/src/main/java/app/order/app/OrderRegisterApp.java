@@ -9,7 +9,7 @@ import domain.order.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import support.messaging.OrderCreatedEvent;
+import support.messaging.command.OrderStartPayload;
 import support.uuid.UuidGenerator;
 
 import java.math.BigDecimal;
@@ -25,8 +25,6 @@ public class OrderRegisterApp {
     private final ProductOrderRepository productOrderRepository;
     private final CustomerRepository customerRepository;
     private final ShippingAddressRepository shippingAddressRepository;
-    private final OrderItemRepository orderItemRepository;
-    private final PaymentRequestRepository paymentRequestRepository;
     private final UuidGenerator uuidGenerator;
 
     private final OrderEventPublisher orderEventPublisher;
@@ -78,17 +76,17 @@ public class OrderRegisterApp {
         // 이제 모두 설정된 상태로 한번에 save
         productOrderRepository.save(productOrderEntity); // cascade 설정되어 있어야 제대로 동작
 
-        orderEventPublisher.publishOrderCreated(new OrderCreatedEvent(
-            productOrderEntity.getOrderId(),
-            customer.getCustomerId(),
-            Long.valueOf(paymentRequestEntity.getPaymentMethod()),
+        orderEventPublisher.publishOrderCreated(new OrderStartPayload(
+            String.valueOf(productOrderEntity.getOrderId()),
+            String.valueOf(customer.getCustomerId()),
+            paymentRequestEntity.getPaymentMethod(),
             paymentRequestEntity.getTransactionId(),
             productOrderEntity.getTotalPrice(),
             "KRW",
-            orderItemEntityList.stream().map(v -> new OrderCreatedEvent.OrderItem(
+            orderItemEntityList.stream().map(v -> new OrderStartPayload.OrderItem(
                 String.valueOf(v.getProductId()),
                 v.getQuantity(),
-                v.getUnitPrice().intValue()
+                v.getUnitPrice()
             )).toList()
         ));
 

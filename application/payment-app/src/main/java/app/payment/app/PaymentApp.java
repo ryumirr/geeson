@@ -31,20 +31,20 @@ public class PaymentApp {
     private final UuidGenerator uuidGenerator;
 
     public PaymentJpaEntity registerPayment(PaymentConfirmCommand command) {
-        Optional<PaymentJpaEntity> orderPayment = paymentRepository.findByOrderId(command.orderId());
+        Optional<PaymentJpaEntity> orderPayment = paymentRepository.findByOrderId(Long.valueOf(command.orderId()));
 
         if(orderPayment.isPresent()) {
             log.info("payment already registered {}", command.orderId());
             return orderPayment.get();
         }
 
-        PaymentMethodJpaEntity paymentMethod = paymentMethodRepository.findByPaymentMethodId(command.paymentMethodId())
+        PaymentMethodJpaEntity paymentMethod = paymentMethodRepository.findByPaymentMethodId(Long.valueOf(command.paymentMethodId()))
             .orElseThrow(() -> new PaymentMethodNotFoundException("payment method not found"));
 
         PaymentJpaEntity payment = paymentRepository.save(
             PaymentJpaEntity.builder()
                 .paymentId(uuidGenerator.nextId())
-                .orderId(command.orderId())
+                .orderId(Long.valueOf(command.orderId()))
                 .amount(command.amount())
                 .currency(command.currency())
                 .status(command.status())

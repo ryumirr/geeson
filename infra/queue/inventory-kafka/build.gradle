@@ -7,8 +7,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
 
     implementation project(":support:messaging")
-    implementation project(":support:uuid")
 
-    implementation project(":application:payment-app")
-    implementation project(":domain:payment-domain")
+    implementation project(":application:order-app")
+    implementation project(":domain:order-domain")
 }

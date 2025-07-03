@@ -3,13 +3,13 @@ package app.payment.command;
 import java.math.BigDecimal;
 
 public record PaymentConfirmCommand (
-    Long customerId,
-    Long orderId,
+    String customerId,
+    String orderId,
     String transactionId,
     BigDecimal amount,
     String currency,
     String status,
-    Long paymentMethodId,
+    String paymentMethodId,
     PGConfirmInfo pgConfirmInfo,
     String pgRes
 ) {

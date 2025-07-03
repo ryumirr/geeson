@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import support.messaging.OrderCreatedEvent;
+import support.messaging.command.OrderStartPayload;
 
 @Service
 @RequiredArgsConstructor
@@ -16,8 +16,8 @@ public class KafkaOrderEventProducer implements OrderEventPublisher {
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
-    public void publishOrderCreated(OrderCreatedEvent event) {
-        String topic = "order.created";
+    public void publishOrderCreated(OrderStartPayload event) {
+        String topic = "ord-ord-req-succ-event";
         try {
             kafkaTemplate.send(topic, String.valueOf(event.orderId()), mapper.writeValueAsString(event)).whenComplete((recordMetadata, ex) -> {
                 log.info("published message to topic: {}, offset: {}, partition: {}", topic, recordMetadata.getRecordMetadata().offset(), recordMetadata.getRecordMetadata().partition());

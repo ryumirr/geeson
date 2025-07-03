@@ -1,7 +1,7 @@
 package storage.rdb.order.repository;
 
-import domain.order.repository.DeadLetterRepository;
 import domain.order.domain.entity.DeadLetterMessageJpaEntity;
+import domain.order.repository.DeadLetterRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import storage.rdb.order.repository.adapter.SpringDataDeadLetterJpaRepository;
