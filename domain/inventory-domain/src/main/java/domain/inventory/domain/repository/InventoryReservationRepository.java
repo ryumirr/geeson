@@ -1,7 +1,15 @@
 package domain.inventory.domain.repository;
 
-import org.springframework.stereotype.Repository;
+import domain.inventory.domain.entity.InventoryReservationJpaEntity;
 
-@Repository
+import java.util.List;
+import java.util.Optional;
+
 public interface InventoryReservationRepository {
+
+    List<InventoryReservationJpaEntity> findByInventory_InventoryId(Long inventoryId);
+
+    Optional<InventoryReservationJpaEntity> findById(Long id);
+
+    InventoryReservationJpaEntity save(InventoryReservationJpaEntity entity);
 }

@@ -5,6 +5,7 @@ dependencies {
     implementation project(':infra:rdb:inventory-db')
     implementation project(':infra:queue:inventory-kafka')
     implementation project(':infra:uuid-impl')
+    implementation project(":module:enum")
 
     implementation project(":support:web-api")
     implementation "jakarta.persistence:jakarta.persistence-api:3.1.0"
