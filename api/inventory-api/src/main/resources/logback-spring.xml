@@ -3,7 +3,7 @@
 
     <!-- 로그 경로 및 파일명 설정 -->
     <property name="LOG_PATH" value="/logs"/>
-    <property name="LOG_FILE" value="${LOG_PATH}/order.log"/>
+    <property name="LOG_FILE" value="${LOG_PATH}/inventory.log"/>
 
     <!-- 콘솔 로그 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -19,7 +19,7 @@
 
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 일자별 로그 파일명 -->
-            <fileNamePattern>${LOG_PATH}/order.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${LOG_PATH}/inventory.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>7</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>

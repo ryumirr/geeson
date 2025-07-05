@@ -1,55 +1,50 @@
 package redis.lock;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Service;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import java.io.IOException;
+
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
-@Import(RedissonConfig.class)
+@RequiredArgsConstructor
 public class RedisLockService {
 
-   private final RedissonConfig config;
    private RedissonClient redissonClient;
 
-   public RedisLockService(RedissonConfig config, RedissonClient redissonClient) {
-       this.config = config;
-       this.redissonClient = redissonClient;
-   }
-
-   public boolean doSomethingWithLock(String lockKey, int waitTime, int leaseTime) throws IOException {
-       if (redissonClient == null) {
-           redissonClient = config.redissonClient();
-       }
-       
-       RLock lock = redissonClient.getLock("lock:" + lockKey);
-       boolean acquired = false;
-       
-       try {
-           acquired = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
-           long threadId = Thread.currentThread().getId();
-           
-           if (acquired) {
-               log.info("Thread Id: {} Lock acquired!", threadId);
-           } else {
-               log.warn("Thread Id: {} Lock not acquired.", threadId);
-           }
-       } catch (InterruptedException e) {
-           Thread.currentThread().interrupt();
-           log.error("Thread interrupted while trying to acquire lock", e);
-       } finally {
-            // 현재 쓰레드가 락 보유중일 때만 실행
-           if (acquired && lock.isHeldByCurrentThread()) {
-               lock.unlock();
-               log.info("Thread Id: {} Lock released! (after unlock status)", 
-                   Thread.currentThread().getId());
-           }
-       }
-       return acquired;
-   }
+    /**
+     * 분산락을 수행하며 waitTime과 leaseTime을 설정합니다.
+     *
+     * @param key       락의 key
+     * @param waitTime  락을 기다리는 최대 시간
+     * @param leaseTime 락을 점유하는 시간
+     * @param timeUnit  시간 단위
+     * @return
+     */
+    public boolean doSomethingWithLock(String key, long waitTime, long leaseTime, TimeUnit timeUnit) {
+        RLock lock = redissonClient.getLock(key);
+        boolean acquired = false;
+        try {
+            acquired = lock.tryLock(waitTime, leaseTime, timeUnit);
+            if (acquired) {
+                // TODO: 비즈니스 로직 수행
+                log.info("Lock acquired for key: {}", key);
+            } else {
+                log.info("Failed to acquire lock for key: {}", key);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.info("Thread interrupted while trying to acquire lock for key: {}", key);
+        } finally {
+            if (acquired && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+                log.info("Lock released for key: {}", key);
+            }
+        }
+        return acquired;
+    }
 }

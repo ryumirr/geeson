@@ -1,4 +1,4 @@
-package config;
+package kafka.inventory.config;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;

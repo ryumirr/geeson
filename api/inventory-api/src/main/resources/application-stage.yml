@@ -5,6 +5,15 @@ spring:
     password: rootpass^^*
   kafka:
     bootstrap-servers: kafka:29092
+  redis:
+    redisson:
+      config: |
+        singleServerConfig:
+          address: "redis://redis:6379"
+          connectionMinimumIdleSize: 5
+          connectionPoolSize: 10
+        threads: 4
+        nettyThreads: 4
 
 api:
   version: "2025-06-15"

@@ -39,9 +39,13 @@ out/
 /order-build.bat
 /payment-build.bat
 /commander-build.bat
+/inventory-build.bat
+
 /order-build.sh
 /payment-build.sh
 /commander-build.sh
+/inventory-build.sh
+
 logs
 
 .env

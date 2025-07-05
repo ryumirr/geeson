@@ -128,8 +128,6 @@ services:
       - ./logs:/app/logs
   inventory-api:
     image: jeongjin984/inventory-api:0.0.1
-    env_file:
-      - .env
     depends_on:
       mysql:
         condition: service_healthy

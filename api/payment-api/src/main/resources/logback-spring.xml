@@ -2,7 +2,7 @@
 <configuration>
 
     <!-- 로그 경로 및 파일명 설정 -->
-    <property name="LOG_PATH" value="/logs"/>
+    <property name="LOG_PATH" value="./logs"/>
     <property name="LOG_FILE" value="${LOG_PATH}/payment.log"/>
 
     <!-- 콘솔 로그 -->
@@ -19,7 +19,7 @@
 
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 일자별 로그 파일명 -->
-            <fileNamePattern>${LOG_PATH}/app.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${LOG_PATH}/payment.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>7</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
