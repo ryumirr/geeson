@@ -12,7 +12,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InventoryReservePayload extends CommandPayload {
-    private String userId;
+    private String reservationId;
     private String productId;
+    private String orderId;
     private Integer quantity;
 }

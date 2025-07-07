@@ -1,15 +1,22 @@
 package app.inventory.app;
 
 import app.inventory.command.InventoryReservationCommand;
+import domain.inventory.domain.entity.InventoryJpaEntity;
 import domain.inventory.domain.entity.InventoryReservationJpaEntity;
+import domain.inventory.domain.repository.InventoryRepository;
 import domain.inventory.domain.repository.InventoryReservationRepository;
+import domain.inventory.exception.NotEnoughInventoryException;
 import lombok.RequiredArgsConstructor;
 import module.enums.ReservationStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,20 +24,32 @@ import java.util.List;
 public class InventoryReservationApp {
 
     private final InventoryReservationRepository reservationRepository;
+    private final InventoryRepository inventoryRepository;
+    private final InventoryReservationRepository inventoryReservationRepository;
 
     /**
      * 재고 예약 생성
      */
     public InventoryReservationJpaEntity reserveInventory(InventoryReservationCommand command) {
-        Timestamp expires = command.expiresAt() != null ? Timestamp.valueOf(command.expiresAt()) : null;
+        List<InventoryJpaEntity> inventories = inventoryRepository.findByProductId(command.productId());
 
-        InventoryReservationJpaEntity entity = InventoryReservationJpaEntity.create(
-            command.inventoryId(),
+        if(inventories.isEmpty()) throw new NotEnoughInventoryException("Not Enough Inventory product : " + command.productId());
+
+        // 예: 가장 재고가 양이 많은 warehouse
+        InventoryJpaEntity selectedInventory = inventories.stream()
+            .filter(inv -> inv.canReserve(command.reservedQuantity()))
+            .max(Comparator.comparing(inv -> inv.getWareHouse().getCapacity()))
+            .orElseThrow(() -> new NotEnoughInventoryException("Not Enough Inventory product : " + command.productId()));
+
+        selectedInventory.reserve(command.reservedQuantity());
+
+        return inventoryReservationRepository.save(InventoryReservationJpaEntity.create(
+            command.reservationId(),
+            selectedInventory,
             command.orderId(),
             command.reservedQuantity(),
-            expires
-        );
-        return reservationRepository.save(entity);
+            LocalDateTime.now().plusDays(7)
+        ));
     }
 
     /**

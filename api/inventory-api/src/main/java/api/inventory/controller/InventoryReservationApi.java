@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import support.uuid.UuidGenerator;
+
 import java.util.List;
 
 @RestController
@@ -20,6 +22,7 @@ import java.util.List;
 public class InventoryReservationApi {
 
     private final InventoryReservationApp reservationApp;
+    private final UuidGenerator uuidGenerator;
 
     /**
      * 재고 예약 생성
@@ -27,10 +30,10 @@ public class InventoryReservationApi {
     @PostMapping
     public ResponseEntity<InventoryReservationRes> reserve(@RequestBody @Valid InventoryReservationReq req) {
         InventoryReservationJpaEntity entity = reservationApp.reserveInventory(new InventoryReservationCommand(
-            req.inventoryId(),
+            uuidGenerator.nextId(),
+            req.productId(),
             req.orderId(),
-            req.reservedQuantity(),
-            req.expiresAt()
+            req.reservedQuantity()
         ));
 
         InventoryReservationRes res = new InventoryReservationRes(
@@ -40,7 +43,7 @@ public class InventoryReservationApi {
             entity.getReservedQuantity(),
             entity.getReservedAt(),
             entity.getExpiresAt(),
-            entity.getStatus()
+            entity.getStatus().name()
         );
 
         return ResponseEntity.status(201).body(res);
@@ -59,7 +62,7 @@ public class InventoryReservationApi {
             entity.getReservedQuantity(),
             entity.getReservedAt(),
             entity.getExpiresAt(),
-            entity.getStatus()
+            entity.getStatus().name()
         ));
     }
 
@@ -76,7 +79,7 @@ public class InventoryReservationApi {
                 entity.getReservedQuantity(),
                 entity.getReservedAt(),
                 entity.getExpiresAt(),
-                entity.getStatus()
+                entity.getStatus().name()
             )).toList();
 
         return ResponseEntity.ok(result);

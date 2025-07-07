@@ -22,4 +22,4 @@ uuid:
   node-id: ${NODE_ID:0}
 
 server:
-  port: 9093
+  port: 9095

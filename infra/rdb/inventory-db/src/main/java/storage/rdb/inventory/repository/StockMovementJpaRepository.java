@@ -26,6 +26,6 @@ public class StockMovementJpaRepository implements StockMovementRepository {
 
     @Override
     public List<StockMovementJpaEntity> findByProductId(Long productId) {
-        return repository.findByInventory_ProductId(productId);
+        return repository.findByProductId(productId);
     }
 }
