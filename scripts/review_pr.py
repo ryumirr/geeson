@@ -15,7 +15,15 @@ HEADERS = {
 
 def get_diff():
     url = f"{API_BASE}/pulls/{PR_NUMBER}"
-    pr = requests.get(url, headers=HEADERS).json()
+    resp = requests.get(url, headers=HEADERS)
+
+    if resp.status_code != 200:
+        raise Exception(f"Failed to get PR info: {resp.status_code} {resp.text}")
+
+    pr = resp.json()
+    if 'diff_url' not in pr:
+        raise Exception(f"'diff_url' not found in PR data: {pr}")
+
     diff_url = pr['diff_url']
     diff = requests.get(diff_url, headers=HEADERS).text
     return diff
