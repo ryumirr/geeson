@@ -4,7 +4,7 @@ import requests
 
 # 환경 변수
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+GITHUB_TOKEN = os.getenv("GEESON_REPO_TOKEN")
 REPO = os.getenv("GITHUB_REPOSITORY")  # e.g., "owner/repo"
 API_BASE = f"https://api.github.com/repos/{REPO}"
 
