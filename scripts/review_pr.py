@@ -46,10 +46,16 @@ def review_with_chatgpt(diff):
         "Content-Type": "application/json"
     }
     payload = {
-        "model": "gpt-4",  # 또는 "gpt-4o"
+        "model": "gpt-4",  # 또는 gpt-4o
         "messages": [
-            {"role": "system", "content": "You are a senior software engineer doing a pull request code review. Provide concise and constructive feedback."},
-            {"role": "user", "content": f"Please review the following Git diff and provide feedback:\n\n{diff}"}
+            {
+                "role": "system",
+                "content": "너는 숙련된 소프트웨어 엔지니어이며, Pull Request에 대한 코드 리뷰를 수행한다. 리뷰는 반드시 **한국어로** 작성해야 한다."
+            },
+            {
+                "role": "user",
+                "content": f"다음 Git diff에 대한 코드 리뷰를 해주세요:\n\n{diff}"
+            }
         ],
         "temperature": 0.3
     }
