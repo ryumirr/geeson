@@ -57,14 +57,7 @@ git clone <repository-url>
 cd geeson
 ```
 
-### 2. 환경 설정
-`.env` 파일을 생성하고 필요한 환경 변수를 설정하세요:
-```env
-MYSQL_ROOT_PASSWORD=rootpass^^*
-MYSQL_DATABASE=geeson
-```
-
-### 3. Docker Compose로 서비스 실행
+### 2. Docker Compose로 서비스 실행
 ```bash
 docker compose up -d
 ```
@@ -75,7 +68,7 @@ docker compose up -d
 - Redis (포트: 6379)
 - 각종 API 서비스들
 
-### 4. 서비스 접근
+### 3. 서비스 접근
 - **관리자 웹**: http://localhost:8080
 - **주문 API**: http://localhost:8081
 - **결제 API**: http://localhost:8082
