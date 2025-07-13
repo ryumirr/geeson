@@ -68,19 +68,10 @@ docker compose up -d
 - Redis (포트: 6379)
 - 각종 API 서비스들
 
-### 3. 서비스 접근
-- **관리자 웹**: http://localhost:8080
-- **주문 API**: http://localhost:8081
-- **결제 API**: http://localhost:8082
-- **재고 API**: http://localhost:8083
-
 ## 🔧 개발 환경 설정
 
 ### 로컬 개발
 1. **데이터베이스 스키마 생성**
-```bash
-# MySQL 컨테이너에 접속
-docker exec -it mysql mysql -u root -p
 
 # 스키마 생성
 source /path/to/infra/rdb/ddl-script/*.sql
@@ -89,13 +80,13 @@ source /path/to/infra/rdb/ddl-script/*.sql
 2. **개별 서비스 실행**
 ```bash
 # 주문 API 실행
-./gradlew :api:order-api:bootRun
+./gradlew :api:order-api:bootRun --spring.profiles.active=local
 
 # 결제 API 실행
-./gradlew :api:payment-api:bootRun
+./gradlew :api:payment-api:bootRun --spring.profiles.active=local
 
 # 재고 API 실행
-./gradlew :api:inventory-api:bootRun
+./gradlew :api:inventory-api:bootRun --spring.profiles.active=local
 ```
 
 ### 빌드
@@ -110,34 +101,22 @@ source /path/to/infra/rdb/ddl-script/*.sql
 ## 📊 주요 기능
 
 ### 주문 관리
-- 고객 등록 및 관리
 - 주문 생성 및 처리
-- 배송 주소 관리
-- 주문 상태 추적
 
 ### 결제 관리
-- 다양한 결제 수단 지원
-- 결제 게이트웨이 연동
-- 결제 상태 관리
-- 트랜잭션 기록
 
 ### 재고 관리
 - 창고 등록 및 관리
 - 재고 예약 시스템
-- 재고 수량 추적
-- 재고 이력 관리
 
 ### 상품 관리
-- 상품 정보 관리
-- 카테고리 관리
-- 상품 검색
 
 ## 🔄 메시징 아키텍처
 
 Kafka를 사용한 이벤트 기반 아키텍처:
-- **주문 이벤트**: 주문 생성, 취소, 상태 변경
-- **결제 이벤트**: 결제 요청, 완료, 실패
-- **재고 이벤트**: 재고 예약, 해제, 수량 변경
+- **주문 이벤트**: 주문 생성,
+- **결제 이벤트**: 결제 요청, 완료
+- **재고 이벤트**: 재고 예약, 완료
 
 ## 🗄️ 데이터베이스
 
@@ -161,25 +140,6 @@ Kafka를 사용한 이벤트 기반 아키텍처:
 
 모든 서비스는 구조화된 로깅을 사용하며, 로그는 `./logs` 디렉토리에 저장됩니다.
 
-## 🔒 보안
-
-- JWT 기반 인증
-- API 요청/응답 마스킹
-- 데이터베이스 연결 암호화
-
-## 📈 모니터링
-
-- Spring Boot Actuator를 통한 헬스 체크
-- 각 서비스별 메트릭 수집
-- 로그 집중화
-
-## 🤝 기여하기
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
 ## 📄 라이선스
 
