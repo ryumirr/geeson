@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import storage.rdb.order.repository.adapter.SpringDataProductOrderJpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -23,4 +24,8 @@ public class ProductOrderJpaRepository implements ProductOrderRepository {
         return repository.findAll();
     }
 
+    @Override
+    public Optional<ProductOrderJpaEntity> findById(Long id) {
+        return repository.findById(id);
+    }
 }

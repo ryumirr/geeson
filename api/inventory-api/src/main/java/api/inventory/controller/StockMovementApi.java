@@ -2,22 +2,15 @@ package api.inventory.controller;
 
 import app.inventory.app.StockMovementInApp;
 import app.inventory.app.StockMovementOutApp;
-import jakarta.validation.Valid;
 import domain.inventory.domain.entity.StockMovementJpaEntity;
 import api.inventory.request.StockMovementInReq;
 import api.inventory.response.StockMovementInRes;
 import api.inventory.request.StockMovementOutReq;
 import api.inventory.response.StockMovementOutRes;
-import api.inventory.request.StockMovementHistoryReq;
-import api.inventory.response.StockMovementHistoryRes;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor

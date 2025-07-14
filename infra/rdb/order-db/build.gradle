@@ -3,6 +3,7 @@ dependencies {
     implementation(project(":application:order-app"))
     implementation(project(":domain:order-domain"))
     implementation(project(":domain"))
+    implementation project(':module:enum')
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation('com.fasterxml.jackson.core:jackson-databind:2.13.4.2')
     runtimeOnly("mysql:mysql-connector-java:${property("mysqlVersion")}")
