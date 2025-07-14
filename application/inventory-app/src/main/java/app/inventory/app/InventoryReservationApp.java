@@ -11,21 +11,17 @@ import module.enums.ReservationStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class InventoryReservationApp {
 
-    private final InventoryReservationRepository reservationRepository;
     private final InventoryRepository inventoryRepository;
-    private final InventoryReservationRepository inventoryReservationRepository;
+    private final InventoryReservationRepository reservationRepository;
 
     /**
      * 재고 예약 생성
@@ -43,7 +39,7 @@ public class InventoryReservationApp {
 
         selectedInventory.reserve(command.reservedQuantity());
 
-        return inventoryReservationRepository.save(InventoryReservationJpaEntity.create(
+        return reservationRepository.save(InventoryReservationJpaEntity.create(
             command.reservationId(),
             selectedInventory,
             command.orderId(),

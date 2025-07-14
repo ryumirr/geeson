@@ -14,7 +14,16 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class RedisLockService {
 
-   private RedissonClient redissonClient;
+    private RedissonClient redissonClient;
+
+    /**
+     * Spring DI 안되는 외부라이브러리 -> 테스트 위해 생성자를 명시적으로 작성
+     * 
+     * @param redissonClient
+     */
+    public RedisLockService(RedissonClient redissonClient) {
+        this.redissonClient = redissonClient;
+    }
 
     /**
      * 분산락을 수행하며 waitTime과 leaseTime을 설정합니다.
@@ -22,29 +31,25 @@ public class RedisLockService {
      * @param key       락의 key
      * @param waitTime  락을 기다리는 최대 시간
      * @param leaseTime 락을 점유하는 시간
-     * @param timeUnit  시간 단위
+     * @param unit  시간 단위
      * @return
      */
-    public boolean doSomethingWithLock(String key, long waitTime, long leaseTime, TimeUnit timeUnit) {
-        RLock lock = redissonClient.getLock(key);
-        boolean acquired = false;
+    public boolean doSomethingWithLock(String key, int waitTime, int leaseTime, TimeUnit unit)
+            throws InterruptedException {
+        RLock lock = redissonClient.getLock("lock:" + key);
+        boolean acquired = lock.tryLock(waitTime, leaseTime, unit);
+        if (!acquired) {
+            return false;
+        }
         try {
-            acquired = lock.tryLock(waitTime, leaseTime, timeUnit);
-            if (acquired) {
-                // TODO: 비즈니스 로직 수행
-                log.info("Lock acquired for key: {}", key);
-            } else {
-                log.info("Failed to acquire lock for key: {}", key);
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.info("Thread interrupted while trying to acquire lock for key: {}", key);
+            // 실제 처리 로직
+            System.out.println("🔒 Lock acquired by " + Thread.currentThread().getName());
         } finally {
-            if (acquired && lock.isHeldByCurrentThread()) {
+            if (lock.isHeldByCurrentThread()) {
                 lock.unlock();
-                log.info("Lock released for key: {}", key);
+                System.out.println("🔓 Lock released by " + Thread.currentThread().getName());
             }
         }
-        return acquired;
+        return true;
     }
 }

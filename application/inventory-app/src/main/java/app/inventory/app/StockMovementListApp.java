@@ -1,4 +1,4 @@
-package app.inventory;
+package app.inventory.app;
 
 import domain.inventory.domain.entity.StockMovementJpaEntity;
 import domain.inventory.domain.repository.StockMovementRepository;

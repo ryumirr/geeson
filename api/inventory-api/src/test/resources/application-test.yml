@@ -6,10 +6,13 @@ spring:
     password:
   jpa:
     hibernate:
-      ddl-auto: create-drop  # <- 자동 테이블 생성
+      ddl-auto: create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
   h2:
     console:
       enabled: true
+
+uuid:
+  node-id: ${NODE_ID:1}

@@ -26,9 +26,9 @@ public class WarehouseApi {
     private final WarehouseDeleteApp warehouseDeleteApp;
 
     @PostMapping
-    public RegisterWarehouseRes register(@RequestBody @Valid RegisterWarehousesReq req) {
+    public ResponseEntity<RegisterWarehouseRes> register(@RequestBody @Valid RegisterWarehousesReq req) {
         WarehouseJpaEntity warehouse = warehouseRegisterApp.register(req.toOneEntity());
-        return RegisterWarehouseRes.from(warehouse);
+        return ResponseEntity.ok(RegisterWarehouseRes.from(warehouse));
     }
 
     @GetMapping
