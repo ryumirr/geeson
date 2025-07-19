@@ -13,4 +13,6 @@ public interface ProductOrderRepository {
     List<ProductOrderJpaEntity> getAllOrders(int page, int size);
 
     Optional<ProductOrderJpaEntity> findById(Long id);
+    
+    List<ProductOrderJpaEntity> findByCustomerId(Long customerId);
 }

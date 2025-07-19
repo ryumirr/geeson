@@ -17,4 +17,9 @@ public class InventoryJpaRepository implements InventoryRepository {
     public List<InventoryJpaEntity> findByProductId(Long productId) {
         return repository.findAllByProductId(productId);
     }
+    
+    @Override
+    public InventoryJpaEntity save(InventoryJpaEntity entity) {
+        return repository.save(entity);
+    }
 }

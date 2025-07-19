@@ -36,7 +36,7 @@ import lombok.RequiredArgsConstructor;
  * 6. 운송장 번호 기반 조회
  */
 @RestController
-@RequestMapping("/api/shipments")
+@RequestMapping("/api/v1/shipments")
 @RequiredArgsConstructor
 public class ShipmentApi {
 

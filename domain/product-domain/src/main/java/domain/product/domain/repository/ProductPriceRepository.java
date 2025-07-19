@@ -1,6 +1,12 @@
 package domain.product.domain.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import domain.product.domain.entity.ProductPriceJpaEntity;
+import org.springframework.stereotype.Repository;
 
-public interface ProductPriceRepository  {
+import java.util.Optional;
+
+@Repository
+public interface ProductPriceRepository {
+    Optional<ProductPriceJpaEntity> findById(Long id);
+    ProductPriceJpaEntity save(ProductPriceJpaEntity entity);
 }

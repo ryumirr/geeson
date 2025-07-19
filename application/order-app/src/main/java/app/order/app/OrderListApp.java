@@ -17,4 +17,8 @@ public class OrderListApp {
     public List<ProductOrderJpaEntity> getAllOrders(int page, int size) {
         return productOrderRepository.getAllOrders(page, size);
     }
+    
+    public List<ProductOrderJpaEntity> getOrdersByCustomerId(Long customerId) {
+        return productOrderRepository.findByCustomerId(customerId);
+    }
 }

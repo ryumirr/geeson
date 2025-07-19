@@ -16,13 +16,14 @@ public class InventorySelectApp {
         this.inventoryRepository = inventoryRepository;
     }
 
-    public Optional<InventoryJpaEntity> findAvailableInventory(Long productId, int quantity) {
+    public InventoryJpaEntity findAvailableInventory(Long productId, int quantity) {
         List<InventoryJpaEntity> inventories = inventoryRepository.findByProductId(productId);
 
         // 예: 가장 재고가 양이 많은 warehouse
         return inventories.stream()
             .filter(inv -> inv.canReserve(quantity))
-            .max(Comparator.comparing(inv -> inv.getWareHouse().getCapacity()));
+            .max(Comparator.comparing(inv -> inv.getWareHouse().getCapacity()))
+            .orElseThrow(() -> new IllegalArgumentException("Not enough inventory"));
     }
 
 

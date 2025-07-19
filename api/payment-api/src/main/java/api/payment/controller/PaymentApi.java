@@ -4,6 +4,7 @@ import api.payment.request.PaymentMethodRegisterReq;
 import api.payment.request.PaymentRegisterReq;
 import api.payment.request.TossRequest;
 import api.payment.response.CustomerPaymentMethodRes;
+import api.payment.response.CustomerPaymentRes;
 import api.payment.response.PGConfirmRes;
 import api.payment.response.PaymentMethodRegisterRes;
 import api.payment.response.PaymentRegisterRes;
@@ -24,7 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/payment")
+@RequestMapping("/api/v1/payments")
 @RequiredArgsConstructor
 @Slf4j
 public class PaymentApi {
@@ -43,6 +44,33 @@ public class PaymentApi {
             v.getMethodId(),
             v.getType(),
             v.getMaskedNumber()
+        )).toList();
+    }
+    
+    /**
+     * Get all payments for a specific customer
+     * @param customerId the ID of the customer
+     * @return list of payments for the customer
+     */
+    @GetMapping("/")
+    public List<CustomerPaymentRes> getCustomerPayments(
+        @RequestParam Long customerId
+    ) {
+        List<PaymentJpaEntity> customerPayments = paymentApp.getCustomerPayments(customerId);
+        
+        return customerPayments.stream().map(payment -> new CustomerPaymentRes(
+            payment.getPaymentId(),
+            payment.getOrderId(),
+            payment.getAmount(),
+            payment.getCurrency(),
+            payment.getStatus(),
+            payment.getRequestedAt(),
+            payment.getCompletedAt(),
+            new CustomerPaymentRes.PaymentMethodInfo(
+                payment.getPaymentMethod().getMethodId(),
+                payment.getPaymentMethod().getType(),
+                payment.getPaymentMethod().getMaskedNumber()
+            )
         )).toList();
     }
 

@@ -28,4 +28,9 @@ public class ProductOrderJpaRepository implements ProductOrderRepository {
     public Optional<ProductOrderJpaEntity> findById(Long id) {
         return repository.findById(id);
     }
+    
+    @Override
+    public List<ProductOrderJpaEntity> findByCustomerId(Long customerId) {
+        return repository.findByCustomer_CustomerId(customerId);
+    }
 }

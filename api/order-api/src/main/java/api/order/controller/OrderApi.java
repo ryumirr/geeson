@@ -89,4 +89,33 @@ public class OrderApi {
                 )
             )).toList();
     }
+    
+    @GetMapping("/")
+    public List<ProductOrderRes> getOrdersByCustomerId(
+        @RequestParam Long customerId
+    ) {
+        return orderListApp.getOrdersByCustomerId(customerId)
+            .stream().map( order -> new ProductOrderRes(
+                order.getOrderId(),
+                order.getStatus(),
+                order.getShippingAddress().formatAddress(),
+                new ProductOrderRes.Customer(
+                    order.getCustomer().getCustomerId(),
+                    order.getCustomer().getName()
+                ),
+                order.getOrderItems().stream().map(item -> new ProductOrderRes.OrderItem(
+                    item.getProductId(),
+                    item.getQuantity(),
+                    item.getUnitPrice(),
+                    item.getTotalPrice()
+                )).toList(),
+                new ProductOrderRes.Payment(
+                    order.getPayment().getPaymentId(),
+                    order.getPayment().getAmount(),
+                    order.getPayment().getPaymentMethod(),
+                    order.getPayment().getPaymentStatus(),
+                    order.getPayment().getTransactionId()
+                )
+            )).toList();
+    }
 }

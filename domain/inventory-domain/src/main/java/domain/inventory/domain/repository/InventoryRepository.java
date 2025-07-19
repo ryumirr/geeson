@@ -8,4 +8,11 @@ import java.util.List;
 @Repository
 public interface InventoryRepository {
     List<InventoryJpaEntity> findByProductId(Long productId);
+    
+    /**
+     * Save an inventory entity
+     * @param entity The inventory entity to save
+     * @return The saved inventory entity
+     */
+    InventoryJpaEntity save(InventoryJpaEntity entity);
 }

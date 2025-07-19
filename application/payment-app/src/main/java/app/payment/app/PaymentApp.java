@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import support.uuid.UuidGenerator;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -75,5 +76,14 @@ public class PaymentApp {
         );
 
         return payment;
+    }
+    
+    /**
+     * Get all payments for a specific customer
+     * @param customerId the ID of the customer
+     * @return list of payments for the customer
+     */
+    public List<PaymentJpaEntity> getCustomerPayments(Long customerId) {
+        return paymentRepository.findByCustomerId(customerId);
     }
 }
