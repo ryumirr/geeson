@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @Builder
 public class CustomerJpaEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long customerId;
     private String name;
     private String email;

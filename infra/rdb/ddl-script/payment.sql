@@ -1,9 +1,7 @@
-CREATE DATABASE payment_db;
-
 USE payment_db;
 
 CREATE TABLE payment_methods (
-                                         method_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                         method_id BIGINT  PRIMARY KEY,
                                          customer_id BIGINT,
                                          type VARCHAR(50) NOT NULL, -- CARD, ACCOUNT, MOBILE, PAYPAL 등
                                          card_code VARCHAR(20) NOT NULL,
@@ -15,7 +13,7 @@ CREATE TABLE payment_methods (
 );
 
 CREATE TABLE payments (
-                                        payment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                        payment_id BIGINT  PRIMARY KEY,
                                         order_id BIGINT NOT NULL,
                                         amount DECIMAL(10, 2) NOT NULL,
                                         currency VARCHAR(10) DEFAULT 'KRW',
@@ -27,7 +25,7 @@ CREATE TABLE payments (
 );
 
 CREATE TABLE payment_status_history (
-                                        history_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                        history_id BIGINT  PRIMARY KEY,
                                         payment_id BIGINT NOT NULL,
                                         previous_status VARCHAR(50),
                                         new_status VARCHAR(50),
@@ -37,7 +35,7 @@ CREATE TABLE payment_status_history (
 );
 
 CREATE TABLE payment_gateways (
-                                        gateway_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                        gateway_id BIGINT  PRIMARY KEY,
                                         name VARCHAR(100) NOT NULL,
                                         api_url VARCHAR(255),
                                         vendor_code VARCHAR(50),
@@ -45,12 +43,13 @@ CREATE TABLE payment_gateways (
 );
 
 CREATE TABLE transactions (
-                              transaction_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                              payment_id BIGINT NOT NULL,
+                              transaction_id BIGINT  PRIMARY KEY,
+                              payment_id BIGINT,
                               gateway_id BIGINT NOT NULL,
                               transaction_type VARCHAR(50), -- APPROVE, CANCEL, REFUND
                               transaction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                               amount DECIMAL(10, 2),
+                              pg_order_id VARCHAR(255),
                               pg_transaction_id VARCHAR(255),
                               result_code VARCHAR(50),
                               result_message TEXT,
@@ -59,7 +58,7 @@ CREATE TABLE transactions (
 );
 
 CREATE TABLE refunds (
-                         refund_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                         refund_id BIGINT  PRIMARY KEY,
                          payment_id BIGINT NOT NULL,
                          refund_amount DECIMAL(10, 2),
                          refund_reason TEXT,
@@ -70,7 +69,7 @@ CREATE TABLE refunds (
 );
 
 CREATE TABLE billing_keys (
-                              billing_key_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                              billing_key_id BIGINT  PRIMARY KEY,
                               customer_id BIGINT,
                               provider VARCHAR(100),
                               token VARCHAR(255), -- PG사에서 발급된 결제 토큰
@@ -80,7 +79,7 @@ CREATE TABLE billing_keys (
 );
 
 CREATE TABLE payment_errors (
-                                error_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                error_id BIGINT  PRIMARY KEY,
                                 payment_id BIGINT,
                                 error_code VARCHAR(50),
                                 error_message TEXT,
@@ -89,7 +88,7 @@ CREATE TABLE payment_errors (
 );
 
 CREATE TABLE settlements (
-                             settlement_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                             settlement_id BIGINT  PRIMARY KEY,
                              payment_id BIGINT NOT NULL,
                              seller_id BIGINT NOT NULL,
                              settlement_amount DECIMAL(10, 2),
@@ -101,7 +100,7 @@ CREATE TABLE settlements (
 );
 
 CREATE TABLE receipts (
-                          receipt_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                          receipt_id BIGINT  PRIMARY KEY,
                           payment_id BIGINT NOT NULL,
                           receipt_url VARCHAR(500),
                           issued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

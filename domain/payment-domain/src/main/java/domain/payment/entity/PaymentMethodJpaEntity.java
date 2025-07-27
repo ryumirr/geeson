@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import support.constants.payment.PgProviderCode;
+import support.uuid.UuidGenerator;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,20 +15,27 @@ import java.time.LocalDateTime;
 @Table(name = "payment_methods")
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Getter
 public class PaymentMethodJpaEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long methodId;
 
     private Long customerId;
     private String type; // CARD, ACCOUNT, MOBILE, etc
     private String cardCode;
-    private String provider;
+    @Enumerated(EnumType.STRING)
+    private PgProviderCode provider;
     private String maskedNumber;
     private LocalDate expirationDate;
     private String billingKey;
     private LocalDateTime createdAt;
+
+    public void setPaymentResult(String type, String cardCode, PgProviderCode provider, String maskedNumber) {
+        this.type = type;
+        this.cardCode = cardCode;
+        this.provider = provider;
+        this.maskedNumber = maskedNumber;
+    }
+
 }
 

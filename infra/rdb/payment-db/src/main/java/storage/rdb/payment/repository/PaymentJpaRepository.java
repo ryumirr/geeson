@@ -20,7 +20,7 @@ public class PaymentJpaRepository implements PaymentRepository {
     }
 
     @Override
-    public Optional<PaymentJpaEntity> findByOrderId(Long orderId) {
+    public Optional<PaymentJpaEntity> findByOrderId(String orderId) {
         return repository.findByOrderId(orderId);
     }
     

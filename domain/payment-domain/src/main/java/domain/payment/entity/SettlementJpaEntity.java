@@ -1,6 +1,8 @@
 package domain.payment.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -8,9 +10,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "settlements")
+@AllArgsConstructor
+@NoArgsConstructor
 public class SettlementJpaEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long settlementId;
 
     @ManyToOne(fetch = FetchType.LAZY)

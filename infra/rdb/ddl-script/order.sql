@@ -1,9 +1,7 @@
-CREATE DATABASE order_db;
-
 USE order_db;
 
 CREATE TABLE customers (
-    customer_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    customer_id BIGINT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     phone VARCHAR(20),
@@ -12,7 +10,7 @@ CREATE TABLE customers (
 );
 
 CREATE TABLE shipping_addresses (
-    address_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    address_id BIGINT  PRIMARY KEY,
     customer_id BIGINT NOT NULL,
     address_line1 VARCHAR(255) NOT NULL,
     address_line2 VARCHAR(255),
@@ -26,7 +24,7 @@ CREATE TABLE shipping_addresses (
 );
 
 CREATE TABLE orders (
-    order_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_id BIGINT PRIMARY KEY,
     customer_id BIGINT NOT NULL,
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     total_price DECIMAL(10, 2) NOT NULL,
@@ -39,7 +37,7 @@ CREATE TABLE orders (
 );
 
 CREATE TABLE payments_request (
-                                  payment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                  payment_id BIGINT  PRIMARY KEY,
                                   order_id BIGINT NOT NULL,
                                   amount DECIMAL(10, 2) NOT NULL,
                                   payment_method VARCHAR(50) NOT NULL,
@@ -50,7 +48,7 @@ CREATE TABLE payments_request (
 );
 
 CREATE TABLE shipments (
-                           shipment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                           shipment_id BIGINT  PRIMARY KEY,
                            order_id BIGINT NOT NULL,
                            tracking_number VARCHAR(255),
                            status VARCHAR(50) DEFAULT 'PENDING',
@@ -62,7 +60,7 @@ CREATE TABLE shipments (
 );
 
 CREATE TABLE order_items (
-    order_item_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_item_id BIGINT  PRIMARY KEY,
     order_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,
     quantity INT NOT NULL,
@@ -74,7 +72,7 @@ CREATE TABLE order_items (
 );
 
 CREATE TABLE order_status_history (
-    history_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    history_id BIGINT  PRIMARY KEY,
     order_id BIGINT NOT NULL,
     status VARCHAR(50) NOT NULL,
     changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -82,7 +80,7 @@ CREATE TABLE order_status_history (
 );
 
 CREATE TABLE order_returns (
-    return_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    return_id BIGINT  PRIMARY KEY,
     order_id BIGINT NOT NULL,
     reason VARCHAR(255),
     status VARCHAR(50) DEFAULT 'PENDING',
@@ -92,7 +90,7 @@ CREATE TABLE order_returns (
 );
 
 CREATE TABLE coupons (
-    coupon_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    coupon_id BIGINT  PRIMARY KEY,
     code VARCHAR(50) UNIQUE NOT NULL,
     discount_percentage DECIMAL(5, 2),
     discount_amount DECIMAL(10, 2),
@@ -102,7 +100,7 @@ CREATE TABLE coupons (
 );
 
 CREATE TABLE order_coupons (
-    order_coupon_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_coupon_id BIGINT  PRIMARY KEY,
     order_id BIGINT NOT NULL,
     coupon_id BIGINT NOT NULL,
     applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -127,7 +125,7 @@ CREATE TABLE shipping_status (
 );
 
 CREATE TABLE dead_letter_queue (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGINT  PRIMARY KEY,
     topic VARCHAR(255),
     `key` VARCHAR(255),
     payload TEXT,

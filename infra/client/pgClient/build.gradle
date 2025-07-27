@@ -1,0 +1,5 @@
+dependencies {
+    implementation project(":domain:payment-domain")
+    implementation project(":application:payment-app")
+    implementation project(":support:constant")
+}

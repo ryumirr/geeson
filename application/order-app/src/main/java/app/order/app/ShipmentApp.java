@@ -17,7 +17,6 @@ import domain.order.repository.ProductOrderRepository;
 @Service
 @RequiredArgsConstructor
 public class ShipmentApp {
-
     private final ShipmentRepository shipmentRepo;
     private final ProductOrderRepository orderRepo;
 

@@ -27,6 +27,7 @@ public class OrderApi {
             orderReq.customerId(),
             orderReq.shippingAddressId(),
             orderReq.paymentMethodId(),
+            orderReq.paymentKey(),
             orderReq.items().stream().map(v -> new OrderRegisterCommand.OrderItem(
                 v.productId(),
                 v.productName(),

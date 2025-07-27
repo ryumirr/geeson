@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SpringDataPaymentJpaRepository extends JpaRepository<PaymentJpaEntity, Long> {
-    Optional<PaymentJpaEntity> findByOrderId(Long orderId);
+    Optional<PaymentJpaEntity> findByOrderId(String orderId);
     
     @Query("SELECT p FROM PaymentJpaEntity p JOIN p.paymentMethod pm WHERE pm.customerId = :customerId")
     List<PaymentJpaEntity> findByCustomerId(@Param("customerId") Long customerId);

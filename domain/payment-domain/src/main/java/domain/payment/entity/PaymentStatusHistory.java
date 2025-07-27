@@ -1,14 +1,18 @@
 package domain.payment.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import support.uuid.UuidGenerator;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "payment_status_history")
+@NoArgsConstructor
+@AllArgsConstructor
 public class PaymentStatusHistory {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long historyId;
 
     @ManyToOne(fetch = FetchType.LAZY)

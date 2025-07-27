@@ -46,13 +46,21 @@ public class InventoryApi {
     public ResponseEntity<SelectInventoryRes> selectInventory(
             @RequestParam("productId") Long productId,
             @RequestParam("quantity") Integer quantity) {
-        Optional<InventoryJpaEntity> optionalEntity = inventorySelectApp.findAvailableInventory(
+        InventoryJpaEntity inventory = inventorySelectApp.findAvailableInventory(
             productId,
             quantity
         );
         
-        return optionalEntity
-            .map(entity -> ResponseEntity.ok(SelectInventoryRes.from(entity)))
-            .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(new SelectInventoryRes(
+            inventory.getInventoryId(),
+            inventory.getProduct().getProductId(),
+            inventory.getWareHouse().getWarehouseId(),
+            inventory.getTotalQuantity(),
+            inventory.getReservedQuantity(),
+            inventory.getReorderLevel(),
+            inventory.getReorderQuantity(),
+            inventory.getCreatedAt(),
+            inventory.getUpdatedAt()
+        ));
     }
 }

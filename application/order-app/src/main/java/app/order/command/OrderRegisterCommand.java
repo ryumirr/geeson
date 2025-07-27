@@ -7,6 +7,7 @@ public record OrderRegisterCommand(
         Long customerId,
         Long shippingAddressId,
         Long paymentMethodId,
+        String paymentKey,
         List<OrderItem> items
 ) {
     public BigDecimal getTotalPrice() {

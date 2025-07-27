@@ -9,6 +9,6 @@ import java.util.Optional;
 @Repository
 public interface PaymentRepository  {
     PaymentJpaEntity save(PaymentJpaEntity entity);
-    Optional<PaymentJpaEntity> findByOrderId(Long orderId);
+    Optional<PaymentJpaEntity> findByOrderId(String orderId);
     List<PaymentJpaEntity> findByCustomerId(Long customerId);
 }

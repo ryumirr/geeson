@@ -1,12 +1,15 @@
 package kafka.payment.consumer;
 
-import app.payment.app.PaymentApp;
+import app.payment.app.PaymentConfirmApp;
+import app.payment.app.PaymentMethodRegisterApp;
+import app.payment.app.PaymentMethodSelectApp;
+import app.payment.app.PaymentRegisterApp;
 import app.payment.command.PaymentConfirmCommand;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import domain.payment.entity.PaymentJpaEntity;
-import kafka.payment.PGConfirmRes;
-import kafka.payment.TossInfraRequest;
+import domain.payment.entity.PaymentMethodJpaEntity;
+import domain.payment.entity.TransactionJpaEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -17,46 +20,42 @@ import support.messaging.event.PaymentFailedEvent;
 import support.messaging.event.PaymentSucceedEvent;
 import support.uuid.UuidGenerator;
 
-import java.io.IOException;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class KafkaOrderEventConsumer {
-    private final PaymentApp paymentApp;
+    private final PaymentRegisterApp paymentRegisterApp;
+    private final PaymentConfirmApp paymentConfirmApp;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final TossInfraRequest tossInfraRequest;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final UuidGenerator uuidGenerator;
+    private final PaymentMethodSelectApp paymentMethodSelectApp;
 
     @KafkaListener(topics = "ord-pay-req-cmd", groupId = "payment-consumer-group")
-    public void paymentRequestCommand(String command) throws JsonProcessingException {
+    public void paymentRequestCommand(String command){
         log.info("payment request command received: {}", command);
 
-        PaymentRequestPayload payload = objectMapper.readValue(command, PaymentRequestPayload.class);
+        PaymentRequestPayload payload = null;
 
         try {
-            PGConfirmRes res = tossInfraRequest.pgConfirmRequest();
+            payload =objectMapper.readValue(command, PaymentRequestPayload.class);
+        } catch (JsonProcessingException e) {
+            log.error("failed to parse command: {}", e.getMessage());
+            return;
+        }
 
-            PaymentJpaEntity paymentJpaEntity = paymentApp.registerPayment(new PaymentConfirmCommand(
-                payload.getUserId(),
-                payload.getOrderId(),
-                "transactionId",
-                payload.getAmount(),
-                payload.getCurrency(),
-                res.status(),
-                payload.getPaymentMethodId(),
-                new PaymentConfirmCommand.PGConfirmInfo(
-                    "TOSS",
-                    "test_" + UUID.randomUUID(),
-                    "TOSS00001",
-                    res.paymentKey(),
-                    res.orderId(),
-                    res.totalAmount()
-                ),
-                res.toString()
-            ));
+        if(payload.getPaymentKey() == null) {
+            log.error("payment key is null");
+            return;
+        }
+
+        try {
+            PaymentMethodJpaEntity paymentMethod = paymentMethodSelectApp.getByPaymentMethodId(Long.valueOf(payload.getPaymentMethodId()));
+            TransactionJpaEntity transaction = paymentConfirmApp.tossPaymentRequest(payload.getPaymentKey(), payload.getOrderId(), payload.getAmount());
+            PaymentJpaEntity payment = paymentRegisterApp.registerTossPayment(transaction, paymentMethod);
 
             PaymentSucceedEvent paymentSucceed = new PaymentSucceedEvent(
                 String.valueOf(uuidGenerator.nextId()),
@@ -69,6 +68,7 @@ public class KafkaOrderEventConsumer {
 
             kafkaTemplate.send("ord-pay-req-succ-evt", objectMapper.writeValueAsString(paymentSucceed));
         } catch (Exception e) {
+            log.error("failed to register payment: {}", e.getMessage());
             PaymentFailedEvent paymentFailed = new PaymentFailedEvent(
                 String.valueOf(uuidGenerator.nextId()),
                 payload.getSagaId(),
@@ -78,8 +78,11 @@ public class KafkaOrderEventConsumer {
                 e.getMessage()
             );
 
-            kafkaTemplate.send("ord-pay-req-fail-evt", objectMapper.writeValueAsString(paymentFailed));
-            throw new RuntimeException(e);
+            try {
+                kafkaTemplate.send("ord-pay-req-fail-evt", objectMapper.writeValueAsString(paymentFailed));
+            } catch (JsonProcessingException ex) {
+                log.error("failed to send failed event: {}", ex.getMessage());
+            }
         }
     }
 

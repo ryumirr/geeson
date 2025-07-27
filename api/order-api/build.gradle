@@ -6,6 +6,7 @@ dependencies {
     implementation project(':infra:rdb:order-db')
     implementation project(':infra:queue:order-kafka')
     implementation project(':infra:uuid-impl')
+    implementation project(':infra:client:pgClient')
     implementation project(':module:enum')
 
     implementation project(":support:web-api")

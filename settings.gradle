@@ -43,6 +43,8 @@ include(
     'infra:queue:kafka',
     'infra:redis',
     'infra:uuid-impl',
+    
+    'infra:client:pgClient'
 )
 
 include(
@@ -71,9 +73,9 @@ include(
     'support:logging',
     'support:web-api',
     'support:masking',
-    'support:uuid'
+    'support:uuid',
+    'support:constant'
 )
-
 
 include(
     'commander'

@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 @Builder
 public class OrderItemJpaEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderItemId;
 
     @ManyToOne(fetch = FetchType.LAZY)

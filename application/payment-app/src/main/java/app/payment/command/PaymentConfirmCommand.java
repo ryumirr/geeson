@@ -1,5 +1,7 @@
 package app.payment.command;
 
+import org.json.simple.JSONObject;
+
 import java.math.BigDecimal;
 
 public record PaymentConfirmCommand (
@@ -10,7 +12,6 @@ public record PaymentConfirmCommand (
     String currency,
     String status,
     String paymentMethodId,
-    PGConfirmInfo pgConfirmInfo,
     String pgRes
 ) {
 

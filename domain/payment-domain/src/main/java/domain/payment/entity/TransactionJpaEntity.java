@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import support.constants.payment.TransactionResultCode;
+import support.constants.payment.TransactionType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,7 +19,6 @@ import java.time.LocalDateTime;
 @Builder
 public class TransactionJpaEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long transactionId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -28,10 +29,28 @@ public class TransactionJpaEntity {
     @JoinColumn(name = "gateway_id")
     private PaymentGatewayJpaEntity gateway;
 
-    private String transactionType;
+    @Enumerated(EnumType.STRING)
+    private TransactionType transactionType;
     private BigDecimal amount;
+    private String pgOrderId;
     private String pgTransactionId;
-    private String resultCode;
+
+    @Enumerated(EnumType.STRING)
+    private TransactionResultCode resultCode;
     private String resultMessage;
     private LocalDateTime transactionTime;
+
+    public void transactionSucceed(String resultMessage) {
+        this.resultCode = TransactionResultCode.SUCCESS;
+        this.resultMessage = resultMessage;
+    }
+
+    public void transactionFailed(String resultMessage) {
+        this.resultCode = TransactionResultCode.FAILED;
+        this.resultMessage = resultMessage;
+    }
+
+    public Boolean isCompleted() {
+        return this.resultCode != TransactionResultCode.PENDING;
+    }
 }

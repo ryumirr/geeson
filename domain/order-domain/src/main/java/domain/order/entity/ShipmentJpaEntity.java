@@ -10,19 +10,7 @@ import module.enums.ShipmentStatus;
 @Entity
 @Table(name = "shipments")
 public class ShipmentJpaEntity {
-
-    public static ShipmentJpaEntity from(String trackingNumber, ProductOrderJpaEntity order) {
-        ShipmentJpaEntity entity = new ShipmentJpaEntity();
-        entity.order = order;
-        entity.trackingNumber = trackingNumber;
-        entity.status = ShipmentStatus.READY.name();
-        entity.createdAt = LocalDateTime.now();
-        entity.updatedAt = LocalDateTime.now();
-        return entity;
-    }
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long shipmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -46,6 +34,16 @@ public class ShipmentJpaEntity {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public static ShipmentJpaEntity from(String trackingNumber, ProductOrderJpaEntity order) {
+        ShipmentJpaEntity entity = new ShipmentJpaEntity();
+        entity.order = order;
+        entity.trackingNumber = trackingNumber;
+        entity.status = ShipmentStatus.READY.name();
+        entity.createdAt = LocalDateTime.now();
+        entity.updatedAt = LocalDateTime.now();
+        return entity;
+    }
 
     public void updateStatus(ShipmentStatus status) {
         this.status = status.name();
