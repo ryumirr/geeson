@@ -24,16 +24,14 @@ public class InventoryItemsRegisterApp {
 
         InventoryItemsJpaEntity entity = InventoryItemsJpaEntity.from(
                 inventory,
-                this.createBatchLotId(command.inventoryId()),
+                this.createBatchLotIdByOrderId(command.inventoryId()),
                 command.serialNumber(),
                 command.status());
 
         return inventoryItemsRepository.save(entity);
     }
 
-    private Long createBatchLotId(Long orderId) {
-        // Implement logic to create a unique batch lot ID based on the order ID, carrier, and tracking number
+    private Long createBatchLotIdByOrderId(Long orderId) {
         return orderId * 1000 + System.currentTimeMillis() % 1000;
-
     }
 }
