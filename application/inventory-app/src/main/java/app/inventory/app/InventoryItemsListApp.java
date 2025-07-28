@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import domain.inventory.domain.entity.InventoryItemsJpaEntity;
 import domain.inventory.domain.repository.InventoryItemsRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -21,7 +22,7 @@ public class InventoryItemsListApp {
      */
     public InventoryItemsJpaEntity findById(Long id) {
         return inventoryItemsRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Inventory Item not found: id=" + id));
+                .orElseThrow(() -> new EntityNotFoundException("Inventory Item not found: id=" + id));
     }
 
 }
