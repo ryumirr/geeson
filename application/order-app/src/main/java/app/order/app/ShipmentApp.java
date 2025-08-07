@@ -2,10 +2,12 @@ package app.order.app;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import app.order.command.ShipmentCommand;
-import app.order.exception.CustomerNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 
 import module.enums.ShipmentStatus;
+import app.order.port.in.CreateShipmentUseCase;
+import app.order.port.in.GetShipmentUseCase;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -16,30 +18,63 @@ import domain.order.repository.ProductOrderRepository;
 
 @Service
 @RequiredArgsConstructor
-public class ShipmentApp {
+@Transactional
+public class ShipmentApp implements CreateShipmentUseCase, GetShipmentUseCase{
     private final ShipmentRepository shipmentRepo;
     private final ProductOrderRepository orderRepo;
 
-    public ShipmentJpaEntity createShipment(ShipmentCommand command) {
-        ProductOrderJpaEntity order = orderRepo.findById(command.getOrderId())
+    @Override
+    public CreateShipmentResult createShipment(CreateShipmentCommand command) {
+        ProductOrderJpaEntity order = orderRepo.findById(command.orderId())
                 .orElseThrow(() -> new IllegalArgumentException("Order not found"));
 
-        List<ShipmentJpaEntity> shipments = shipmentRepo.findByOrderId(command.getOrderId());
+        List<ShipmentJpaEntity> shipments = shipmentRepo.findByOrderId(command.orderId());
         Optional<ShipmentJpaEntity> existing = shipments.stream()
-                .filter(s -> s.getTrackingNumber().equals(command.getTrackingNumber()))
+                .filter(s -> s.getTrackingNumber().equals(command.trackingNumber()))
                 .findFirst();
 
         if (existing.isPresent()) {
-            return existing.get();
+            // 이미 존재하는 배송 정보가 있는 경우, 존재하는 배송 정보를 반환
+            ShipmentJpaEntity existingShipment = existing.get();
+            return new CreateShipmentResult(
+                existingShipment.getShipmentId(),
+                existingShipment.getOrder().getOrderId(),
+                existingShipment.getTrackingNumber(),
+                existingShipment.getStatus(),
+                existingShipment.getShippedDate().toString(),
+                existingShipment.getCreatedAt().toString(),
+                existingShipment.getUpdatedAt().toString()
+            );            
+        } else {
+            // 새로 생성 하는 경우
+            ShipmentJpaEntity shipment = ShipmentJpaEntity.from(command.trackingNumber(), order);
+            ShipmentJpaEntity result = shipmentRepo.save(shipment);
+            return new CreateShipmentResult(
+                result.getShipmentId(),
+                result.getOrder().getOrderId(),
+                result.getTrackingNumber(),
+                result.getStatus(),
+                result.getShippedDate().toString(),
+                result.getCreatedAt().toString(),
+                result.getUpdatedAt().toString()
+            );
         }
-
-        ShipmentJpaEntity shipment = ShipmentJpaEntity.from(command.getTrackingNumber(), order);
-        return shipmentRepo.save(shipment); // 또는 create(shipment)
     }
 
-    public ShipmentJpaEntity getShipmentById(Long id) {
-        return shipmentRepo.findByShipmentId(id)
-            .orElseThrow(() -> new IllegalArgumentException("Shipment not found: " + id));
+    @Override
+    public GetShipmentResult getShipmentById(GetShipmentCommand command) {
+        ShipmentJpaEntity shipment = shipmentRepo.findByShipmentId(command.shipmentId())
+                .orElseThrow(() -> new IllegalArgumentException("Shipment not found: " + command.shipmentId()));
+
+        return new GetShipmentResult(
+                shipment.getShipmentId(),
+                shipment.getOrder().getOrderId(),
+                shipment.getTrackingNumber(),
+                shipment.getStatus(),
+                shipment.getShippedDate() != null ? shipment.getShippedDate().toString() : null,
+                shipment.getDeliveredDate() != null ? shipment.getDeliveredDate().toString() : null,
+                shipment.getCreatedAt().toString(),
+                shipment.getUpdatedAt().toString());
     }
 
     public List<ShipmentJpaEntity> getShipmentsByOrderId(Long orderId) {

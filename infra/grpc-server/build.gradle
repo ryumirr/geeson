@@ -1,0 +1,91 @@
+plugins {
+    id 'com.google.protobuf' version '0.9.4'
+}
+
+group = 'grpc.server'
+version = '0.0.1'
+
+dependencies {
+    implementation project(":application:order-app")
+    implementation project(":infra:rdb:order-db")
+    implementation project(":infra:queue:order-kafka")
+    implementation project(":domain:order-domain")
+    implementation project(":support:uuid")
+    implementation project(":support:messaging")
+    implementation project(":infra:uuid-impl")
+    implementation project(":module:enum")
+
+    implementation("net.devh:grpc-server-spring-boot-starter:2.15.0.RELEASE")
+
+    // ✅ gRPC 및 protobuf core
+    implementation 'io.grpc:grpc-netty-shaded:1.59.0'
+    implementation 'io.grpc:grpc-protobuf:1.59.0'
+    implementation 'io.grpc:grpc-stub:1.59.0'
+    implementation 'com.google.protobuf:protobuf-java:3.24.4'
+
+    // ✅ JPA 기능 사용을 위한 필수 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter'
+
+    // Optional: 로깅/어노테이션
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+
+    // Kafka core
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    // JSON 직렬화/역직렬화 (Kafka message payload 처리)
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
+
+    
+}
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.24.4'
+    }
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.59.0'
+        }
+    }
+generateProtoTasks {
+    all().each { task ->
+        task.builtins {
+            java {
+                outputSubDir = 'java'  // ✅ 메시지 클래스용
+            }
+        }
+        task.plugins {
+            grpc {
+                outputSubDir = 'grpc'  // ✅ 서비스용
+            }
+        }
+    }
+}
+}
+
+sourceSets {
+    main {
+        proto {
+            srcDir 'src/main/proto'
+        }
+        java {
+            // 💡 여기가 중요
+            srcDirs = [
+                'src/main/java',  // 반드시 있어야 함!!
+                'build/generated/source/proto/main/java',
+                'build/generated/source/proto/main/grpc'
+            ]
+        }
+    }
+}
+
+
+tasks.named('compileJava') {
+    dependsOn tasks.named('generateProto')
+}
+tasks.named('processResources') {
+    exclude('**/*.proto') // .proto는 복사에서 제외
+}

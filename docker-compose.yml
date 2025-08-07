@@ -59,6 +59,21 @@ services:
       interval: 5s
       timeout: 3s
       retries: 3
+  grpc-server:
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
+    build:
+      context: ./infra/grpc-server
+      dockerfile: ../../Dockerfile
+    image: jeongjin984/grpc-server:0.0.1
+    container_name: grpc-server
+    ports:
+      - "6565:6565"
+    networks:
+      - grpc-net
+    volumes:
+      - ./logs:/logs
+
   geeson-commander:
     image: jeongjin984/commander:0.0.1
     ports:
@@ -68,6 +83,7 @@ services:
         condition: service_started
     networks:
       - api-net
+      - grpc-net
     volumes:
       - ./logs:/logs
   order-api:
@@ -84,6 +100,7 @@ services:
       - kafka-net
       - mysql-net
       - redis-net
+      - grpc-net
     volumes:
       - ./logs:/logs
   payment-api:
@@ -173,4 +190,6 @@ networks:
   mysql-net:
     driver: bridge
   redis-net:
+    driver: bridge
+  grpc-net:
     driver: bridge

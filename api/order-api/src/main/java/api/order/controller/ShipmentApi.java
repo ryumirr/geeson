@@ -1,10 +1,8 @@
 package api.order.controller;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -16,14 +14,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import api.order.request.UpdateShipmentStatusReq;
 import app.order.app.ShipmentApp;
-import app.order.command.ShipmentCommand;
+import app.order.port.in.CreateShipmentUseCase;
+import app.order.port.in.GetShipmentUseCase;
+import app.order.port.in.CreateShipmentUseCase.CreateShipmentCommand;
+import app.order.port.in.CreateShipmentUseCase.CreateShipmentResult;
 import domain.order.entity.ShipmentJpaEntity;
-import storage.rdb.order.repository.ShipmentJpaRepository;
 import api.order.request.ShipmentReq;
 import api.order.response.ShipmentRes;
 
 import jakarta.validation.Valid;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -41,34 +40,37 @@ import lombok.RequiredArgsConstructor;
 public class ShipmentApi {
 
     private final ShipmentApp shipmentApp;
-
+    private final CreateShipmentUseCase createShipmentUseCase;
+    private final GetShipmentUseCase getShipmentUseCase;
     /**
      * 배송 생성
-     * @param req
-     * @return ResponseEntity<ShipmentRes>
      */
     @PostMapping
     public ResponseEntity<ShipmentRes> create(@RequestBody @Valid ShipmentReq req) {
-        // @todo Kafka 이벤트 발행
-        ShipmentJpaEntity resulted = shipmentApp.createShipment(
-            new ShipmentCommand(req.orderId(), req.carrier(), req.trackingNumber()));
-        return ResponseEntity.status(201).body(ShipmentRes.from(resulted));
+        CreateShipmentResult result = createShipmentUseCase.createShipment(
+                new CreateShipmentCommand(req.orderId(), req.trackingNumber()));
+
+        return ResponseEntity.status(201).body(ShipmentRes.from(result));
     }
 
     /**
      * 배송 단건 조회
+     *
      * @param id
      * @return ResponseEntity<ShipmentRes>
      */
     @GetMapping("/{id}")
     public ResponseEntity<ShipmentRes> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(ShipmentRes.from(shipmentApp.getShipmentById(id)));
+        GetShipmentUseCase.GetShipmentCommand command = new GetShipmentUseCase.GetShipmentCommand(id);
+        GetShipmentUseCase.GetShipmentResult result = getShipmentUseCase.getShipmentById(command);
+        return ResponseEntity.ok(ShipmentRes.from(result));
     }
 
     /**
      * 주문별 배송 조회
+     * 
      * @param orderId
-     * @return  ResponseEntity<List<ShipmentRes>>
+     * @return ResponseEntity<List<ShipmentRes>>
      */
     @GetMapping("/order/{orderId}")
     public ResponseEntity<List<ShipmentRes>> getByOrderId(@PathVariable Long orderId) {
@@ -78,20 +80,21 @@ public class ShipmentApi {
 
     /**
      * 배송 상태 변경
+     * 
      * @param id
      * @param req
-     * @return  ResponseEntity<Void>
+     * @return ResponseEntity<Void>
      */
     @PatchMapping("/{id}/status")
     public ResponseEntity<Void> updateStatus(@PathVariable Long id, @RequestBody UpdateShipmentStatusReq req) {
-        // @todo Kafka 이벤트 발행
         shipmentApp.updateStatus(id, req.status());
         return ResponseEntity.noContent().build();
     }
 
     /**
      * 배송 목록 조회
-     * @return  ResponseEntity<List<ShipmentRes>>
+     * 
+     * @return ResponseEntity<List<ShipmentRes>>
      */
     @GetMapping
     public ResponseEntity<List<ShipmentRes>> listAll() {
