@@ -84,3 +84,7 @@ include(
 include(
     'commander'
 )
+
+include(
+    'proto'
+)
