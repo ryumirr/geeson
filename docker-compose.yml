@@ -117,6 +117,7 @@ services:
       - kafka-net
       - mysql-net
       - redis-net
+      - grpc-net
     volumes:
       - ./logs:/logs
   auth-api:
@@ -141,6 +142,7 @@ services:
       - kafka-net
       - mysql-net
       - redis-net
+      - grpc-net
     volumes:
       - ./logs:/app/logs
   inventory-api:
@@ -176,7 +178,7 @@ services:
     volumes:
       - ./logs:/logs
 volumes:
-  kafka_data_2:
+  kafka_data:
     driver: local
   mysql_data:
     driver: local
