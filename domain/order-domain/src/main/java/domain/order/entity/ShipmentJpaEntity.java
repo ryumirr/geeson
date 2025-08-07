@@ -5,12 +5,16 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import module.enums.ShipmentStatus;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 
 @Getter
 @Entity
 @Table(name = "shipments")
 public class ShipmentJpaEntity {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long shipmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -40,6 +44,7 @@ public class ShipmentJpaEntity {
         entity.order = order;
         entity.trackingNumber = trackingNumber;
         entity.status = ShipmentStatus.READY.name();
+        entity.shippedDate = LocalDateTime.now();
         entity.createdAt = LocalDateTime.now();
         entity.updatedAt = LocalDateTime.now();
         return entity;
