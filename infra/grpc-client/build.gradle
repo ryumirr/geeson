@@ -1,0 +1,9 @@
+dependencies {
+    implementation 'net.devh:grpc-client-spring-boot-starter:2.15.0.RELEASE'
+
+    implementation project(':infra:grpc-server')
+    implementation project(':proto')
+}
+tasks.bootJar {
+    enabled = false
+}

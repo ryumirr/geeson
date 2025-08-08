@@ -10,8 +10,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
 grpc:
-  server:
-    reflection-service-enabled: false
-    port: 6565
-uuid:
-  node-id: ${NODE_ID:1}
+  client:
+    shipment:
+      address: static://localhost:6565
+      negotiationType: plaintext
