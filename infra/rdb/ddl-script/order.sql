@@ -1,5 +1,3 @@
-USE order_db;
-
 CREATE TABLE customers (
     customer_id BIGINT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
