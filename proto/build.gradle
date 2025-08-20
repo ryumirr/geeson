@@ -57,6 +57,7 @@ tasks.named('processResources') {
     exclude('**/*.proto') // .proto 파일은 리소스로 복사되지 않도록
 }
 
+// 
 tasks.named('bootJar') {
     enabled = false
 }

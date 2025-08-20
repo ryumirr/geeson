@@ -20,7 +20,7 @@ spring:
 grpc:
   clients:
     shipment:
-      address: "order-api:6565"
+      address: "grpc-server:6565"
       negotiationType: plaintext
       enableKeepAlive: true
 

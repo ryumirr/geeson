@@ -46,21 +46,21 @@ public class GrpcServerApplication {
     }
 
     /**
-     * [삭제예정] grpc 컴파일된 클래스들 확인용
+     * [삭제예정, 디버깅용] grpc 컴파일된 클래스들 확인용
      * @param ctx
      * @return
      */
-    @Bean
-    CommandLineRunner runner(ApplicationContext ctx) {
-        return args -> {
-            System.out.println("========== Beans ==========");
-            String[] beans = ctx.getBeanDefinitionNames();
-            Arrays.sort(beans);
-            for (String bean : beans) {
-                // if (bean.toLowerCase().contains("shipment")) {
-                System.out.println("💡 " + bean);
-                // }
-            }
-        };
-    }
+    // @Bean
+    // CommandLineRunner runner(ApplicationContext ctx) {
+    //     return args -> {
+    //         System.out.println("========== Beans ==========");
+    //         String[] beans = ctx.getBeanDefinitionNames();
+    //         Arrays.sort(beans);
+    //         for (String bean : beans) {
+    //             // if (bean.toLowerCase().contains("shipment")) {
+    //             System.out.println("💡 " + bean);
+    //             // }
+    //         }
+    //     };
+    // }
 }
