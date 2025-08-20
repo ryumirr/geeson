@@ -2,6 +2,7 @@ package api.order.response;
 
 import domain.order.entity.ShipmentJpaEntity;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +15,7 @@ import app.order.port.in.GetShipmentUseCase.GetShipmentResult;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ShipmentRes {
 
     private Long shipmentId;

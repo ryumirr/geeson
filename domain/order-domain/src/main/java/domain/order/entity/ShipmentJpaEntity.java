@@ -5,12 +5,10 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import module.enums.ShipmentStatus;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 
 @Getter
 @Entity
-@Table(name = "shipments")
+@Table(name = "shipments", schema = "order_db")
 public class ShipmentJpaEntity {
 
     @Id

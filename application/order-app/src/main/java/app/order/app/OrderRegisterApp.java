@@ -16,7 +16,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +27,10 @@ public class OrderRegisterApp {
     private final UuidGenerator uuidGenerator;
 
     private final OrderEventPublisher orderEventPublisher;
+
+    public ProductOrderJpaEntity resolveRegisterOrder(OrderRegisterCommand command) {
+        return null;
+    }
 
     public ProductOrderJpaEntity registerOrder(OrderRegisterCommand command) {
         CustomerJpaEntity customer = customerRepository.findByCustomerId(command.customerId())

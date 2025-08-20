@@ -4,15 +4,25 @@ import grpc.shipment.GetShipmentRequest;
 import grpc.shipment.GetShipmentResponse;
 import grpc.shipment.ShipmentServiceGrpc;
 import grpc.shipment.ShipmentServiceGrpc.ShipmentServiceBlockingStub;
-
-import net.devh.boot.grpc.client.inject.GrpcClient;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ShipmentGrpcClient {
 
-    @GrpcClient("shipment")
     private ShipmentServiceBlockingStub shipmentStub;
+
+    @PostConstruct
+    public void init() {
+        ManagedChannel channel = ManagedChannelBuilder
+                .forAddress("grpc-server", 6565) // plaintext port
+                .usePlaintext()                 // ⚠️ important to avoid TLS (443)
+                .build();
+
+        shipmentStub = ShipmentServiceGrpc.newBlockingStub(channel);
+    }
 
     public GetShipmentResponse getShipment(Long shipmentId) {
         GetShipmentRequest request = GetShipmentRequest.newBuilder()
@@ -22,4 +32,3 @@ public class ShipmentGrpcClient {
         return shipmentStub.getShipment(request);
     }
 }
-
