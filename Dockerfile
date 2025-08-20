@@ -8,7 +8,7 @@ WORKDIR /app
 ARG JAR_FILE
 
 # 디버깅: JAR_FILE 값 확인
-RUN echo "JAR_FILE: ${JAR_FILE}"
+ARG JAR_FILE=${JAR_DIR}/${JAR_FILE}
 COPY ${JAR_FILE} app.jar
 
 # 포트 오픈 (Spring Boot + gRPC)

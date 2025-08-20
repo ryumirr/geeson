@@ -45,7 +45,7 @@ public class InventoryApi {
      * Find available inventory for a product with sufficient quantity
      */
     @GetMapping("/available")
-    public ResponseEntity<Object> selectInventory(
+    public ResponseEntity<SelectInventoryRes> selectInventory(
             @RequestParam("productId") Long productId,
             @RequestParam("quantity") Integer quantity) {
         InventoryJpaEntity inventory = inventorySelectApp.findAvailableInventory(
@@ -80,7 +80,7 @@ public class InventoryApi {
         }
     }
   
-    // @Todo delete this test endpoint after verifying grpc connection
+    // @todo [2025-08-20] DELETE this endpoint after confirming gRPC shipment fetch is stable
     // Test response class for Shipment
     private static class TestShipmentRes {
         private Long shipmentId;
