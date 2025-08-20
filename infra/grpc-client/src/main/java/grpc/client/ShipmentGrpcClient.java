@@ -8,12 +8,12 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
-import net.devh.boot.grpc.client.inject.GrpcClient;
+// import net.devh.boot.grpc.client.inject.GrpcClient;
 
 @Service
 public class ShipmentGrpcClient {
 
-    @GrpcClient("shipment")
+    // @GrpcClient("shipment")
     private ShipmentServiceBlockingStub shipmentStub;
 
     @PostConstruct
