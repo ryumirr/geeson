@@ -1,5 +1,7 @@
 package app.order.port.in;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,6 +15,7 @@ public interface CreateShipmentUseCase {
         String trackingNumber,
         String status,
         String shippedDate,
+        String deliveredDate,
         String createdAt,
         String updatedAt
     ) {}

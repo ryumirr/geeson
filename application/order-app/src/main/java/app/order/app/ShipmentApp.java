@@ -42,6 +42,7 @@ public class ShipmentApp implements CreateShipmentUseCase, GetShipmentUseCase{
                 existingShipment.getTrackingNumber(),
                 existingShipment.getStatus(),
                 existingShipment.getShippedDate().toString(),
+                existingShipment.getDeliveredDate().toString(),
                 existingShipment.getCreatedAt().toString(),
                 existingShipment.getUpdatedAt().toString()
             );            
@@ -55,6 +56,7 @@ public class ShipmentApp implements CreateShipmentUseCase, GetShipmentUseCase{
                 result.getTrackingNumber(),
                 result.getStatus(),
                 result.getShippedDate().toString(),
+                result.getDeliveredDate().toString(),
                 result.getCreatedAt().toString(),
                 result.getUpdatedAt().toString()
             );
@@ -63,7 +65,7 @@ public class ShipmentApp implements CreateShipmentUseCase, GetShipmentUseCase{
 
     @Override
     public GetShipmentResult getShipmentById(GetShipmentCommand command) {
-        ShipmentJpaEntity shipment = shipmentRepo.findByShipmentId(command.shipmentId())
+        ShipmentJpaEntity shipment = shipmentRepo.findByShipmentId(command.shipmentId().longValue())
                 .orElseThrow(() -> new IllegalArgumentException("Shipment not found: " + command.shipmentId()));
 
         return new GetShipmentResult(
