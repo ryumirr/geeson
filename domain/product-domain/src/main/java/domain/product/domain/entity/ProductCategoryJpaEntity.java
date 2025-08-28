@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -12,8 +11,8 @@ import java.time.LocalDateTime;
 @Table(name = "product_categories")
 @NoArgsConstructor
 @Getter
-@Setter
 public class ProductCategoryJpaEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long categoryId;
@@ -23,18 +22,20 @@ public class ProductCategoryJpaEntity {
     private Long parentId;
     private Integer depth;
     private Boolean isActive;
-    
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public ProductCategoryJpaEntity(Long categoryId, String name, String description, Long parentId, Integer depth, Boolean isActive) {
+    @Builder
+    public ProductCategoryJpaEntity(Long categoryId, String name, String description, Long parentId, Integer depth,
+                                    Boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.categoryId = categoryId;
         this.name = name;
         this.description = description;
         this.parentId = parentId;
         this.depth = depth;
         this.isActive = isActive;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
+        this.updatedAt = updatedAt != null ? updatedAt : LocalDateTime.now();
     }
 }
