@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import storage.rdb.inventory.repository.adapter.SpringDataInventoryJpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -21,5 +22,10 @@ public class InventoryJpaRepository implements InventoryRepository {
     @Override
     public InventoryJpaEntity save(InventoryJpaEntity entity) {
         return repository.save(entity);
+    }
+
+    @Override
+    public Optional<InventoryJpaEntity> findById(Long id) {
+        return repository.findById(id);
     }
 }
