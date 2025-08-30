@@ -8,12 +8,14 @@ spring:
       ddl-auto: none
     properties:
       hibernate:
+        ddl-auto: none
         dialect: org.hibernate.dialect.MySQL8Dialect
+      packages-to-scan: domain.order.entity
   kafka:
     bootstrap-servers: localhost:9092
 grpc:
   server:
-    reflection-service-enabled: true
     port: 6565
+    address: 0.0.0.0
 uuid:
   node-id: ${NODE_ID:1}

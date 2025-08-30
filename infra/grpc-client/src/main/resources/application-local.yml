@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/order_db
     username: root
-    password: rootpass^^*
+    password: "rootpass^^*"
   jpa:
     hibernate:
       ddl-auto: none
@@ -12,7 +12,8 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
 grpc:
-  client:
+  clients:
     shipment:
-      address: static://localhost:6565
+      address: static://"order-api:6565"
       negotiationType: plaintext
+      enableKeepAlive: truex

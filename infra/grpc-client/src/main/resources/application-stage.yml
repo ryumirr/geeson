@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/order_db
     username: root
-    password: rootpass^^*
+    password: "rootpass^^*"
   jpa:
     hibernate:
       ddl-auto: none
@@ -10,7 +10,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
 grpc:
-  client:
-    shipment:
-      address: static://localhost:6565
+  clients:
+    order:
+      address: static://"grpc-server:6565"
       negotiationType: plaintext
+      enableKeepAlive: true

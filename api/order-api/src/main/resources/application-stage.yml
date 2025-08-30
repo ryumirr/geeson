@@ -18,6 +18,7 @@ spring:
 grpc:
   server:
     port: 6565
+    address: 0.0.0.0
     reflection-service-enabled: true
     health-service-enabled: true
     security:

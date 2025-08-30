@@ -1,9 +1,32 @@
+plugins {
+    id 'java-library'
+    id 'java-test-fixtures'
+}
+
 dependencies {
+    implementation 'io.grpc:grpc-core:1.59.0' // 추가 권장
+    implementation 'io.grpc:grpc-inprocess:1.59.0'
+    implementation 'io.grpc:grpc-netty-shaded:1.59.0'
     implementation 'net.devh:grpc-client-spring-boot-starter:2.15.0.RELEASE'
 
     implementation project(':infra:grpc-server')
     implementation project(':proto')
+    testFixturesImplementation 'org.springframework:spring-context:6.0.15'
+    testFixturesImplementation 'org.springframework.boot:spring-boot-test:3.1.4'
+    testFixturesImplementation 'org.springframework.boot:spring-boot-test-autoconfigure:3.1.4'
+    testFixturesImplementation 'org.mockito:mockito-core:5.2.0'
+    testFixturesImplementation 'io.grpc:grpc-core:1.59.0'
+    testFixturesImplementation 'io.grpc:grpc-inprocess:1.59.0'
+
+    testFixturesImplementation project(':proto')
+    testImplementation 'org.mockito:mockito-core:5.2.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.2.0'
 }
+
 tasks.bootJar {
     enabled = false
+}
+
+test {
+    useJUnitPlatform()
 }
