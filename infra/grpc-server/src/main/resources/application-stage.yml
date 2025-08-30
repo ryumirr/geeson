@@ -11,6 +11,7 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
 grpc:
   server:
+    address: 0.0.0.0
     reflection-service-enabled: false
     port: 6565
 uuid:
