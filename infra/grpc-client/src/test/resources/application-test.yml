@@ -23,3 +23,9 @@ spring:
       default-topic: dummy
 uuid:
   node-id: ${NODE_ID:1}
+grpc:
+  clients:
+    shipment:
+      address: static://${grpc.shipment.host:grpc-server}:${grpc.shipment.port:6565}
+      negotiationType: plaintext
+      enableKeepAlive: true
