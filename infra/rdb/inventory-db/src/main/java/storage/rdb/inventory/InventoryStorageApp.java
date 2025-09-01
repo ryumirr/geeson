@@ -8,9 +8,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication(
         scanBasePackages = {"storage.rdb.inventory", "app.inventory"}
 )
-@EnableJpaRepositories(
-        basePackages = {"app.inventory", "storage.rdb.inventory"}
-)
 @EntityScan(basePackages = {"app.inventory", "storage.rdb.inventory"})
 public class InventoryStorageApp {
     public static void main(String[] args) {
