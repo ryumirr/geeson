@@ -1,4 +1,4 @@
-package grpc.server.shipment;
+package grpc.server.order;
 
 import grpc.shipment.CreateShipmentRequest;
 import grpc.shipment.CreateShipmentResponse;
@@ -11,7 +11,6 @@ import net.devh.boot.grpc.server.service.GrpcService;
 import app.order.port.in.CreateShipmentUseCase;
 import app.order.port.in.GetShipmentUseCase;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @GrpcService

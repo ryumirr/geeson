@@ -5,7 +5,7 @@ spring:
     password: "rootpass^^*"
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
@@ -23,7 +23,7 @@ spring:
 grpc:
   clients:
     shipment:
-      address: "grpc-server:6565"
+      address: grpc-server:6565
       negotiationType: plaintext
       enableKeepAlive: true
 

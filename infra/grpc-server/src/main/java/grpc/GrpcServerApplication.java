@@ -7,8 +7,8 @@ import org.springframework.context.annotation.Import;
 @SpringBootApplication(
     scanBasePackages = {
         "grpc",           // proto, gRPC 서버
-        "app.order",      // 애플리케이션/도메인 서비스 (Order)
-        "app.inventory",  // (있다면) 애플리케이션/도메인 서비스 (Inventory)
+        "app.order",
+        "app.inventory",
         "support.uuid"
     }
 )
@@ -18,9 +18,9 @@ import org.springframework.context.annotation.Import;
     grpc.server.config.UuidConfig.class,
     grpc.server.config.KafkaConfig.class,
     grpc.server.config.OrderEventPublisherConfig.class,
-    grpc.server.shipment.ShipmentGrpcService.class,
+    grpc.server.order.ShipmentGrpcService.class,
 
-    // --- 멀티 DB configs (핵심) ---
+    // --- 멀티 DB configs ---
     grpc.server.config.OrderDbConfig.class,
     grpc.server.config.InventoryDbConfig.class
 })
