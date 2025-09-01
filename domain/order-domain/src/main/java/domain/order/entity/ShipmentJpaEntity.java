@@ -13,6 +13,7 @@ public class ShipmentJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "shipment_id")
     private Long shipmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
