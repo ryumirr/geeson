@@ -16,4 +16,4 @@ grpc:
     shipment:
       address: static://"grpc-server:6565"
       negotiationType: plaintext
-      enableKeepAlive: truex
+      enableKeepAlive: true
