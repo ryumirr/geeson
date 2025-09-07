@@ -1,0 +1,33 @@
+group = 'grpc.server'
+version = '0.0.1'
+
+dependencies {
+    implementation project(":application:order-app")
+    implementation project(":infra:rdb:order-db")
+    implementation project(":infra:queue:order-kafka")
+    implementation project(":domain:order-domain")
+    implementation project(":support:uuid")
+    implementation project(":support:messaging")
+    implementation project(":infra:uuid-impl")
+    implementation project(":module:enum")
+    implementation project(':proto')
+
+    implementation("net.devh:grpc-server-spring-boot-starter:2.15.0.RELEASE")
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter'
+
+    // Optional: 로깅/어노테이션
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+
+    // Kafka client core
+    implementation 'org.apache.kafka:kafka-clients:3.7.0'
+
+    // Spring Kafka support
+    implementation 'org.springframework.kafka:spring-kafka:3.1.2'
+
+    // JSON 직렬화/역직렬화용 (필요 시)
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
+
+}

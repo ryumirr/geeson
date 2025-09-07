@@ -3,17 +3,44 @@ spring:
     url: jdbc:mysql://mysql:3306/order_db
     username: root
     password: rootpass^^*
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
   kafka:
     bootstrap-servers: kafka:29092
   redis:
     redisson:
       config: |
         singleServerConfig:
-          address: "redis://localhost:6379"
+          address: "redis://redis:6379"
           connectionMinimumIdleSize: 5
           connectionPoolSize: 10
         threads: 4
         nettyThreads: 4
+
+grpc:
+  server:
+    port: 6565
+    address: 0.0.0.0
+    reflection-service-enabled: true
+    health-service-enabled: true
+    security:
+      enabled: false
+    enable-keep-alive: true
+    keep-alive-time: 60s
+    keep-alive-timeout: 30s
+    max-inbound-message-size: 4194304
+    permit-keep-alive-time: 60s
+    permit-keep-alive-without-calls: true
+
+  client:
+    inventoryService:
+      address: static://inventory:6565
+      negotiationType: plaintext
+
 api:
   version: '2025-05-25'
 

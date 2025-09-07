@@ -6,12 +6,18 @@ import org.springframework.stereotype.Service;
 import java.util.Comparator;
 import java.util.List;
 
+import grpc.client.ShipmentGrpcClient; 
+import grpc.shipment.GetShipmentResponse;
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class InventorySelectApp {
     private final InventoryRepository inventoryRepository;
+    private final ShipmentGrpcClient shipmentGrpcClient;
 
-    public InventorySelectApp(InventoryRepository inventoryRepository) {
-        this.inventoryRepository = inventoryRepository;
+    public GetShipmentResponse getShipment(Long shipmentId) {
+        return shipmentGrpcClient.getShipment(shipmentId);
     }
 
     /**

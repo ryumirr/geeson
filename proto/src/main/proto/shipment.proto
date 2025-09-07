@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package grpc.shipment;
+option java_package = "grpc.shipment";
+
+option java_multiple_files = true;
+
+service ShipmentService {
+  rpc CreateShipment (CreateShipmentRequest) returns (CreateShipmentResponse);
+  rpc GetShipment (GetShipmentRequest) returns (GetShipmentResponse); // 기존 메서드
+}
+
+message CreateShipmentRequest {
+  int64 orderId = 1;
+  string trackingNumber = 2;
+}
+
+message CreateShipmentResponse {
+  int64 shipmentId = 1;
+  int64 orderId = 2;
+  string trackingNumber = 3;
+  string status = 4;
+  string shippedDate = 5;
+  string deliveredDate = 6;
+  string createdAt = 7;
+  string updatedAt = 8;
+}
+
+message GetShipmentRequest {
+  int64 shipmentId = 1;
+}
+
+message GetShipmentResponse {
+  int64 shipmentId = 1;
+  int64 orderId = 2;
+  string trackingNumber = 3;
+  string status = 4;
+  string shippedDate = 5;
+  string deliveredDate = 6;
+  string createdAt = 7;
+  string updatedAt = 8;
+}

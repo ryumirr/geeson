@@ -1,5 +1,3 @@
-USE order_db;
-
 CREATE TABLE customers (
     customer_id BIGINT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -48,15 +46,15 @@ CREATE TABLE payments_request (
 );
 
 CREATE TABLE shipments (
-                           shipment_id BIGINT  PRIMARY KEY,
-                           order_id BIGINT NOT NULL,
-                           tracking_number VARCHAR(255),
-                           status VARCHAR(50) DEFAULT 'PENDING',
-                           shipped_date TIMESTAMP,
-                           delivered_date TIMESTAMP,
-                           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                           FOREIGN KEY (order_id) REFERENCES orders(order_id)
+    shipment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_id BIGINT NOT NULL,
+    tracking_number VARCHAR(255),
+    status VARCHAR(50) DEFAULT 'PENDING',
+    shipped_date TIMESTAMP NULL,
+    delivered_date TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id)
 );
 
 CREATE TABLE order_items (

@@ -1,5 +1,3 @@
-USE payment_db;
-
 CREATE TABLE payment_methods (
                                          method_id BIGINT  PRIMARY KEY,
                                          customer_id BIGINT,

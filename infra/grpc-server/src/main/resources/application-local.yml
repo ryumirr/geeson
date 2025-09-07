@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    order:
+      url: jdbc:mysql://localhost:3306/order_db
+      username: root
+      password: "rootpass^^*"
+      driver-class-name: com.mysql.cj.jdbc.Driver
+    inventory:
+      url: jdbc:mysql://localhost:3306/inventory_db
+      username: root
+      password: "rootpass^^*"
+      driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        ddl-auto: none
+        dialect: org.hibernate.dialect.MySQL8Dialect
+      packages-to-scan: domain.order.entity
+  kafka:
+    bootstrap-servers: localhost:9092
+grpc:
+  server:
+    port: 6565
+    address: 0.0.0.0
+uuid:
+  node-id: ${NODE_ID:1}

@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    order:
+      url: jdbc:mysql://mysql:3306/order_db
+      username: root
+      password: "rootpass^^*"
+      driver-class-name: com.mysql.cj.jdbc.Driver
+    inventory:
+      url: jdbc:mysql://mysql:3306/inventory_db
+      username: root
+      password: "rootpass^^*"
+      driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+grpc:
+  server:
+    address: 0.0.0.0
+    reflection-service-enabled: false
+    port: 6565
+uuid:
+  node-id: ${NODE_ID:1}

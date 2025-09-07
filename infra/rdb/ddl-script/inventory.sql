@@ -1,7 +1,3 @@
-CREATE DATABASE inventory_db;
-
-USE inventory_db;
-
 CREATE TABLE products (
     product_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -112,7 +108,6 @@ CREATE TABLE inventory_adjustments (
     FOREIGN KEY (inventory_id) REFERENCES inventory(inventory_id)
 );
 
-<<<<<<< HEAD
 INSERT INTO inventory_db.inventory (
     inventory_id,
     product_id,
@@ -136,7 +131,3 @@ INSERT INTO inventory_db.inventory (
     '2025-07-02 11:28:31',
     '2025-07-02 11:28:31'
 );
-=======
--- reference_id 검색 최적화를 위한 인덱스 추가
-CREATE INDEX idx_stock_movements_reference ON stock_movements(reference_id);
->>>>>>> 52492ef ([soy-04:feat]stock_movement_register_api default엔드포인트 추가)

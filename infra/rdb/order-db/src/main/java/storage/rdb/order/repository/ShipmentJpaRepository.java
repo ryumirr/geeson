@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import storage.rdb.order.repository.adapter.SpringDataShipmentJpaRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 

@@ -8,9 +8,12 @@ import module.enums.ShipmentStatus;
 
 @Getter
 @Entity
-@Table(name = "shipments")
+@Table(name = "shipments", schema = "order_db")
 public class ShipmentJpaEntity {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "shipment_id")
     private Long shipmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -40,6 +43,7 @@ public class ShipmentJpaEntity {
         entity.order = order;
         entity.trackingNumber = trackingNumber;
         entity.status = ShipmentStatus.READY.name();
+        entity.shippedDate = LocalDateTime.now();
         entity.createdAt = LocalDateTime.now();
         entity.updatedAt = LocalDateTime.now();
         return entity;

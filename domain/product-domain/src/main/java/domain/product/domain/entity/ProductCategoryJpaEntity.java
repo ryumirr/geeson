@@ -1,6 +1,7 @@
 package domain.product.domain.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +11,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "product_categories")
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
+@Setter
+@Builder
 public class ProductCategoryJpaEntity {
 
     @Id
