@@ -3,10 +3,8 @@ package app.inventory.app;
 import domain.inventory.domain.entity.InventoryJpaEntity;
 import domain.inventory.domain.repository.InventoryRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 import grpc.client.ShipmentGrpcClient; 
 import grpc.shipment.GetShipmentResponse;
@@ -22,6 +20,14 @@ public class InventorySelectApp {
         return shipmentGrpcClient.getShipment(shipmentId);
     }
 
+    /**
+     * Find available inventory for a product with sufficient quantity.
+     * 
+     * @param productId
+     * @param quantity
+     * @return InventoryJpaEntity
+     * @throws IllegalArgumentException if no available inventory is found
+     */
     public InventoryJpaEntity findAvailableInventory(Long productId, int quantity) {
         List<InventoryJpaEntity> inventories = inventoryRepository.findByProductId(productId);
 
@@ -31,6 +37,4 @@ public class InventorySelectApp {
             .max(Comparator.comparing(inv -> inv.getWareHouse().getCapacity()))
             .orElseThrow(() -> new IllegalArgumentException("Not enough inventory"));
     }
-
-
 }
