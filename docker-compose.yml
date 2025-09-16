@@ -101,10 +101,11 @@ services:
     volumes:
       - ./logs:/logs
 
-
   order-api:
     container_name: order-api-1
     image: jeongjin984/order-api:0.0.1
+    ports:
+      - "9093:8080"
     depends_on:
       mysql:
         condition: service_healthy

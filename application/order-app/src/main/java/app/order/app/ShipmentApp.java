@@ -56,7 +56,7 @@ public class ShipmentApp implements CreateShipmentUseCase, GetShipmentUseCase{
                 result.getTrackingNumber(),
                 result.getStatus(),
                 result.getShippedDate().toString(),
-                result.getDeliveredDate().toString(),
+                null,
                 result.getCreatedAt().toString(),
                 result.getUpdatedAt().toString()
             );

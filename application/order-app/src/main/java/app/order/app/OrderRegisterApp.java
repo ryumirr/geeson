@@ -5,6 +5,9 @@ import domain.order.entity.*;
 import domain.order.message.OrderEventPublisher;
 import app.order.exception.CustomerNotFoundException;
 import app.order.exception.ShippingAddressNotFoundException;
+import app.order.port.in.CreateShipmentUseCase;
+import app.order.port.in.CreateShipmentUseCase.CreateShipmentCommand;
+import app.order.port.in.CreateShipmentUseCase.CreateShipmentResult;
 import domain.order.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,12 +28,9 @@ public class OrderRegisterApp {
     private final CustomerRepository customerRepository;
     private final ShippingAddressRepository shippingAddressRepository;
     private final UuidGenerator uuidGenerator;
-
+    private final ShipmentApp shipmentApp;
+    private final CreateShipmentUseCase createShipmentUseCase;
     private final OrderEventPublisher orderEventPublisher;
-
-    public ProductOrderJpaEntity resolveRegisterOrder(OrderRegisterCommand command) {
-        return null;
-    }
 
     public ProductOrderJpaEntity registerOrder(OrderRegisterCommand command) {
         CustomerJpaEntity customer = customerRepository.findByCustomerId(command.customerId())
@@ -79,6 +79,10 @@ public class OrderRegisterApp {
 
         // 이제 모두 설정된 상태로 한번에 save
         productOrderRepository.save(productOrderEntity); // cascade 설정되어 있어야 제대로 동작
+
+        // 주문과 함께 Shipment관련 정보도 생성
+        CreateShipmentResult result = createShipmentUseCase.createShipment(
+                new CreateShipmentCommand(productOrderEntity.getOrderId(), "TRACK-" + productOrderEntity.getOrderId()));
 
         orderEventPublisher.publishOrderCreated(new OrderStartPayload(
             String.valueOf(productOrderEntity.getOrderId()),
