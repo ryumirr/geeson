@@ -79,49 +79,24 @@ services:
     volumes:
       - ./logs:/logs
 
-  grpc-server:
-    environment:
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SPRING_JPA_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
-    build:
-      context: ./infra/grpc-server
-      dockerfile: ../../Dockerfile
-    image: jeongjin984/grpc-server:0.0.1
-    container_name: grpc-server
+  order-api:
+    container_name: order-api-1
+    image: jeongjin984/order-api:0.0.1
     ports:
-      - "6565:6565"
+      - "9093:8080"   # REST
+      - "6566:6565"   # gRPC
     depends_on:
-      mysql:
-        condition: service_healthy
+      - kafka
+      - mysql
     networks:
       grpc-net:
         aliases:
           - shipment
-      mysql-net:    # added to reach MySQL
+      kafka-net:
+      mysql-net:
+      redis-net:
     volumes:
       - ./logs:/logs
-
-
-  order-api:
-    container_name: order-api-1
-    image: jeongjin984/order-api:0.0.1
-    depends_on:
-      mysql:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      grpc-server:
-        condition: service_started
-    networks:
-      - api-net
-      - kafka-net
-      - mysql-net
-      - redis-net
-      - grpc-net
-    volumes:
-        - ./logs:/logs
 
   payment-api:
     platform: linux/amd64
@@ -171,7 +146,8 @@ services:
   inventory-api:
     image: jeongjin984/inventory-api:0.0.1
     ports:
-      - "9095:8080"
+      - "9095:8080"   # REST
+      - "6565:6565"   # gRPC
     environment:
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     depends_on:
@@ -181,8 +157,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      grpc-server:
-        condition: service_started
     networks:
       - api-net
       - kafka-net

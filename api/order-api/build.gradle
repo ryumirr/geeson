@@ -11,4 +11,9 @@ dependencies {
 
     implementation project(":support:web-api")
     implementation project(":support:uuid")
+
+    implementation project(":proto")
+    implementation "net.devh:grpc-server-spring-boot-starter:2.15.0.RELEASE"
+    implementation "net.devh:grpc-client-spring-boot-starter:2.15.0.RELEASE"
+
 }

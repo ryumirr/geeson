@@ -50,3 +50,8 @@ uuid:
 
 server:
   port: 9093
+
+grpc:
+  server:
+    port: 6565   # gRPC 포트
+    address: 0.0.0.0

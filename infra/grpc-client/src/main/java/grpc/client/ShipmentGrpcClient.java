@@ -6,24 +6,25 @@ import grpc.shipment.ShipmentServiceGrpc;
 import grpc.shipment.ShipmentServiceGrpc.ShipmentServiceBlockingStub;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Service;
-// import net.devh.boot.grpc.client.inject.GrpcClient;
 
 @Service
 public class ShipmentGrpcClient {
 
-    // @GrpcClient("shipment")
+    private ManagedChannel channel;
     private ShipmentServiceBlockingStub shipmentStub;
 
     @PostConstruct
     public void init() {
-        ManagedChannel channel = ManagedChannelBuilder
-                .forAddress("grpc-server", 6565) // plaintext port
-                .usePlaintext()                 // ⚠️ important to avoid TLS (443)
+        this.channel = ManagedChannelBuilder
+                .forAddress("shipment", 6565)
+                .usePlaintext()
                 .build();
 
-        shipmentStub = ShipmentServiceGrpc.newBlockingStub(channel);
+        this.shipmentStub = ShipmentServiceGrpc.newBlockingStub(channel);
     }
 
     public GetShipmentResponse getShipment(Long shipmentId) {
@@ -31,7 +32,19 @@ public class ShipmentGrpcClient {
                 .setShipmentId(shipmentId)
                 .build();
 
-        return shipmentStub.getShipment(request);
+        try {
+            return shipmentStub.getShipment(request);
+        } catch (StatusRuntimeException e) {
+            // gRPC 호출 실패 시 로그 남기기
+            System.err.println("❌ gRPC getShipment failed: " + e.getStatus());
+            throw e; // 혹은 Optional.empty() / custom exception
+        }
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        if (channel != null) {
+            channel.shutdown();
+        }
     }
 }
-

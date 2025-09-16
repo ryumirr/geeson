@@ -46,7 +46,6 @@ include(
     
     'infra:client:pgClient',
 
-    'infra:grpc-server',
     'infra:grpc-client',
     
 )
