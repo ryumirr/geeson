@@ -149,3 +149,12 @@ INSERT INTO inventory_db.warehouses (
     '2025-07-02 11:28:25',
     '2025-07-02 11:28:25'
 );
+
+-- Test Data
+INSERT INTO order_db.orders
+(order_id, customer_id, order_date, total_price, status, shipping_address_id, payment_id, created_at, updated_at)
+VALUES(1, 1, '2025-09-01 18:41:09', 999.00, 'READY', NULL, NULL, '2025-09-01 18:41:09', '2025-09-01 18:41:09');
+
+INSERT INTO order_db.shipments
+(shipment_id, order_id, tracking_number, status, shipped_date, delivered_date, created_at, updated_at)
+VALUES(1, 1, 'test-tracking-number', 'PENDING', NULL, NULL, '2025-09-01 18:41:15', '2025-09-01 18:41:15');
