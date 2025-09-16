@@ -115,4 +115,3 @@ INSERT INTO inventory_db.inventory (
     '2025-07-02 11:28:31',
     '2025-07-02 11:28:31'
 );
-CREATE INDEX idx_stock_movements_reference ON stock_movements(reference_id);
