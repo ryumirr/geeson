@@ -4,6 +4,7 @@ import app.inventory.port.in.CreateInventoryItemUseCase;
 import app.inventory.port.in.GetInventoryItemUseCase;
 import grpc.inventory.CreateInventoryItemRequest;
 import grpc.inventory.GetInventoryItemRequest;
+import grpc.inventory.GetInventoryItemBySerialRequest;
 import grpc.inventory.InventoryItem;
 import grpc.inventory.InventoryItemResponse;
 import grpc.inventory.InventoryItemServiceGrpc;
@@ -34,27 +35,19 @@ public class InventoryItemGrpcService extends InventoryItemServiceGrpc.Inventory
             InventoryItem item = InventoryItem.newBuilder()
                     .setInventoryItemId(result.inventoryItemId())
                     .setInventoryId(result.inventoryId())
-                    .setBatchLotId(result.batchLotId())
+                    .setBatchLotId(result.batchLotId() != null ? result.batchLotId() : 0)
                     .setSerialNumber(result.serialNumber())
                     .setStatus(result.status())
                     .setCreatedAt(result.createdAt())
                     .setUpdatedAt(result.updatedAt())
                     .build();
 
-            InventoryItemResponse response = InventoryItemResponse.newBuilder()
-                    .setItem(item)
-                    .build();
-
-            responseObserver.onNext(response);
+            responseObserver.onNext(InventoryItemResponse.newBuilder().setItem(item).build());
             responseObserver.onCompleted();
         } catch (IllegalArgumentException e) {
-            responseObserver.onError(
-                Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException()
-            );
+            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
         } catch (Exception e) {
-            responseObserver.onError(
-                Status.INTERNAL.withDescription("Unexpected server error").asRuntimeException()
-            );
+            responseObserver.onError(Status.INTERNAL.withDescription("Unexpected server error").asRuntimeException());
         }
     }
 
@@ -69,27 +62,46 @@ public class InventoryItemGrpcService extends InventoryItemServiceGrpc.Inventory
             InventoryItem item = InventoryItem.newBuilder()
                     .setInventoryItemId(result.inventoryItemId())
                     .setInventoryId(result.inventoryId())
-                    .setBatchLotId(result.batchLotId())
+                    .setBatchLotId(result.batchLotId() != null ? result.batchLotId() : 0)
                     .setSerialNumber(result.serialNumber())
                     .setStatus(result.status())
                     .setCreatedAt(result.createdAt())
                     .setUpdatedAt(result.updatedAt())
                     .build();
 
-            InventoryItemResponse response = InventoryItemResponse.newBuilder()
-                    .setItem(item)
-                    .build();
-
-            responseObserver.onNext(response);
+            responseObserver.onNext(InventoryItemResponse.newBuilder().setItem(item).build());
             responseObserver.onCompleted();
         } catch (IllegalArgumentException e) {
-            responseObserver.onError(
-                Status.NOT_FOUND.withDescription(e.getMessage()).asRuntimeException()
-            );
+            responseObserver.onError(Status.NOT_FOUND.withDescription(e.getMessage()).asRuntimeException());
         } catch (Exception e) {
-            responseObserver.onError(
-                Status.INTERNAL.withDescription("Unexpected server error").asRuntimeException()
+            responseObserver.onError(Status.INTERNAL.withDescription("Unexpected server error").asRuntimeException());
+        }
+    }
+
+    @Override
+    public void getInventoryItemBySerial(GetInventoryItemBySerialRequest request,
+                                         StreamObserver<InventoryItemResponse> responseObserver) {
+        try {
+            var result = getInventoryItemUseCase.getBySerialNumber(
+                new GetInventoryItemUseCase.GetInventoryItemBySerialCommand(request.getSerialNumber())
             );
+
+            InventoryItem item = InventoryItem.newBuilder()
+                    .setInventoryItemId(result.inventoryItemId())
+                    .setInventoryId(result.inventoryId())
+                    .setBatchLotId(result.batchLotId() != null ? result.batchLotId() : 0)
+                    .setSerialNumber(result.serialNumber())
+                    .setStatus(result.status())
+                    .setCreatedAt(result.createdAt())
+                    .setUpdatedAt(result.updatedAt())
+                    .build();
+
+            responseObserver.onNext(InventoryItemResponse.newBuilder().setItem(item).build());
+            responseObserver.onCompleted();
+        } catch (IllegalArgumentException e) {
+            responseObserver.onError(Status.NOT_FOUND.withDescription(e.getMessage()).asRuntimeException());
+        } catch (Exception e) {
+            responseObserver.onError(Status.INTERNAL.withDescription("Unexpected server error").asRuntimeException());
         }
     }
 }

@@ -103,11 +103,12 @@ public class OrderRegisterApp {
     /**
      * gRPC inventory item 생성 테스트
      */
-    public TestInventoryItemRes testCreateInventoryItem(
+    public TestInventoryItemRes createInventoryItem(
             Long inventoryId,
             String serialNumber,
             String status) {
         try {
+            // serialNumber : "SERIAL-" + productId
             var response = inventoryItemGrpcClient.createInventoryItem(inventoryId, serialNumber, status);
             return new TestInventoryItemRes(response);
         } catch (Exception e) {
@@ -119,9 +120,32 @@ public class OrderRegisterApp {
     /**
      * gRPC inventory item 조회 테스트
      */
+    public TestInventoryItemRes selectInventoryItem(Long inventoryItemId) {
+        try {
+            var response = inventoryItemGrpcClient.getInventoryItem(inventoryItemId);
+            return new TestInventoryItemRes(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error fetching inventory item", e);
+        }
+    }
+
+    /**
+     * gRPC inventory item 조회 테스트
+     */
     public TestInventoryItemRes testSelectInventoryItem(Long inventoryItemId) {
         try {
             var response = inventoryItemGrpcClient.getInventoryItem(inventoryItemId);
+            return new TestInventoryItemRes(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error fetching inventory item", e);
+        }
+    }
+
+    public TestInventoryItemRes selectInventoryItemBySerialNumber(String serialNumber) {
+        try {
+            var response = inventoryItemGrpcClient.getInventoryItemBySerial(serialNumber);
             return new TestInventoryItemRes(response);
         } catch (Exception e) {
             e.printStackTrace();
