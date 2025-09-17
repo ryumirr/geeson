@@ -20,6 +20,18 @@ public class InventoryItemsListApp implements GetInventoryItemUseCase {
         InventoryItemsJpaEntity entity = inventoryItemsRepository.findById(command.inventoryItemId())
                 .orElseThrow(() -> new EntityNotFoundException("Inventory Item not found: id=" + command.inventoryItemId()));
 
+        return mapToResult(entity);
+    }
+
+    @Override
+    public InventoryItemResult getBySerialNumber(GetInventoryItemBySerialCommand command) {
+        InventoryItemsJpaEntity entity = inventoryItemsRepository.findBySerialNumber(command.serialNumber())
+                .orElseThrow(() -> new EntityNotFoundException("Inventory Item not found: serial=" + command.serialNumber()));
+
+        return mapToResult(entity);
+    }
+
+    private InventoryItemResult mapToResult(InventoryItemsJpaEntity entity) {
         return new InventoryItemResult(
                 entity.getInventoryItemId(),
                 entity.getInventory().getInventoryId(),

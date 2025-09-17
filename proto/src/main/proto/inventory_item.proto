@@ -10,6 +10,9 @@ service InventoryItemService {
 
   // InventoryItemsListApp.findById()
   rpc GetInventoryItem (GetInventoryItemRequest) returns (InventoryItemResponse);
+
+  // InventoryItemsListApp.findBySerialNumber()
+  rpc GetInventoryItemBySerial (GetInventoryItemBySerialRequest) returns (InventoryItemResponse);
 }
 
 message InventoryItem {
@@ -34,4 +37,8 @@ message InventoryItemResponse {
 
 message GetInventoryItemRequest {
   int64 inventoryItemId = 1;
+}
+
+message GetInventoryItemBySerialRequest {
+  string serialNumber = 1;
 }

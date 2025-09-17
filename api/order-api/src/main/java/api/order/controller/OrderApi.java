@@ -21,7 +21,8 @@ public class OrderApi {
     private final OrderListApp orderListApp;
 
 
-    // @todo [2025-09-17] DELETE this endpoint after confirming gRPC inventory fetch    @PostMapping("/testCreateOrder")
+    // @todo [2025-09-17] DELETE this endpoint after confirming gRPC inventory fetch
+    @PostMapping("/testCreateOrder")
     public TestOrderRes testCreateOrder(@RequestBody RegisterOrderReq orderReq) {
         var item = orderRegisterApp.testCreateInventoryItem(
                 orderReq.customerId(),

@@ -23,4 +23,9 @@ public class InventoryItemsJpaRepository  implements InventoryItemsRepository {
      public Optional<InventoryItemsJpaEntity> findById(Long id) {
           return repository.findById(id);
      }
+
+    @Override
+    public Optional<InventoryItemsJpaEntity> findBySerialNumber(String serialNumber) {
+        return repository.findBySerialNumber(serialNumber);
+    }
 }

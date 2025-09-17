@@ -1,8 +1,8 @@
 package app.inventory.port.in;
 
 public interface GetInventoryItemUseCase {
-
     record GetInventoryItemCommand(Long inventoryItemId) {}
+    record GetInventoryItemBySerialCommand(String serialNumber) {}
 
     record InventoryItemResult(Long inventoryItemId,
                                Long inventoryId,
@@ -13,4 +13,5 @@ public interface GetInventoryItemUseCase {
                                String updatedAt) {}
 
     InventoryItemResult getById(GetInventoryItemCommand command);
+    InventoryItemResult getBySerialNumber(GetInventoryItemBySerialCommand command);
 }

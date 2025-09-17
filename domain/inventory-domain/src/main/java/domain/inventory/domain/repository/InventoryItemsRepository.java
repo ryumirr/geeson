@@ -10,4 +10,5 @@ import domain.inventory.domain.entity.InventoryJpaEntity;
 public interface InventoryItemsRepository {
     InventoryItemsJpaEntity save(InventoryItemsJpaEntity entity);
     Optional<InventoryItemsJpaEntity> findById(Long id);
+    Optional<InventoryItemsJpaEntity> findBySerialNumber(String serialNumber);
 }

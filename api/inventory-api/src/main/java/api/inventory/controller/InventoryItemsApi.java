@@ -17,29 +17,37 @@ import jakarta.validation.Valid;
 @RequiredArgsConstructor
 public class InventoryItemsApi {
 
-    private final CreateInventoryItemUseCase createInventoryItemUseCase;
-    private final GetInventoryItemUseCase getInventoryItemUseCase;
+        private final CreateInventoryItemUseCase createInventoryItemUseCase;
+        private final GetInventoryItemUseCase getInventoryItemUseCase;
 
-    @PostMapping
-    public ResponseEntity<RegisterInventoryItemRes> registerInventoryItem(
-            @RequestBody @Valid RegisterInventoryItemReq req) {
+        @PostMapping
+        public ResponseEntity<RegisterInventoryItemRes> registerInventoryItem(
+                        @RequestBody @Valid RegisterInventoryItemReq req) {
 
-        var result = createInventoryItemUseCase.handle(
-                new CreateInventoryItemUseCase.CreateInventoryItemCommand(
-                        req.inventoryId(),
-                        req.serialNumber(),
-                        req.status()
-                )
-        );
+                var result = createInventoryItemUseCase.handle(
+                                new CreateInventoryItemUseCase.CreateInventoryItemCommand(
+                                                req.inventoryId(),
+                                                req.serialNumber(),
+                                                req.status()));
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(RegisterInventoryItemRes.from(result));
-    }
+                return ResponseEntity.status(HttpStatus.CREATED).body(RegisterInventoryItemRes.from(result));
+        }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<RegisterInventoryItemRes> findById(@PathVariable Long id) {
-        var result = getInventoryItemUseCase.getById(
-                new GetInventoryItemUseCase.GetInventoryItemCommand(id)
-        );
-        return ResponseEntity.ok(RegisterInventoryItemRes.from(result));
-    }
+        @GetMapping("/{id}")
+        public ResponseEntity<RegisterInventoryItemRes> findById(@PathVariable Long id) {
+                var result = getInventoryItemUseCase.getById(
+                                new GetInventoryItemUseCase.GetInventoryItemCommand(id));
+                return ResponseEntity.ok(RegisterInventoryItemRes.from(result));
+        }
+
+        @GetMapping("/by-serial")
+        public ResponseEntity<RegisterInventoryItemRes> findBySerialNumber(
+                        @RequestParam("serialNumber") String serialNumber) {
+
+                var result = getInventoryItemUseCase.getBySerialNumber(
+                                new GetInventoryItemUseCase.GetInventoryItemBySerialCommand(serialNumber));
+
+                return ResponseEntity.ok(RegisterInventoryItemRes.from(result));
+        }
+
 }

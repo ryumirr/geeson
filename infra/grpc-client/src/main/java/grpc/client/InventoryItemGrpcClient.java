@@ -2,6 +2,7 @@ package grpc.client;
 
 import grpc.inventory.CreateInventoryItemRequest;
 import grpc.inventory.GetInventoryItemRequest;
+import grpc.inventory.GetInventoryItemBySerialRequest;
 import grpc.inventory.InventoryItemResponse;
 import grpc.inventory.InventoryItemServiceGrpc;
 import grpc.inventory.InventoryItemServiceGrpc.InventoryItemServiceBlockingStub;
@@ -28,7 +29,7 @@ public class InventoryItemGrpcClient {
         this.inventoryItemStub = InventoryItemServiceGrpc.newBlockingStub(channel);
     }
 
-    /** gRPC 서버에서 단일 InventoryItem 조회 */
+    /** gRPC 서버에서 단일 InventoryItem 조회 (by ID) */
     public InventoryItemResponse getInventoryItem(Long inventoryItemId) {
         GetInventoryItemRequest request = GetInventoryItemRequest.newBuilder()
                 .setInventoryItemId(inventoryItemId)
@@ -38,6 +39,20 @@ public class InventoryItemGrpcClient {
             return inventoryItemStub.getInventoryItem(request);
         } catch (StatusRuntimeException e) {
             System.err.println("❌ gRPC getInventoryItem failed: " + e.getStatus());
+            throw e;
+        }
+    }
+
+    /** gRPC 서버에서 단일 InventoryItem 조회 (by SerialNumber) */
+    public InventoryItemResponse getInventoryItemBySerial(String serialNumber) {
+        GetInventoryItemBySerialRequest request = GetInventoryItemBySerialRequest.newBuilder()
+                .setSerialNumber(serialNumber)
+                .build();
+
+        try {
+            return inventoryItemStub.getInventoryItemBySerial(request);
+        } catch (StatusRuntimeException e) {
+            System.err.println("❌ gRPC getInventoryItemBySerial failed: " + e.getStatus());
             throw e;
         }
     }
