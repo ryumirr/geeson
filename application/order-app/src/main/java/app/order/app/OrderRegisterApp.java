@@ -17,6 +17,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import grpc.client.InventoryItemGrpcClient;
+import grpc.inventory.InventoryItemResponse;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -25,7 +28,7 @@ public class OrderRegisterApp {
     private final CustomerRepository customerRepository;
     private final ShippingAddressRepository shippingAddressRepository;
     private final UuidGenerator uuidGenerator;
-
+    private final InventoryItemGrpcClient inventoryItemGrpcClient;
     private final OrderEventPublisher orderEventPublisher;
 
     public ProductOrderJpaEntity resolveRegisterOrder(OrderRegisterCommand command) {
@@ -35,43 +38,44 @@ public class OrderRegisterApp {
     public ProductOrderJpaEntity registerOrder(OrderRegisterCommand command) {
         CustomerJpaEntity customer = customerRepository.findByCustomerId(command.customerId())
                 .orElseThrow(() -> new CustomerNotFoundException("customer not found"));
-        ShippingAddressJpaEntity shippingAddress = shippingAddressRepository.findByShippingAddressId(command.shippingAddressId())
+        ShippingAddressJpaEntity shippingAddress = shippingAddressRepository
+                .findByShippingAddressId(command.shippingAddressId())
                 .orElseThrow(() -> new ShippingAddressNotFoundException("shipping address not found"));
 
         ProductOrderJpaEntity productOrderEntity = ProductOrderJpaEntity.builder()
-            .orderId(uuidGenerator.nextId())
-            .customer(customer)
-            .totalPrice(command.getTotalPrice())
-            .status("ORDERED")
-            .orderDate(LocalDateTime.now())
-            .shippingAddress(shippingAddress)
-            .payment(null)
-            .createdAt(LocalDateTime.now())
-            .updatedAt(LocalDateTime.now())
-            .orderItems(new ArrayList<>())
-            .build();
+                .orderId(uuidGenerator.nextId())
+                .customer(customer)
+                .totalPrice(command.getTotalPrice())
+                .status("ORDERED")
+                .orderDate(LocalDateTime.now())
+                .shippingAddress(shippingAddress)
+                .payment(null)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .orderItems(new ArrayList<>())
+                .build();
 
         List<OrderItemJpaEntity> orderItemEntityList = command.items().stream()
-            .map(item -> OrderItemJpaEntity.builder()
-                .orderItemId(uuidGenerator.nextId())
-                .order(productOrderEntity)
-                .productId(item.productId())
-                .quantity(item.quantity())
-                .unitPrice(BigDecimal.valueOf(item.unitPrice()))
-                .totalPrice(command.getTotalPrice())
-                .build()
-            ).toList();
+                .map(item -> OrderItemJpaEntity.builder()
+                        .orderItemId(uuidGenerator.nextId())
+                        .order(productOrderEntity)
+                        .productId(item.productId())
+                        .quantity(item.quantity())
+                        .unitPrice(BigDecimal.valueOf(item.unitPrice()))
+                        .totalPrice(command.getTotalPrice())
+                        .build())
+                .toList();
 
         PaymentRequestJpaEntity paymentRequestEntity = PaymentRequestJpaEntity.builder()
-            .paymentId(uuidGenerator.nextId())
-            .orderId(productOrderEntity.getOrderId())
-            .order(productOrderEntity)
-            .amount(productOrderEntity.getTotalPrice())
-            .paymentMethod(String.valueOf(command.paymentMethodId()))
-            .transactionId(command.paymentKey())
-            .createdAt(LocalDateTime.now())
-            .updatedAt(LocalDateTime.now())
-            .build();
+                .paymentId(uuidGenerator.nextId())
+                .orderId(productOrderEntity.getOrderId())
+                .order(productOrderEntity)
+                .amount(productOrderEntity.getTotalPrice())
+                .paymentMethod(String.valueOf(command.paymentMethodId()))
+                .transactionId(command.paymentKey())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
 
         productOrderEntity.getOrderItems().addAll(orderItemEntityList); // 양방향 세팅
 
@@ -81,20 +85,81 @@ public class OrderRegisterApp {
         productOrderRepository.save(productOrderEntity); // cascade 설정되어 있어야 제대로 동작
 
         orderEventPublisher.publishOrderCreated(new OrderStartPayload(
-            String.valueOf(productOrderEntity.getOrderId()),
-            String.valueOf(customer.getCustomerId()),
-            paymentRequestEntity.getPaymentMethod(),
-            paymentRequestEntity.getTransactionId(),
-            String.valueOf(paymentRequestEntity.getTransactionId()),
-            productOrderEntity.getTotalPrice(),
-            "KRW",
-            orderItemEntityList.stream().map(v -> new OrderStartPayload.OrderItem(
-                String.valueOf(v.getProductId()),
-                v.getQuantity(),
-                v.getUnitPrice()
-            )).toList()
-        ));
+                String.valueOf(productOrderEntity.getOrderId()),
+                String.valueOf(customer.getCustomerId()),
+                paymentRequestEntity.getPaymentMethod(),
+                paymentRequestEntity.getTransactionId(),
+                String.valueOf(paymentRequestEntity.getTransactionId()),
+                productOrderEntity.getTotalPrice(),
+                "KRW",
+                orderItemEntityList.stream().map(v -> new OrderStartPayload.OrderItem(
+                        String.valueOf(v.getProductId()),
+                        v.getQuantity(),
+                        v.getUnitPrice())).toList()));
 
         return productOrderEntity;
     }
+
+    /**
+     * gRPC inventory item 생성 테스트
+     */
+    public TestInventoryItemRes testCreateInventoryItem(
+            Long inventoryId,
+            String serialNumber,
+            String status) {
+        try {
+            var response = inventoryItemGrpcClient.createInventoryItem(inventoryId, serialNumber, status);
+            return new TestInventoryItemRes(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error creating inventory item", e);
+        }
+    }
+
+    /**
+     * gRPC inventory item 조회 테스트
+     */
+    public TestInventoryItemRes testSelectInventoryItem(Long inventoryItemId) {
+        try {
+            var response = inventoryItemGrpcClient.getInventoryItem(inventoryItemId);
+            return new TestInventoryItemRes(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error fetching inventory item", e);
+        }
+    }
+
+    // @todo [2025-09-17] DELETE 이 메서드는 gRPC inventory 확인용 테스트 코드
+    public static class TestInventoryItemRes {
+        private Long inventoryItemId;
+        private Long inventoryId;
+        private String serialNumber;
+        private String status;
+
+        public TestInventoryItemRes(grpc.inventory.InventoryItemResponse proto) {
+            var item = proto.getItem(); // InventoryItem 객체
+
+            this.inventoryItemId = item.getInventoryItemId();
+            this.inventoryId = item.getInventoryId();
+            this.serialNumber = item.getSerialNumber();
+            this.status = item.getStatus();
+        }
+
+        public Long getInventoryItemId() {
+            return inventoryItemId;
+        }
+
+        public Long getInventoryId() {
+            return inventoryId;
+        }
+
+        public String getSerialNumber() {
+            return serialNumber;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+    }
+
 }

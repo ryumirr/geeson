@@ -158,13 +158,17 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - api-net
-      - kafka-net
-      - mysql-net
-      - redis-net
-      - grpc-net
+      grpc-net:
+        aliases:
+          - grpc-server
+          - inventory-api
+      api-net:
+      kafka-net:
+      mysql-net:
+      redis-net:
     volumes:
       - ./logs:/logs
+
   order-saga:
     image: jeongjin984/order-saga:0.0.1
     depends_on:

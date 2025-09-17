@@ -26,3 +26,8 @@ api:
 
 uuid:
   node-id: ${NODE_ID:0}
+
+grpc:
+  server:
+    port: 6565
+    address: 0.0.0.0

@@ -1,28 +1,33 @@
 package app.inventory.app;
 
-import org.springframework.stereotype.Service;
-
+import app.inventory.port.in.GetInventoryItemUseCase;
 import domain.inventory.domain.entity.InventoryItemsJpaEntity;
 import domain.inventory.domain.repository.InventoryItemsRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class InventoryItemsListApp {
+public class InventoryItemsListApp implements GetInventoryItemUseCase {
+
     private final InventoryItemsRepository inventoryItemsRepository;
 
-    /**
-     * Find an inventory item by its ID.
-     * 
-     * @param id The ID of the inventory item.
-     * @return The found inventory item entity, or null if not found.
-     */
-    public InventoryItemsJpaEntity findById(Long id) {
-        return inventoryItemsRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Inventory Item not found: id=" + id));
-    }
+    @Override
+    public InventoryItemResult getById(GetInventoryItemCommand command) {
+        InventoryItemsJpaEntity entity = inventoryItemsRepository.findById(command.inventoryItemId())
+                .orElseThrow(() -> new EntityNotFoundException("Inventory Item not found: id=" + command.inventoryItemId()));
 
+        return new InventoryItemResult(
+                entity.getInventoryItemId(),
+                entity.getInventory().getInventoryId(),
+                entity.getBatchLotId(),
+                entity.getSerialNumber(),
+                entity.getStatus(),
+                entity.getCreatedAt().toString(),
+                entity.getUpdatedAt().toString()
+        );
+    }
 }

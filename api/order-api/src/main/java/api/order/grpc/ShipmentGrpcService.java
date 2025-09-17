@@ -1,4 +1,4 @@
-package grpc.server.order;
+package api.order.grpc;
 
 import grpc.shipment.CreateShipmentRequest;
 import grpc.shipment.CreateShipmentResponse;
