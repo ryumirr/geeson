@@ -156,6 +156,7 @@ public class OrderApi {
 class TestOrderRes {
         private Long customerId;
         private Object item;
+        private String serialNum;
 
         public TestOrderRes(RegisterOrderReq req, Object item) {
                 this.customerId = req.customerId();

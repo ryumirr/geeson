@@ -30,7 +30,7 @@ public class InventoryAddApp {
     public InventoryJpaEntity addInventory(
             Long productId,
             Long warehouseId,
-            Long totalQuantity,
+            Integer totalQuantity,
             Integer reorderLevel,
             Integer reorderQuantity
     ) {
@@ -66,7 +66,7 @@ public class InventoryAddApp {
                 .product(product)
                 .wareHouse(warehouse)
                 .totalQuantity(totalQuantity)
-                .reservedQuantity(0L)
+                .reservedQuantity(0)
                 .reorderLevel(reorderLevel)
                 .reorderQuantity(reorderQuantity)
                 .createdAt(LocalDateTime.now())

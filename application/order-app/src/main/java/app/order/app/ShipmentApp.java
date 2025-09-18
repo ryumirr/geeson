@@ -8,6 +8,7 @@ import module.enums.ShipmentStatus;
 import app.order.port.in.CreateShipmentUseCase;
 import app.order.port.in.GetShipmentUseCase;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,19 +17,28 @@ import domain.order.entity.ShipmentJpaEntity;
 import domain.order.repository.ShipmentRepository;
 import domain.order.repository.ProductOrderRepository;
 
+import grpc.client.InventoryItemGrpcClient;
+import grpc.inventory.InventoryItemResponse;
+import java.text.MessageFormat;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class ShipmentApp implements CreateShipmentUseCase, GetShipmentUseCase{
+public class ShipmentApp implements CreateShipmentUseCase, GetShipmentUseCase {
     private final ShipmentRepository shipmentRepo;
     private final ProductOrderRepository orderRepo;
-
+    private final InventoryItemGrpcClient inventoryItemGrpcClient;
+ 
     @Override
     public CreateShipmentResult createShipment(CreateShipmentCommand command) {
         ProductOrderJpaEntity order = orderRepo.findById(command.orderId())
                 .orElseThrow(() -> new IllegalArgumentException("Order not found"));
 
         List<ShipmentJpaEntity> shipments = shipmentRepo.findByOrderId(command.orderId());
+
+        createInventoryItem(command.orderId(),
+                MessageFormat.format("SERIAL-{0}", order.getOrderId(), order.getCustomer().getCustomerId()), "PENDING");
+
         Optional<ShipmentJpaEntity> existing = shipments.stream()
                 .filter(s -> s.getTrackingNumber().equals(command.trackingNumber()))
                 .findFirst();
@@ -36,30 +46,63 @@ public class ShipmentApp implements CreateShipmentUseCase, GetShipmentUseCase{
         if (existing.isPresent()) {
             // 이미 존재하는 배송 정보가 있는 경우, 존재하는 배송 정보를 반환
             ShipmentJpaEntity existingShipment = existing.get();
+
+            String deliveredDate = existingShipment.getDeliveredDate() != null
+                    ? existingShipment.getDeliveredDate().toString()
+                    : null;
+
+            String shippedDate = existingShipment.getShippedDate() != null
+                    ? existingShipment.getShippedDate().toString()
+                    : null;
+
             return new CreateShipmentResult(
-                existingShipment.getShipmentId(),
-                existingShipment.getOrder().getOrderId(),
-                existingShipment.getTrackingNumber(),
-                existingShipment.getStatus(),
-                existingShipment.getShippedDate().toString(),
-                existingShipment.getDeliveredDate().toString(),
-                existingShipment.getCreatedAt().toString(),
-                existingShipment.getUpdatedAt().toString()
-            );            
+                    existingShipment.getShipmentId(),
+                    existingShipment.getOrder().getOrderId(),
+                    existingShipment.getTrackingNumber(),
+                    existingShipment.getStatus(),
+                    existingShipment.getShippedDate().toString(),
+                    existingShipment.getDeliveredDate().toString(),
+                    existingShipment.getCreatedAt().toString(),
+                    existingShipment.getUpdatedAt().toString());
         } else {
             // 새로 생성 하는 경우
             ShipmentJpaEntity shipment = ShipmentJpaEntity.from(command.trackingNumber(), order);
             ShipmentJpaEntity result = shipmentRepo.save(shipment);
+
+            String deliveredDate = result.getDeliveredDate() != null
+                    ? result.getDeliveredDate().toString()
+                    : null;
+
+            String shippedDate = result.getShippedDate() != null
+                    ? result.getShippedDate().toString()
+                    : null;
+
             return new CreateShipmentResult(
-                result.getShipmentId(),
-                result.getOrder().getOrderId(),
-                result.getTrackingNumber(),
-                result.getStatus(),
-                result.getShippedDate().toString(),
-                result.getDeliveredDate().toString(),
-                result.getCreatedAt().toString(),
-                result.getUpdatedAt().toString()
-            );
+                    result.getShipmentId(),
+                    result.getOrder().getOrderId(),
+                    result.getTrackingNumber(),
+                    result.getStatus(),
+                    shippedDate,
+                    deliveredDate,
+                    result.getCreatedAt().toString(),
+                    result.getUpdatedAt().toString());
+        }
+    }
+
+    /**
+     * gRPC inventory item 생성
+     */
+    public InventoryItemResponse createInventoryItem(
+            Long inventoryId,
+            String serialNumber,
+            String status) {
+        try {
+            // serialNumber : "SERIAL-" + productId
+            return inventoryItemGrpcClient.createInventoryItem(inventoryId, serialNumber, status);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error creating inventory item", e);
         }
     }
 

@@ -7,7 +7,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 public record AddInventoryReq(
     @NotNull Long productId,
     @NotNull Long warehouseId,
-    @NotNull @PositiveOrZero Long totalQuantity,
+    @NotNull @PositiveOrZero Integer totalQuantity,
     @NotNull @PositiveOrZero Integer reorderLevel,
     @NotNull @Positive Integer reorderQuantity
 ) {
