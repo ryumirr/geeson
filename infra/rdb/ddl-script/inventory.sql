@@ -18,7 +18,8 @@ CREATE TABLE inventory (
     reorder_quantity INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (warehouse_id) REFERENCES warehouses(warehouse_id)
+    FOREIGN KEY (warehouse_id) REFERENCES warehouses(warehouse_id),
+    CONSTRAINT uq_product_warehouse UNIQUE (product_id, warehouse_id)
 );
 
 CREATE TABLE inventory_items (
