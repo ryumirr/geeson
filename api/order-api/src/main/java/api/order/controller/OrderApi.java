@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -51,15 +52,43 @@ public class OrderApi {
                 var item = orderRegisterApp.selectInventoryItemBySerialNumber(serialNum);
                 return new TestOrderRes(serialNum, item);
         }
+        
+        @PostMapping("")
+        public RegisterOrderRes ResolveCreateOrder(
+                        @RequestBody RegisterOrderReq orderReq) {
+
+                 // API DTO -> Application Command 변환
+                OrderRegisterCommand command = new OrderRegisterCommand(
+                        orderReq.customerId(),
+                        orderReq.shippingAddressId(),
+                        orderReq.paymentMethodId(),
+                        orderReq.paymentKey(),
+                        orderReq.items().stream()
+                                .map(i -> new OrderRegisterCommand.OrderItem(
+                                        i.productId(),
+                                        i.productName(),
+                                        i.quantity(),
+                                        i.unitPrice()
+                                ))
+                                .toList()
+                );
+                // 재고 확인
+                Map<Long, Boolean> checkedOrderList = orderListApp.checkInventories(command.items());
+                if (checkedOrderList.isEmpty()) {
+                        throw new IllegalArgumentException("재고 부족");
+                }
+
+                // @todo Locking 처리 필요(inventory)
+                RegisterOrderRes productOrder = createOrder(orderReq);
+                return productOrder;
+                // @todo 출고 데이터 생성
+        }
 
         @PostMapping("")
         public RegisterOrderRes createOrder(
                         @RequestBody RegisterOrderReq orderReq) {
 
-                // 재고 확인
-                List<RegisterOrderReq.OrderItem> items = orderReq.items();
-                long productId = items.get(0).productId();
-                orderRegisterApp.selectInventoryItemBySerialNumber("SERIAL-" + productId);
+
 
                 ProductOrderJpaEntity productOrder = orderRegisterApp.registerOrder(new OrderRegisterCommand(
                                 orderReq.customerId(),

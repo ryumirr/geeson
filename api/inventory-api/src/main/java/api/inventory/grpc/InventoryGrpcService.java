@@ -21,15 +21,14 @@ public class InventoryGrpcService extends InventoryServiceGrpc.InventoryServiceI
      */
     @Override
     public void addInventory(AddInventoryRequest request,
-                             StreamObserver<AddInventoryResponse> responseObserver) {
+            StreamObserver<AddInventoryResponse> responseObserver) {
         try {
             InventoryJpaEntity entity = inventoryAddApp.addInventory(
                     request.getProductId(),
                     request.getWarehouseId(),
                     request.getTotalQuantity(),
                     request.getReorderLevel(),
-                    request.getReorderQuantity()
-            );
+                    request.getReorderQuantity());
 
             Inventory inventory = Inventory.newBuilder()
                     .setInventoryId(entity.getInventoryId())
@@ -56,12 +55,11 @@ public class InventoryGrpcService extends InventoryServiceGrpc.InventoryServiceI
      */
     @Override
     public void selectInventory(SelectInventoryRequest request,
-                                StreamObserver<SelectInventoryResponse> responseObserver) {
+            StreamObserver<SelectInventoryResponse> responseObserver) {
         try {
             InventoryJpaEntity entity = inventorySelectApp.findAvailableInventory(
                     request.getProductId(),
-                    request.getQuantity()
-            );
+                    request.getQuantity());
 
             Inventory inventory = Inventory.newBuilder()
                     .setInventoryId(entity.getInventoryId())
@@ -82,4 +80,34 @@ public class InventoryGrpcService extends InventoryServiceGrpc.InventoryServiceI
             responseObserver.onError(Status.NOT_FOUND.withDescription("Inventory not found").asRuntimeException());
         }
     }
+
+    @Override
+    public void reserveInventory(ReserveInventoryRequest request,
+            StreamObserver<ReserveInventoryResponse> responseObserver) {
+        try {
+            boolean reserved = inventoryAddApp.reserveInventory(
+                    request.getProductId(),
+                    request.getQuantity());
+
+            InventoryJpaEntity entity = inventorySelectApp.findAvailableInventory(request.getProductId(), request.getQuantity());
+
+            ReserveInventoryResponse response = ReserveInventoryResponse.newBuilder()
+                    .setSuccess(reserved)
+                    .setInventory(Inventory.newBuilder()
+                            .setInventoryId(entity.getInventoryId())
+                            .setProductId(entity.getProduct().getProductId())
+                            .setWarehouseId(entity.getWareHouse().getWarehouseId())
+                            .setTotalQuantity(entity.getTotalQuantity())
+                            .setReservedQuantity(entity.getReservedQuantity())
+                            .setAvailableQuantity(entity.getAvailableQuantity())
+                            .build())
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            responseObserver.onError(Status.INTERNAL.withDescription("Error reserving inventory").asRuntimeException());
+        }
+    }
+
 }

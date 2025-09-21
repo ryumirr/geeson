@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import grpc.client.InventoryGrpcClient;
 import grpc.client.InventoryItemGrpcClient;
 import grpc.inventory.InventoryItemResponse;
 
@@ -29,11 +30,9 @@ public class OrderRegisterApp {
     private final ShippingAddressRepository shippingAddressRepository;
     private final UuidGenerator uuidGenerator;
     private final InventoryItemGrpcClient inventoryItemGrpcClient;
+    private final InventoryGrpcClient inventoryGrpcClient;
     private final OrderEventPublisher orderEventPublisher;
 
-    public ProductOrderJpaEntity resolveRegisterOrder(OrderRegisterCommand command) {
-        return null;
-    }
 
     public ProductOrderJpaEntity registerOrder(OrderRegisterCommand command) {
         CustomerJpaEntity customer = customerRepository.findByCustomerId(command.customerId())

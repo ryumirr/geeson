@@ -32,8 +32,7 @@ public class InventoryAddApp {
             Long warehouseId,
             Integer totalQuantity,
             Integer reorderLevel,
-            Integer reorderQuantity
-    ) {
+            Integer reorderQuantity) {
         // Create product reference
         ProductJpaEntity product = new ProductJpaEntity();
         try {
@@ -43,16 +42,16 @@ public class InventoryAddApp {
         } catch (Exception e) {
             throw new RuntimeException("Failed to create product reference", e);
         }
-        
+
         // Create warehouse reference
         WarehouseJpaEntity warehouse = null;
         try {
             // Use reflection to create a new instance with the constructor
-            java.lang.reflect.Constructor<WarehouseJpaEntity> constructor = 
-                WarehouseJpaEntity.class.getDeclaredConstructor();
+            java.lang.reflect.Constructor<WarehouseJpaEntity> constructor = WarehouseJpaEntity.class
+                    .getDeclaredConstructor();
             constructor.setAccessible(true);
             warehouse = constructor.newInstance();
-            
+
             // Set the ID field
             java.lang.reflect.Field field = WarehouseJpaEntity.class.getDeclaredField("warehouseId");
             field.setAccessible(true);
@@ -60,7 +59,7 @@ public class InventoryAddApp {
         } catch (Exception e) {
             throw new RuntimeException("Failed to create warehouse reference", e);
         }
-        
+
         // Create a new inventory entity
         InventoryJpaEntity inventory = InventoryJpaEntity.builder()
                 .product(product)
@@ -76,4 +75,24 @@ public class InventoryAddApp {
         // Save and return the entity
         return inventoryRepository.save(inventory);
     }
+
+    @Transactional
+    public boolean reserveInventory(Long productId, int quantity) {
+        InventoryJpaEntity inventory = inventoryRepository.findByProductId(productId)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Inventory not found for productId=" + productId));
+
+        // 재고 부족
+        if (inventory.canReserve(quantity) == false) {
+            return false;
+        }
+
+        // availableQuantity는 Generated Column이라 따로 set 안 함
+        inventory.reserve(inventory.getReservedQuantity() + quantity);
+
+        inventoryRepository.save(inventory);
+        return true;
+    }
+
 }
