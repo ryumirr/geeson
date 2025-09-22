@@ -104,6 +104,28 @@ public class InventoryGrpcClient {
         }
     }
 
+    /** 여러 상품 예약 (bulk reserve) */
+    public ReserveInventoriesResponse reserveInventories(Map<Long, Integer> productQuantities) {
+        // gRPC ReserveItem 객체 리스트로 변환
+        List<ReserveItem> items = productQuantities.entrySet().stream()
+                .map(entry -> ReserveItem.newBuilder()
+                        .setProductId(entry.getKey())
+                        .setQuantity(entry.getValue())
+                        .build())
+                .toList();
+
+        ReserveInventoriesRequest request = ReserveInventoriesRequest.newBuilder()
+                .addAllItems(items)
+                .build();
+
+        try {
+            return inventoryStub.reserveInventories(request);
+        } catch (StatusRuntimeException e) {
+            System.err.println("❌ gRPC reserveInventories failed: " + e.getStatus());
+            throw e;
+        }
+    }
+
     @PreDestroy
     public void shutdown() {
         if (channel != null) {

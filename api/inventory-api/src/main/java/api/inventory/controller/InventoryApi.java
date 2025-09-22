@@ -62,41 +62,4 @@ public class InventoryApi {
                 inventory.getCreatedAt(),
                 inventory.getUpdatedAt()));
     }
-
-    /**
-     * Test grpc-order
-     */
-    @GetMapping("/test-shipment")
-    public ResponseEntity<Object> testSelectShipment(
-            @RequestParam("shipmentId") Long shipmentId) {
-
-        try {
-            GetShipmentResponse shipment = inventorySelectApp.getShipment(shipmentId);
-            return ResponseEntity.status(201).body(new TestShipmentRes(shipment));
-        } catch (Exception e) {
-            e.printStackTrace(); // optional: use logger
-            return ResponseEntity.status(400)
-                    .body("Error fetching shipment");
-        }
-    }
-  
-    // @todo [2025-08-20] DELETE this endpoint after confirming gRPC shipment fetch is stable
-    // Test response class for Shipment
-    private static class TestShipmentRes {
-        private Long shipmentId;
-        private String status;
-
-        public TestShipmentRes(GetShipmentResponse proto) {
-            this.shipmentId = proto.getShipmentId();
-            this.status = proto.getStatus();
-        }
-
-        public Long getShipmentId() {
-            return shipmentId;
-        }
-
-        public String getStatus() {
-            return status;
-        }
-    }
 }

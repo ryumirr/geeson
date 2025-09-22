@@ -8,6 +8,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import app.inventory.dto.InventoryDto;
+import app.inventory.dto.ReserveResultDto;
+import app.inventory.mapper.InventoryMapper;
+import app.inventory.dto.FailedItemDto;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -98,25 +103,35 @@ public class InventoryAddApp {
         return true;
     }
 
-    @Transactional
-    public boolean reserveInventories(Map<Long, Integer> productQuantities) {
-        List<Long> productIds = new ArrayList<>(productQuantities.keySet());
-        List<InventoryJpaEntity> inventories = inventoryRepository.findAllByProductIdIn(productIds);
+   @Transactional
+   public ReserveResultDto reserveInventories(Map<Long, Integer> productQuantities) {
+       List<Long> productIds = new ArrayList<>(productQuantities.keySet());
+       List<InventoryJpaEntity> inventories = inventoryRepository.findAllByProductIdIn(productIds);
 
-        for (InventoryJpaEntity inventory : inventories) {
-            int requiredQty = productQuantities.get(inventory.getProduct().getProductId());
-            if (inventory.getAvailableQuantity() < requiredQty) {
-                return false;
-            }
-        }
+       List<FailedItemDto> failedItems = new ArrayList<>();
+       List<InventoryDto> successInventories = new ArrayList<>();
 
-        for (InventoryJpaEntity inventory : inventories) {
-            int requiredQty = productQuantities.get(inventory.getProduct().getProductId());
-            inventory.reserve(inventory.getReservedQuantity() + requiredQty);
-        }
+       for (InventoryJpaEntity inventory : inventories) {
+           int requiredQty = productQuantities.get(inventory.getProduct().getProductId());
+           if (inventory.getAvailableQuantity() < requiredQty) {
+               failedItems.add(new FailedItemDto(
+                       inventory.getProduct().getProductId(),
+                       inventory.getWareHouse().getWarehouseId(),
+                       requiredQty,
+                       inventory.getAvailableQuantity()));
+               continue;
+           }
 
-        inventoryRepository.saveAll(inventories);
-        return true;
-    }
+           inventory.reserve(inventory.getReservedQuantity() + requiredQty);
+           successInventories.add(InventoryMapper.toDto(inventory));
+       }
+
+       if (!failedItems.isEmpty()) {
+           return new ReserveResultDto(false, failedItems, successInventories);
+       }
+
+       inventoryRepository.saveAll(inventories);
+       return new ReserveResultDto(true, failedItems, successInventories);
+   }
 
 }

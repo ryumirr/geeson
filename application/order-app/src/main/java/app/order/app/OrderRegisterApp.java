@@ -1,6 +1,8 @@
 package app.order.app;
 
+import app.order.app.OrderListApp;
 import app.order.command.OrderRegisterCommand;
+import app.order.command.OrderRegisterCommand.OrderItem;
 import domain.order.entity.*;
 import domain.order.message.OrderEventPublisher;
 import app.order.exception.CustomerNotFoundException;
@@ -16,10 +18,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import grpc.client.InventoryGrpcClient;
 import grpc.client.InventoryItemGrpcClient;
 import grpc.inventory.InventoryItemResponse;
+import grpc.inventory.ReserveInventoriesResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +37,7 @@ public class OrderRegisterApp {
     private final InventoryItemGrpcClient inventoryItemGrpcClient;
     private final InventoryGrpcClient inventoryGrpcClient;
     private final OrderEventPublisher orderEventPublisher;
-
+    private final OrderListApp orderListApp;
 
     public ProductOrderJpaEntity registerOrder(OrderRegisterCommand command) {
         CustomerJpaEntity customer = customerRepository.findByCustomerId(command.customerId())
@@ -99,99 +104,23 @@ public class OrderRegisterApp {
         return productOrderEntity;
     }
 
-    /**
-     * gRPC inventory item 생성 테스트
-     */
-    public TestInventoryItemRes createInventoryItem(
-            Long inventoryId,
-            String serialNumber,
-            String status) {
+    // @todo redisson 처리 추가
+    public ReserveInventoriesResponse reserveInventories(List<OrderItem> productQuantities) {
         try {
-            // serialNumber : "SERIAL-" + productId
-            var response = inventoryItemGrpcClient.createInventoryItem(inventoryId, serialNumber, status);
-            return new TestInventoryItemRes(response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error creating inventory item", e);
-        }
-    }
-
-    /**
-     * gRPC inventory item 조회 테스트
-     */
-    public TestInventoryItemRes selectInventoryItem(Long inventoryItemId) {
-        try {
-            var response = inventoryItemGrpcClient.getInventoryItem(inventoryItemId);
-            return new TestInventoryItemRes(response);
+            // 재고 확인
+            Map<Long, Boolean> checked = orderListApp.checkInventories(productQuantities);
+            if (checked.values().stream().anyMatch(avail -> !avail)) {
+                throw new IllegalArgumentException("재고 부족 상품 존재");
+            }
+            Map<Long, Integer> newProductQuantities = productQuantities.stream()
+                    .collect(Collectors.toMap(
+                            OrderItem::productId,
+                            OrderItem::quantity,
+                            Integer::sum));
+            return inventoryGrpcClient.reserveInventories(newProductQuantities);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Error fetching inventory item", e);
         }
     }
-
-    /**
-     * gRPC inventory item 조회 테스트
-     */
-    public TestInventoryItemRes testSelectInventoryItem(Long inventoryItemId) {
-        try {
-            var response = inventoryItemGrpcClient.getInventoryItem(inventoryItemId);
-            return new TestInventoryItemRes(response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error fetching inventory item", e);
-        }
-    }
-
-    public boolean reserveInventories(Long productId, int quantity) {
-        try {
-            return inventoryGrpcClient.reserveInventory(productId, quantity);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error fetching inventory item", e);
-        }
-    }
-
-    public TestInventoryItemRes selectInventoryItemBySerialNumber(String serialNumber) {
-        try {
-            var response = inventoryItemGrpcClient.getInventoryItemBySerial(serialNumber);
-            return new TestInventoryItemRes(response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error fetching inventory item", e);
-        }
-    }
-
-    // @todo [2025-09-17] DELETE 이 메서드는 gRPC inventory 확인용 테스트 코드
-    public static class TestInventoryItemRes {
-        private Long inventoryItemId;
-        private Long inventoryId;
-        private String serialNumber;
-        private String status;
-
-        public TestInventoryItemRes(grpc.inventory.InventoryItemResponse proto) {
-            var item = proto.getItem(); // InventoryItem 객체
-
-            this.inventoryItemId = item.getInventoryItemId();
-            this.inventoryId = item.getInventoryId();
-            this.serialNumber = item.getSerialNumber();
-            this.status = item.getStatus();
-        }
-
-        public Long getInventoryItemId() {
-            return inventoryItemId;
-        }
-
-        public Long getInventoryId() {
-            return inventoryId;
-        }
-
-        public String getSerialNumber() {
-            return serialNumber;
-        }
-
-        public String getStatus() {
-            return status;
-        }
-    }
-
 }

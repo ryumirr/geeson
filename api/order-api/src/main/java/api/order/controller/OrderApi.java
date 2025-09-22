@@ -3,6 +3,7 @@ package api.order.controller;
 import api.order.request.RegisterOrderReq;
 import api.order.response.ProductOrderRes;
 import api.order.response.RegisterOrderRes;
+import grpc.inventory.ReserveInventoriesResponse;
 import app.order.app.OrderListApp;
 import app.order.app.OrderRegisterApp;
 import app.order.app.OrderRegisterApp.TestInventoryItemRes;
@@ -10,85 +11,48 @@ import app.order.command.OrderRegisterCommand;
 import domain.order.entity.ProductOrderJpaEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/api/v1/orders")
 public class OrderApi {
         private final OrderRegisterApp orderRegisterApp;
         private final OrderListApp orderListApp;
 
-        // @todo [2025-09-17] DELETE this endpoint after confirming gRPC inventory fetch
         @PostMapping("/testCreateOrder")
-        public TestOrderRes testCreateOrder(@RequestBody RegisterOrderReq orderReq) {
-                List<RegisterOrderReq.OrderItem> items = orderReq.items();
-                long productId = items.get(0).productId();
-
-                var item = orderRegisterApp.createInventoryItem(
-                                orderReq.customerId(),
-                                "SERIAL-" + productId,
-                                "READY");
-
-                return new TestOrderRes(orderReq, item);
-        }
-
-        // @todo [2025-09-17] DELETE this endpoint after confirming gRPC inventory fetch
-        @GetMapping("/testGetOrder")
-        public TestOrderRes testGetOrder(
-                        @RequestBody RegisterOrderReq orderReq) {
-                var item = orderRegisterApp.testSelectInventoryItem(1L);
-
-                // Order 등록 결과를 InventoryItem과 함께 응답
-                return new TestOrderRes(orderReq, item);
-        }
-
-        // @todo [2025-09-17] DELETE this endpoint after confirming gRPC inventory fetch
-        @GetMapping("/testGetInvenItemsBySerialNum")
-        public TestOrderRes testGetInvenItemsBySerialNum(
-                        @RequestParam("serialNum") String serialNum) {
-                var item = orderRegisterApp.selectInventoryItemBySerialNumber(serialNum);
-                return new TestOrderRes(serialNum, item);
-        }
-        
-        @PostMapping("")
         public RegisterOrderRes ResolveCreateOrder(
                         @RequestBody RegisterOrderReq orderReq) {
 
-                 // API DTO -> Application Command 변환
+                // API DTO -> Application Command 변환
                 OrderRegisterCommand command = new OrderRegisterCommand(
-                        orderReq.customerId(),
-                        orderReq.shippingAddressId(),
-                        orderReq.paymentMethodId(),
-                        orderReq.paymentKey(),
-                        orderReq.items().stream()
-                                .map(i -> new OrderRegisterCommand.OrderItem(
-                                        i.productId(),
-                                        i.productName(),
-                                        i.quantity(),
-                                        i.unitPrice()
-                                ))
-                                .toList()
-                );
-                // 재고 확인
-                Map<Long, Boolean> checkedOrderList = orderListApp.checkInventories(command.items());
-                if (checkedOrderList.isEmpty()) {
-                        throw new IllegalArgumentException("재고 부족");
-                }
+                                orderReq.customerId(),
+                                orderReq.shippingAddressId(),
+                                orderReq.paymentMethodId(),
+                                orderReq.paymentKey(),
+                                orderReq.items().stream()
+                                                .map(i -> new OrderRegisterCommand.OrderItem(
+                                                                i.productId(),
+                                                                i.productName(),
+                                                                i.quantity(),
+                                                                i.unitPrice()))
+                                                .toList());
 
-                // @todo Locking 처리 필요(inventory)
-                RegisterOrderRes productOrder = createOrder(orderReq);
-                return productOrder;
-                // @todo 출고 데이터 생성
+                ReserveResultDto reservedInventories = orderRegisterApp.reserveInventories(command.items());
+                if (!reservedInventories.failedItems().isEmpty()) {
+                        log.info("주문 재고 예약 부족 failedItems: {}", reservedInventories.failedItems());
+                        throw new IllegalArgumentException("주문 재고 예약 부족");
+                }
+                return createOrder(orderReq);
         }
 
         @PostMapping("")
         public RegisterOrderRes createOrder(
                         @RequestBody RegisterOrderReq orderReq) {
-
-
 
                 ProductOrderJpaEntity productOrder = orderRegisterApp.registerOrder(new OrderRegisterCommand(
                                 orderReq.customerId(),
@@ -177,28 +141,4 @@ public class OrderApi {
                                                                 order.getPayment().getTransactionId())))
                                 .toList();
         }
-}
-
-// @todo [2025-09-17] DELETE this endpoint after confirming gRPC inventory fetch
-// is stable
-// Test response class for Order
-class TestOrderRes {
-        private Long customerId;
-        private Object item;
-        private String serialNum;
-
-        public TestOrderRes(RegisterOrderReq req, Object item) {
-                this.customerId = req.customerId();
-                this.item = item;
-        }
-
-        public TestOrderRes(String serialNum, TestInventoryItemRes item) {
-                this.serialNum = serialNum;
-                this.item = item;
-        }
-
-        public Object getItem() {
-                return item;
-        }
-
 }

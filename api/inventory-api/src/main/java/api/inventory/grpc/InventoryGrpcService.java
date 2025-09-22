@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 
 import app.inventory.app.InventoryAddApp;
 import app.inventory.app.InventorySelectApp;
+import app.inventory.dto.ReserveResultDto;
 import domain.inventory.domain.entity.InventoryJpaEntity;
 import grpc.inventory.*;
 import io.grpc.Status;
@@ -139,33 +140,30 @@ public class InventoryGrpcService extends InventoryServiceGrpc.InventoryServiceI
                                                 grpc.inventory.ReserveItem::getQuantity,
                                                 Integer::sum // 중복 productId 있으면 수량 합산
                                 ));
-                boolean result = inventoryAddApp.reserveInventories(productQuantities);
+                ReserveResultDto result = inventoryAddApp.reserveInventories(productQuantities);
 
                 ReserveInventoriesResponse.Builder builder = ReserveInventoriesResponse.newBuilder()
-                                .setSuccess(result == true);
+                                .setSuccess(result.success());
 
-                // @todo result 객체에 실패한 아이템들, 성공한 재고들 담아서 응답에 추가하기
-                // result.failedItems().forEach(fi -> builder.addFailedItems(
-                //                 grpc.inventory.FailedItem.newBuilder()
-                //                                 .setProductId(fi.productId())
-                //                                 .setWarehouseId(fi.warehouseId())
-                //                                 .setRequested(fi.requested())
-                //                                 .setAvailable(fi.available())
-                //                                 .build()));
+                result.failedItems().forEach(fi -> builder.addFailedItems(
+                                grpc.inventory.FailedItem.newBuilder()
+                                                .setProductId(fi.productId())
+                                                .setWarehouseId(fi.warehouseId())
+                                                .setRequested(fi.requested())
+                                                .setAvailable(fi.available())
+                                                .build()));
 
-                // result.successInventories().forEach(inv -> builder.addInventories(
-                //                 grpc.inventory.Inventory.newBuilder()
-                //                                 .setInventoryId(inv.getInventoryId())
-                //                                 .setProductId(inv.getProductId())
-                //                                 .setWarehouseId(inv.getWarehouseId())
-                //                                 .setTotalQuantity(inv.getTotalQuantity())
-                //                                 .setReservedQuantity(inv.getReservedQuantity())
-                //                                 .setAvailableQuantity(inv.getAvailableQuantity())
-                //                                 .setReorderLevel(inv.getReorderLevel())
-                //                                 .setReorderQuantity(inv.getReorderQuantity())
-                //                                 .setCreatedAt(inv.getCreatedAt().toString())
-                //                                 .setUpdatedAt(inv.getUpdatedAt().toString())
-                //                                 .build()));
+                result.successInventories().forEach(inv -> builder.addInventories(
+                                grpc.inventory.Inventory.newBuilder()
+                                                .setInventoryId(inv.inventoryId())
+                                                .setProductId(inv.productId())
+                                                .setWarehouseId(inv.warehouseId())
+                                                .setTotalQuantity(inv.totalQuantity())
+                                                .setReservedQuantity(inv.reservedQuantity())
+                                                .setAvailableQuantity(inv.availableQuantity())
+                                                .setReorderLevel(inv.reorderLevel())
+                                                .setReorderQuantity(inv.reorderQuantity())
+                                                .build()));
 
                 responseObserver.onNext(builder.build());
                 responseObserver.onCompleted();
