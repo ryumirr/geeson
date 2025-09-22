@@ -4,13 +4,16 @@ package grpc.inventory;
 option java_package = "grpc.inventory";
 option java_multiple_files = true;
 
+// ===== Service =====
 service InventoryService {
   rpc AddInventory(AddInventoryRequest) returns (AddInventoryResponse);
   rpc SelectInventory(SelectInventoryRequest) returns (SelectInventoryResponse);
   rpc SelectInventories(SelectInventoriesRequest) returns (SelectInventoriesResponse);
   rpc ReserveInventory(ReserveInventoryRequest) returns (ReserveInventoryResponse);
+  rpc ReserveInventories(ReserveInventoriesRequest) returns (ReserveInventoriesResponse);
 }
 
+// ===== Entities =====
 message Inventory {
   int64 inventoryId = 1;
   int64 productId = 2;
@@ -24,6 +27,7 @@ message Inventory {
   string updatedAt = 10;
 }
 
+// ===== Add =====
 message AddInventoryRequest {
   int64 productId = 1;
   int64 warehouseId = 2;
@@ -36,6 +40,7 @@ message AddInventoryResponse {
   Inventory inventory = 1;
 }
 
+// ===== Select (Single) =====
 message SelectInventoryRequest {
   int64 productId = 1;
   int32 quantity = 2;
@@ -45,18 +50,14 @@ message SelectInventoryResponse {
   Inventory inventory = 1;
 }
 
-// ===== Bulk =====
-message SelectInventoriesRequest {
-  repeated InventoryCheck checks = 1;
-}
-
+// ===== Select (Bulk) =====
 message InventoryCheck {
   int64 productId = 1;
   int32 quantity = 2;
 }
 
-message SelectInventoriesResponse {
-  repeated InventoryResult results = 1;
+message SelectInventoriesRequest {
+  repeated InventoryCheck checks = 1;
 }
 
 message InventoryResult {
@@ -65,7 +66,11 @@ message InventoryResult {
   Inventory inventory = 3;
 }
 
-// ===== Reserve =====
+message SelectInventoriesResponse {
+  repeated InventoryResult results = 1;
+}
+
+// ===== Reserve (Single) =====
 message ReserveInventoryRequest {
   int64 productId = 1;
   int64 warehouseId = 2;
@@ -73,6 +78,31 @@ message ReserveInventoryRequest {
 }
 
 message ReserveInventoryResponse {
-  bool success = 1;       // 예약 성공 여부
-  Inventory inventory = 2; // 최신 재고 상태
+  bool success = 1;          // 예약 성공 여부
+  Inventory inventory = 2;   // 최신 재고 상태
+}
+
+// ===== Reserve (Bulk) =====
+message ReserveItem {
+  int64 productId = 1;
+  int64 warehouseId = 2;
+  int32 quantity = 3;
+}
+
+message ReserveInventoriesRequest {
+  repeated ReserveItem items = 1;
+}
+
+// 실패한 항목 (요청 수량 vs 실제 가능 수량)
+message FailedItem {
+  int64 productId = 1;
+  int64 warehouseId = 2;
+  int32 requested = 3;
+  int32 available = 4;
+}
+
+message ReserveInventoriesResponse {
+  bool success = 1;                        // 전체 예약 성공 여부
+  repeated FailedItem failedItems = 2;     // 실패한 항목 목록
+  repeated Inventory inventories = 3;      // 성공한 항목들의 최신 재고 상태
 }

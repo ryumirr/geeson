@@ -14,6 +14,7 @@ public interface InventoryRepository {
     Optional<InventoryJpaEntity> findById(Long id);
     List<InventoryJpaEntity> findByProductId(Long productId);
     InventoryJpaEntity save(InventoryJpaEntity entity);
+    List<InventoryJpaEntity> saveAll(List<InventoryJpaEntity> entities);
     // 단일 productId 조건 (여러 개)
     List<InventoryJpaEntity> findAllByProductIdIn(List<Long> productIds);
 

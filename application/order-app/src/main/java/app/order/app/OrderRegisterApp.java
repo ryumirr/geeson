@@ -142,6 +142,15 @@ public class OrderRegisterApp {
         }
     }
 
+    public boolean reserveInventories(Long productId, int quantity) {
+        try {
+            return inventoryGrpcClient.reserveInventory(productId, quantity);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error fetching inventory item", e);
+        }
+    }
+
     public TestInventoryItemRes selectInventoryItemBySerialNumber(String serialNumber) {
         try {
             var response = inventoryItemGrpcClient.getInventoryItemBySerial(serialNumber);

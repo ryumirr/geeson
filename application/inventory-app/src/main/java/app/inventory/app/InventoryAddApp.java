@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -92,6 +95,27 @@ public class InventoryAddApp {
         inventory.reserve(inventory.getReservedQuantity() + quantity);
 
         inventoryRepository.save(inventory);
+        return true;
+    }
+
+    @Transactional
+    public boolean reserveInventories(Map<Long, Integer> productQuantities) {
+        List<Long> productIds = new ArrayList<>(productQuantities.keySet());
+        List<InventoryJpaEntity> inventories = inventoryRepository.findAllByProductIdIn(productIds);
+
+        for (InventoryJpaEntity inventory : inventories) {
+            int requiredQty = productQuantities.get(inventory.getProduct().getProductId());
+            if (inventory.getAvailableQuantity() < requiredQty) {
+                return false;
+            }
+        }
+
+        for (InventoryJpaEntity inventory : inventories) {
+            int requiredQty = productQuantities.get(inventory.getProduct().getProductId());
+            inventory.reserve(inventory.getReservedQuantity() + requiredQty);
+        }
+
+        inventoryRepository.saveAll(inventories);
         return true;
     }
 
