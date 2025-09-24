@@ -1,5 +1,7 @@
 package grpc.client;
 
+import grpc.shipment.CreateShipmentRequest;
+import grpc.shipment.CreateShipmentResponse;
 import grpc.shipment.GetShipmentRequest;
 import grpc.shipment.GetShipmentResponse;
 import grpc.shipment.ShipmentServiceGrpc;
@@ -38,6 +40,20 @@ public class ShipmentGrpcClient {
             // gRPC 호출 실패 시 로그 남기기
             System.err.println("❌ gRPC getShipment failed: " + e.getStatus());
             throw e; // 혹은 Optional.empty() / custom exception
+        }
+    }
+
+    public CreateShipmentResponse createShipment(String orderId, String trackingNumber) {
+        CreateShipmentRequest request = CreateShipmentRequest.newBuilder()
+                .setOrderId(Long.parseLong(orderId))
+                .setTrackingNumber(trackingNumber)
+                .build();
+
+        try {
+            return shipmentStub.createShipment(request);
+        } catch (StatusRuntimeException e) {
+            System.err.println("❌ gRPC createShipment failed: " + e.getStatus());
+            throw e;
         }
     }
 

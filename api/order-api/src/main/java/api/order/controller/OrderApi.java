@@ -6,7 +6,6 @@ import api.order.response.RegisterOrderRes;
 import grpc.inventory.ReserveInventoriesResponse;
 import app.order.app.OrderListApp;
 import app.order.app.OrderRegisterApp;
-import app.order.app.OrderRegisterApp.TestInventoryItemRes;
 import app.order.command.OrderRegisterCommand;
 import domain.order.entity.ProductOrderJpaEntity;
 import lombok.RequiredArgsConstructor;
@@ -42,9 +41,9 @@ public class OrderApi {
                                                                 i.unitPrice()))
                                                 .toList());
 
-                ReserveResultDto reservedInventories = orderRegisterApp.reserveInventories(command.items());
-                if (!reservedInventories.failedItems().isEmpty()) {
-                        log.info("주문 재고 예약 부족 failedItems: {}", reservedInventories.failedItems());
+                ReserveInventoriesResponse reservedInventories = orderRegisterApp.reserveInventories(command.items());
+                if (!reservedInventories.getFailedItemsList().isEmpty()) {
+                        log.info("주문 재고 예약 부족 failedItems: {}", reservedInventories.getFailedItemsList());
                         throw new IllegalArgumentException("주문 재고 예약 부족");
                 }
                 return createOrder(orderReq);

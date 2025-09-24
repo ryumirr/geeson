@@ -22,13 +22,13 @@ public interface SpringDataInventoryJpaRepository extends JpaRepository<Inventor
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select i from InventoryJpaEntity i " +
-           "where i.product.productId = :productId and i.warehouseId = :warehouseId")
+        "where i.product.productId = :productId and i.wareHouse.warehouseId = :warehouseId")
     Optional<InventoryJpaEntity> findByProductIdAndWarehouseId(@Param("productId") Long productId,
-                                                               @Param("warehouseId") Long warehouseId);
+                                                            @Param("warehouseId") Long warehouseId);
 
     @Query("""
         select i from InventoryJpaEntity i
-        where (i.product.productId, i.warehouseId) in :pairs
+        where (i.product.productId, i.wareHouse.warehouseId) in :pairs
     """)
     List<InventoryJpaEntity> findAllByProductIdAndWarehouseIdIn(@Param("pairs") List<Object[]> pairs);
 }
