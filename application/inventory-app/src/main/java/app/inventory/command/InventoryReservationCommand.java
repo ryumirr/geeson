@@ -5,7 +5,8 @@ import jakarta.validation.constraints.NotNull;
 
 public record InventoryReservationCommand(
     @NotNull Long reservationId,
-    @NotNull Long productId,
+    @NotNull Long inventoryId,
     @NotNull Long orderId,
-    @Min(1) int reservedQuantity
+    @Min(1) int reservedQuantity,
+    Integer ttlSeconds 
 ) {}

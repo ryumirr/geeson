@@ -37,9 +37,10 @@ public class InventoryReservationConsumer {
         try {
             InventoryReservationJpaEntity reserved = inventoryReservationApp.reserveInventory(new InventoryReservationCommand(
                 Long.valueOf(payload.getReservationId()),
-                Long.parseLong(payload.getProductId()),
+                Long.parseLong(payload.getInventoryId()),
                 Long.parseLong(payload.getOrderId()),
-                payload.getQuantity()
+                payload.getQuantity(),
+                payload.getExpiresAt()
             ));
 
             kafkaTemplate.send("ord-inv-dec-succ-evt", mapper.writeValueAsString(new InventoryReserveSucceedEvent(
@@ -47,7 +48,7 @@ public class InventoryReservationConsumer {
                 payload.getSagaId(),
                 payload.getStepId(),
                 payload.getOrderId(),
-                payload.getProductId(),
+                payload.getInventoryId(),
                 String.valueOf(reserved.getReservationId()),
                 "SUCCESS"
             )));
@@ -59,7 +60,7 @@ public class InventoryReservationConsumer {
                     payload.getSagaId(),
                     payload.getStepId(),
                     payload.getOrderId(),
-                    payload.getProductId(),
+                    payload.getInventoryId(),
                     e.getMessage()
                 )));
             } catch (JsonProcessingException ex) {

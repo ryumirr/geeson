@@ -15,4 +15,5 @@ public interface InventoryReservationRepository {
     Optional<InventoryReservationJpaEntity> findById(Long id);
 
     InventoryReservationJpaEntity save(InventoryReservationJpaEntity entity);
+    List<InventoryReservationJpaEntity> findByOrderId(Long orderId);
 }

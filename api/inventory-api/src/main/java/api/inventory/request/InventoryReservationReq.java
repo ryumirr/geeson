@@ -5,8 +5,8 @@ import jakarta.validation.constraints.Positive;
 import java.time.LocalDateTime;
 
 public record InventoryReservationReq(
-    @NotNull Long productId,
+    @NotNull Long inventoryId,
     @NotNull Long orderId,
     @Positive int reservedQuantity,
-    LocalDateTime expiresAt
+    @Positive int ttlSeconds
 ) {}

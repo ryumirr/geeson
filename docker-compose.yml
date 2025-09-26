@@ -92,6 +92,7 @@ services:
       grpc-net:
         aliases:
           - shipment
+          - order-api
       kafka-net:
       mysql-net:
       redis-net:
