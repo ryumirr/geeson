@@ -7,6 +7,14 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface SpringDataStockMovementJpaRepository extends JpaRepository<StockMovementJpaEntity, Long> {
-    @Query("select m from StockMovementJpaEntity m inner join m.inventory i inner join  i.product p where p.productId = :productId")
-    List<StockMovementJpaEntity> findByProductId(Long productId);
+    /**
+     * 특정 인벤토리의 이동 기록 조회
+     */
+    List<StockMovementJpaEntity> findByInventory_InventoryId(Long inventoryId);
+
+    /**
+     * referenceId 로 조회 (중복 방지용)
+     */
+    StockMovementJpaEntity findByReferenceId(String referenceId);
+
 }
