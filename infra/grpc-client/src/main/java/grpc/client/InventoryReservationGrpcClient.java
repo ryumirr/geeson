@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import grpc.inventory.InventoryReservationServiceGrpc;
 import grpc.inventory.InventoryReservationServiceGrpc.InventoryReservationServiceBlockingStub;
+import grpc.inventory.InventoryReservation;
 
 @Service
 @Slf4j
