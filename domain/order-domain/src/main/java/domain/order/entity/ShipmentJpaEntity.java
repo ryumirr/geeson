@@ -1,18 +1,23 @@
 package domain.order.entity;
 
+import lombok.Getter;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import module.enums.ShipmentStatus;
 
+@Getter
 @Entity
-@Table(name = "shipments")
+@Table(name = "shipments", schema = "order_db")
 public class ShipmentJpaEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "shipment_id")
     private Long shipmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "order_id", referencedColumnName = "order_id")
     private ProductOrderJpaEntity order;
 
     @Column(name = "tracking_number")
@@ -27,9 +32,25 @@ public class ShipmentJpaEntity {
     @Column(name = "delivered_date")
     private LocalDateTime deliveredDate;
 
-    @Column(name = "created_date")
-    private LocalDateTime createdDate;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    @Column(name = "updated_date")
-    private LocalDateTime updatedDate;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    public static ShipmentJpaEntity from(String trackingNumber, ProductOrderJpaEntity order) {
+        ShipmentJpaEntity entity = new ShipmentJpaEntity();
+        entity.order = order;
+        entity.trackingNumber = trackingNumber;
+        entity.status = ShipmentStatus.READY.name();
+        entity.shippedDate = LocalDateTime.now();
+        entity.createdAt = LocalDateTime.now();
+        entity.updatedAt = LocalDateTime.now();
+        return entity;
+    }
+
+    public void updateStatus(ShipmentStatus status) {
+        this.status = status.name();
+        this.updatedAt = LocalDateTime.now();
+    }
 }

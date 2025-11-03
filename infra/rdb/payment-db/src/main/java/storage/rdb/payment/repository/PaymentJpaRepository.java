@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import storage.rdb.payment.repository.adapter.SpringDataPaymentJpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -19,7 +20,12 @@ public class PaymentJpaRepository implements PaymentRepository {
     }
 
     @Override
-    public Optional<PaymentJpaEntity> findByOrderId(Long orderId) {
+    public Optional<PaymentJpaEntity> findByOrderId(String orderId) {
         return repository.findByOrderId(orderId);
+    }
+    
+    @Override
+    public List<PaymentJpaEntity> findByCustomerId(Long customerId) {
+        return repository.findByCustomerId(customerId);
     }
 }

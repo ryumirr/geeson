@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package grpc.inventory;
+option java_package = "grpc.inventory";
+option java_multiple_files = true;
+
+// ===== Service =====
+service InventoryReservationService {
+  // 예약 생성
+  rpc CreateReservation(CreateReservationRequest) returns (CreateReservationResponse);
+
+  // 예약 조회
+  rpc GetReservation(GetReservationRequest) returns (GetReservationResponse);
+
+  // 특정 주문의 예약 전체 조회
+  rpc GetReservationsByOrder(GetReservationsByOrderRequest) returns (GetReservationsByOrderResponse);
+
+  // 특정 재고(inventory)의 예약 전체 조회
+  rpc GetReservationsByInventory(GetReservationsByInventoryRequest) returns (GetReservationsByInventoryResponse);
+
+  // 예약 만료/취소 처리
+  rpc CancelReservation(CancelReservationRequest) returns (CancelReservationResponse);
+
+  // 예약 확정 처리 (출고 시점)
+  rpc CompleteReservation(CompleteReservationRequest) returns (CompleteReservationResponse);
+}
+
+// ===== Entity =====
+message InventoryReservation {
+  int64 reservationId = 1;
+  int64 inventoryId = 2;
+  int64 orderId = 3;
+  int32 reservedQuantity = 4;
+  string reservedAt = 5;
+  string expiresAt = 6;
+  string status = 7; // RESERVED, COMPLETED, CANCELLED, EXPIRED
+}
+
+// ===== Create =====
+message CreateReservationRequest {
+  int64 inventoryId = 1;
+  int64 orderId = 2;
+  int32 reservedQuantity = 3;
+  int32 ttlSeconds = 4; // optional TTL
+}
+
+message CreateReservationResponse {
+  InventoryReservation reservation = 1;
+}
+
+// ===== Get Single =====
+message GetReservationRequest {
+  int64 reservationId = 1;
+}
+
+message GetReservationResponse {
+  InventoryReservation reservation = 1;
+}
+
+// ===== Get by Order =====
+message GetReservationsByOrderRequest {
+  int64 orderId = 1;
+}
+
+message GetReservationsByOrderResponse {
+  repeated InventoryReservation reservations = 1;
+}
+
+// ===== Get by Inventory =====
+message GetReservationsByInventoryRequest {
+  int64 inventoryId = 1;
+}
+
+message GetReservationsByInventoryResponse {
+  repeated InventoryReservation reservations = 1;
+}
+
+// ===== Cancel =====
+message CancelReservationRequest {
+  int64 reservationId = 1;
+}
+
+message CancelReservationResponse {
+  bool success = 1;
+  InventoryReservation reservation = 2;
+}
+
+// ===== Complete =====
+message CompleteReservationRequest {
+  int64 reservationId = 1;
+}
+
+message CompleteReservationResponse {
+  bool success = 1;
+  InventoryReservation reservation = 2;
+}
+

@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package grpc.inventory;
+option java_package = "grpc.inventory";
+option java_multiple_files = true;
+
+service InventoryItemService {
+  // InventoryItemsRegisterApp.registerInventoryItem()
+  rpc CreateInventoryItem (CreateInventoryItemRequest) returns (InventoryItemResponse);
+
+  // InventoryItemsListApp.findById()
+  rpc GetInventoryItem (GetInventoryItemRequest) returns (InventoryItemResponse);
+
+  // InventoryItemsListApp.findBySerialNumber()
+  rpc GetInventoryItemBySerial (GetInventoryItemBySerialRequest) returns (InventoryItemResponse);
+}
+
+message InventoryItem {
+  int64 inventoryItemId = 1;
+  int64 inventoryId = 2;
+  int64 batchLotId = 3;
+  string serialNumber = 4;
+  string status = 5;
+  string createdAt = 6;
+  string updatedAt = 7;
+}
+
+message CreateInventoryItemRequest {
+  int64 inventoryId = 1;
+  string serialNumber = 2;
+  string status = 3;
+}
+
+message InventoryItemResponse {
+  InventoryItem item = 1;
+}
+
+message GetInventoryItemRequest {
+  int64 inventoryItemId = 1;
+}
+
+message GetInventoryItemBySerialRequest {
+  string serialNumber = 1;
+}

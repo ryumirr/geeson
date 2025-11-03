@@ -29,4 +29,9 @@ public class InventoryReservationJpaRepository implements InventoryReservationRe
     public Optional<InventoryReservationJpaEntity> findById(Long id) {
         return repository.findById(id);
     }
+
+    @Override
+    public List<InventoryReservationJpaEntity> findByOrderId(Long orderId) {
+        return repository.findByOrderId(orderId);
+    }
 }

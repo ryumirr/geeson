@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @Getter
 public class ShippingAddressJpaEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long addressId;
 
     private String addressLine1;

@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package grpc.inventory;
+option java_package = "grpc.inventory";
+option java_multiple_files = true;
+
+// ===== Service =====
+service StockMovementService {
+  // 신규 이동 추가
+  rpc AddStockMovement(AddStockMovementRequest) returns (AddStockMovementResponse);
+
+  // 특정 재고(inventory)의 이동 내역 조회
+  rpc GetStockMovementsByInventory(GetStockMovementsByInventoryRequest) returns (GetStockMovementsByInventoryResponse);
+
+  // referenceId로 조회
+  rpc GetStockMovementByReference(GetStockMovementByReferenceRequest) returns (GetStockMovementByReferenceResponse);
+}
+
+// ===== Entity =====
+message StockMovement {
+  int64 movementId = 1;
+  int64 inventoryId = 2;
+  MovementType movementType = 3;
+  int32 quantity = 4;
+  string movementDate = 5; // ISO-8601 (ex: 2025-09-26T22:15:00)
+  string description = 6;
+  string referenceId = 7;
+}
+
+enum MovementType {
+  IN = 0;
+  OUT = 1;
+  TRANSFER = 2;
+}
+
+// ===== Add =====
+message AddStockMovementRequest {
+  int64 inventoryId = 1;
+  MovementType movementType = 2;
+  int32 quantity = 3;
+  string description = 4;
+  string referenceId = 5;
+}
+
+message AddStockMovementResponse {
+  StockMovement stockMovement = 1;
+}
+
+// ===== Get by Inventory =====
+message GetStockMovementsByInventoryRequest {
+  int64 inventoryId = 1;
+}
+
+message GetStockMovementsByInventoryResponse {
+  repeated StockMovement stockMovements = 1;
+}
+
+// ===== Get by Reference =====
+message GetStockMovementByReferenceRequest {
+  int64 referenceId = 1;
+}
+
+message GetStockMovementByReferenceResponse {
+  StockMovement stockMovement = 1;
+}

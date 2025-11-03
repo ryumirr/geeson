@@ -25,16 +25,22 @@ public class InventoryReservationConsumer {
     private final InventoryReservationApp inventoryReservationApp;
 
     @KafkaListener(topics = "ord-inv-dec-cmd", groupId = "inventory-consumer-group")
-    public void inventoryDecreaseCommand(String command) throws JsonProcessingException {
+    public void inventoryDecreaseCommand(String command){
         log.info("inventory decrease command received: {}", command);
-        InventoryReservePayload payload = mapper.readValue(command, InventoryReservePayload.class);
+        InventoryReservePayload payload = null;
+        try {
+            payload = mapper.readValue(command, InventoryReservePayload.class);
+        } catch (JsonProcessingException e) {
+            log.error("failed to parse command: {}", e.getMessage());
+        }
 
         try {
             InventoryReservationJpaEntity reserved = inventoryReservationApp.reserveInventory(new InventoryReservationCommand(
                 Long.valueOf(payload.getReservationId()),
-                Long.parseLong(payload.getProductId()),
+                Long.parseLong(payload.getInventoryId()),
                 Long.parseLong(payload.getOrderId()),
-                payload.getQuantity()
+                payload.getQuantity(),
+                payload.getExpiresAt()
             ));
 
             kafkaTemplate.send("ord-inv-dec-succ-evt", mapper.writeValueAsString(new InventoryReserveSucceedEvent(
@@ -42,20 +48,24 @@ public class InventoryReservationConsumer {
                 payload.getSagaId(),
                 payload.getStepId(),
                 payload.getOrderId(),
-                payload.getProductId(),
+                payload.getInventoryId(),
                 String.valueOf(reserved.getReservationId()),
                 "SUCCESS"
             )));
         } catch (Exception e) {
             log.error("failed to reserve inventory: {}", e.getMessage());
-            kafkaTemplate.send("ord-inv-dec-fail-evt", mapper.writeValueAsString(new InventoryReserveFailedEvent(
-                String.valueOf(uuidGenerator.nextId()),
-                payload.getSagaId(),
-                payload.getStepId(),
-                payload.getOrderId(),
-                payload.getProductId(),
-                e.getMessage()
-            )));
+            try {
+                kafkaTemplate.send("ord-inv-dec-fail-evt", mapper.writeValueAsString(new InventoryReserveFailedEvent(
+                    String.valueOf(uuidGenerator.nextId()),
+                    payload.getSagaId(),
+                    payload.getStepId(),
+                    payload.getOrderId(),
+                    payload.getInventoryId(),
+                    e.getMessage()
+                )));
+            } catch (JsonProcessingException ex) {
+                log.error("failed to send failed event: {}", ex.getMessage());
+            }
         }
 
     }

@@ -1,4 +1,11 @@
 dependencies {
     implementation project(':api:api-commons')
+    implementation project(':application:product-app')
     implementation project(':domain:product-domain')
+    implementation project(':infra:rdb:product-db')
+    implementation project(':infra:queue:product-kafka')
+    implementation project(':infra:uuid-impl')
+
+    implementation project(":support:web-api")
+    implementation project(":support:uuid")
 }

@@ -43,6 +43,11 @@ include(
     'infra:queue:kafka',
     'infra:redis',
     'infra:uuid-impl',
+    
+    'infra:client:pgClient',
+
+    'infra:grpc-client',
+    
 )
 
 include(
@@ -56,7 +61,8 @@ include(
     'application',
     'application:order-app',
     'application:payment-app',
-    'application:inventory-app'
+    'application:inventory-app',
+    'application:product-app'
 )
 
 include(
@@ -70,10 +76,14 @@ include(
     'support:logging',
     'support:web-api',
     'support:masking',
-    'support:uuid'
+    'support:uuid',
+    'support:constant'
 )
-
 
 include(
     'commander'
+)
+
+include(
+    'proto'
 )

@@ -1,7 +1,3 @@
-CREATE DATABASE product_db;
-
-USE product_db;
-
 CREATE TABLE products (
                           product_id BIGINT AUTO_INCREMENT PRIMARY KEY,
                           name VARCHAR(255) NOT NULL,
@@ -123,22 +119,17 @@ CREATE TABLE product_visibility (
                                     FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
 
+-- Test Data
 INSERT INTO products (
     product_id,
     name,
-    description,
     sku,
-    category_id,
-    price,
     created_at,
     updated_at
 ) VALUES (
     1,
     'test',
-    'test-name',
     '1',
-    NULL,
-    NULL,
     '2025-07-02 11:27:50',
     '2025-07-02 11:27:50'
 );

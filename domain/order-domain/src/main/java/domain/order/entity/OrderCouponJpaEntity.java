@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 @Table(name = "order_coupons")
 public class OrderCouponJpaEntity {
     @Id
-    @GeneratedValue
     @Column(name = "order_coupon_id")
     private long orderCouponId;
 
