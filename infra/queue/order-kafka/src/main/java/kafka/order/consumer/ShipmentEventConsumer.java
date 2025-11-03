@@ -4,6 +4,9 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
+
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import support.uuid.UuidGenerator;
@@ -23,8 +26,10 @@ import grpc.client.ShipmentGrpcClient;
 import grpc.client.InventoryReservationGrpcClient;
 import grpc.client.StockMovementGrpcClient;
 import grpc.client.InventoryGrpcClient;
+import grpc.client.WarehouseGrpcClient;
+import grpc.client.PurchaseOrderGrpcClient;
 import grpc.shipment.GetShipmentResponse;
-
+import grpc.purchaseorder.SelectPurchaseOrderResponse;
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -36,6 +41,8 @@ public class ShipmentEventConsumer {
     private final StockMovementGrpcClient stockMovementGrpcClient;
     private final InventoryReservation inventoryReservation;
     private final InventoryGrpcClient inventoryGrpcClient;
+    private final WarehouseGrpcClient warehouseGrpcClient;
+    private final PurchaseOrderGrpcClient purchaseOrderGrpcClient;
     private final OrderEventPublisher orderEventPublisher;
 
     @KafkaListener(topics = "ord-ord-req-succ-event", groupId = "shipment-group")
@@ -75,6 +82,9 @@ public class ShipmentEventConsumer {
                 log.info("✅ Inventory reservation succeeded: reservationId={}", reservationResult.getReservationId());
 
                 // 창고 정보 확인(warehouses)
+                warehouseGrpcClient.getWarehouse(inventory.getInventory().getWarehouseId());
+                // 발주 정보 확인(purchase orders)
+                SelectPurchaseOrderResponse response = purchaseOrderGrpcClient.selectPurchaseOrder(inventory.getInventory().getPurchaseOrderId());
             }
 
         } catch (Exception e) {
