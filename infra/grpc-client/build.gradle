@@ -13,6 +13,8 @@ dependencies {
     // proto(stub)
     implementation project(":proto")
 
+    implementation project(':support:messaging')
+    implementation project(':domain:inventory-domain')
     // Test fixtures
     testFixturesImplementation "org.springframework:spring-context:6.0.15"
     testFixturesImplementation "org.springframework.boot:spring-boot-test:3.1.4"
