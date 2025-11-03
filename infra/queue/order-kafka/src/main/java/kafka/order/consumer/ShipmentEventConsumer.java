@@ -85,6 +85,7 @@ public class ShipmentEventConsumer {
                 warehouseGrpcClient.getWarehouse(inventory.getInventory().getWarehouseId());
                 // 발주 정보 확인(purchase orders)
                 SelectPurchaseOrderResponse response = purchaseOrderGrpcClient.selectPurchaseOrder(inventory.getInventory().getPurchaseOrderId());
+                // @todo OrderShippedEvent 발행
             }
 
         } catch (Exception e) {
