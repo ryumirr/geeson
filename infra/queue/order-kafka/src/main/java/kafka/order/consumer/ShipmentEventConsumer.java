@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import app.order.app.ShipmentApp;
 import domain.order.entity.ShipmentJpaEntity;
-
+import domain.order.message.OrderEventPublisher;
 import grpc.client.ShipmentGrpcClient;
 import grpc.client.InventoryReservationGrpcClient;
 import grpc.client.StockMovementGrpcClient;
@@ -41,6 +41,7 @@ public class ShipmentEventConsumer {
     private final StockMovementGrpcClient stockMovementGrpcClient;
     private final InventoryReservation inventoryReservation;
     private final InventoryGrpcClient inventoryGrpcClient;
+    private final OrderEventPublisher orderEventPublisher;
 
     @KafkaListener(topics = "ord-ord-req-succ-event", groupId = "shipment-group")
     public void handleOrderCreated(String message) {
@@ -76,6 +77,9 @@ public class ShipmentEventConsumer {
                                 .setReferenceId(String.valueOf(
                                         inventory.getInventory().getInventoryId() * hashCode()))
                                 .build());
+                log.info("✅ Inventory reservation succeeded: reservationId={}", reservationResult.getReservationId());
+
+                // 창고 정보 확인(warehouses)
             }
 
         } catch (Exception e) {

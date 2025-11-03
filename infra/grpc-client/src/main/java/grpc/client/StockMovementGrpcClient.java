@@ -9,6 +9,7 @@ import grpc.inventory.GetStockMovementByReferenceResponse;
 import grpc.inventory.StockMovementServiceGrpc;
 import grpc.inventory.StockMovementServiceGrpc.StockMovementServiceBlockingStub;
 
+import domain.inventory.message.StockOutCreatedEventPublisher;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -23,6 +24,7 @@ public class StockMovementGrpcClient {
 
     private ManagedChannel channel;
     private StockMovementServiceBlockingStub stockMovementStub;
+    private StockOutCreatedEventPublisher stockOutCreatedEventPublisher;
 
     @PostConstruct
     public void init() {
@@ -46,7 +48,18 @@ public class StockMovementGrpcClient {
     // ===== Add =====
     public AddStockMovementResponse addStockMovement(AddStockMovementRequest request) {
         try {
-            return stockMovementStub.addStockMovement(request);
+            AddStockMovementResponse response = stockMovementStub.addStockMovement(request);
+            // test
+            StockOutCreatedEventPublisher publisher = stockOutCreatedEventPublisher
+                    .publishStockOutCreatedEvent(new StockOutCreatedPayload(
+                            response.getMovementId(), // movement_id returned from DB or stub
+                            request.getInventoryId(), // inventory_id from request
+                            "OUT", // fixed movement type
+                            request.getQuantity(), // quantity moved out
+                            request.getReferenceId(), // request or generated ref
+                            request.getDescription() // optional
+                    ));
+            return response;
         } catch (StatusRuntimeException e) {
             log.error("gRPC call addStockMovement failed: {}", e.getStatus(), e);
             throw e;
