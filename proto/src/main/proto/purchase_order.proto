@@ -9,23 +9,23 @@ service PurchaseOrderService {
   // 신규 발주 등록
   rpc AddPurchaseOrder(AddPurchaseOrderRequest) returns (AddPurchaseOrderResponse);
 
-  // 단일 발주 조회
-  rpc SelectPurchaseOrder(SelectPurchaseOrderRequest) returns (SelectPurchaseOrderResponse);
+  // 단일 발주 조회 (ID 또는 복합키로)
+  rpc GetPurchaseOrder(GetPurchaseOrderRequest) returns (GetPurchaseOrderResponse);
 
-  // 다중 발주 조회
-  rpc SelectPurchaseOrders(SelectPurchaseOrdersRequest) returns (SelectPurchaseOrdersResponse);
+  // 다중 발주 조회 (조건 기반)
+  rpc ListPurchaseOrders(ListPurchaseOrdersRequest) returns (ListPurchaseOrdersResponse);
 
   // 발주 상태 갱신 (예: APPROVED, CANCELLED)
   rpc UpdatePurchaseOrderStatus(UpdatePurchaseOrderStatusRequest) returns (UpdatePurchaseOrderStatusResponse);
 }
 
-// ===== Entities =====
+// ===== Entity =====
 message PurchaseOrder {
   int64 purchaseOrderId = 1;
   int64 supplierId = 2;
   int64 warehouseId = 3;
-  string orderDate = 4;
-  string status = 5;
+  string orderDate = 4;     // ISO8601 timestamp (e.g. 2025-11-04T09:00:00Z)
+  string status = 5;        // e.g. PENDING, APPROVED, CANCELLED
   double totalAmount = 6;
   string createdAt = 7;
   string updatedAt = 8;
@@ -35,30 +35,41 @@ message PurchaseOrder {
 message AddPurchaseOrderRequest {
   int64 supplierId = 1;
   int64 warehouseId = 2;
-  string orderDate = 3;
-  string status = 4;
-  double totalAmount = 5;
+  string orderDate = 3;     // optional, default: current timestamp
+  double totalAmount = 4;
 }
 
 message AddPurchaseOrderResponse {
   PurchaseOrder purchaseOrder = 1;
 }
 
-// ===== Select (Single) =====
-message SelectPurchaseOrderRequest {
-  int64 purchaseOrderId = 1;
+// ===== Get (단일 조회) =====
+message GetPurchaseOrderRequest {
+  oneof selector {
+    int64 purchaseOrderId = 1;   // 기본키로 조회
+    PurchaseOrderKey key = 2;    // supplier_id + warehouse_id 조합으로 조회
+  }
 }
 
-message SelectPurchaseOrderResponse {
+message GetPurchaseOrderResponse {
   PurchaseOrder purchaseOrder = 1;
 }
 
-// ===== Select (Bulk) =====
-message SelectPurchaseOrdersRequest {
-  repeated int64 purchaseOrderIds = 1; // 조회할 발주 ID 목록
+// 복합키 구조체
+message PurchaseOrderKey {
+  int64 supplierId = 1;
+  int64 warehouseId = 2;
 }
 
-message SelectPurchaseOrdersResponse {
+// ===== List (다중 조회) =====
+message ListPurchaseOrdersRequest {
+  repeated int64 purchaseOrderIds = 1;
+  int64 supplierId = 2;   // optional filter
+  int64 warehouseId = 3;  // optional filter
+  string status = 4;      // optional filter
+}
+
+message ListPurchaseOrdersResponse {
   repeated PurchaseOrder purchaseOrders = 1;
 }
 

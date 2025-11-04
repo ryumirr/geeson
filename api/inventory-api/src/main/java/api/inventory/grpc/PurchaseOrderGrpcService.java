@@ -15,6 +15,7 @@ import domain.inventory.domain.repository.WarehouseRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @GrpcService
 @RequiredArgsConstructor
@@ -26,7 +27,9 @@ public class PurchaseOrderGrpcService extends PurchaseOrderServiceGrpc.PurchaseO
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
-    /** 발주 등록 */
+    // ==========================
+    // 신규 발주 등록
+    // ==========================
     @Override
     public void addPurchaseOrder(AddPurchaseOrderRequest request,
                                  StreamObserver<AddPurchaseOrderResponse> responseObserver) {
@@ -36,28 +39,21 @@ public class PurchaseOrderGrpcService extends PurchaseOrderServiceGrpc.PurchaseO
             WarehouseJpaEntity warehouse = warehouseRepository.findById(request.getWarehouseId())
                     .orElseThrow(() -> new RuntimeException("Warehouse not found: " + request.getWarehouseId()));
 
+            LocalDateTime orderDate = request.getOrderDate().isEmpty()
+                    ? LocalDateTime.now()
+                    : LocalDateTime.parse(request.getOrderDate(), FORMATTER);
+
             PurchaseOrderJpaEntity entity = PurchaseOrderJpaEntity.create(
                     supplier,
                     warehouse,
-                    LocalDateTime.parse(request.getOrderDate(), FORMATTER),
-                    request.getStatus(),
+                    orderDate,
+                    "PENDING",
                     BigDecimal.valueOf(request.getTotalAmount())
             );
 
             PurchaseOrderJpaEntity saved = purchaseOrderRepository.save(entity);
 
-            PurchaseOrder po = PurchaseOrder.newBuilder()
-                    .setPurchaseOrderId(saved.getPurchaseOrderId())
-                    .setSupplierId(saved.getSupplier().getSupplierId())
-                    .setWarehouseId(saved.getWarehouse().getWarehouseId())
-                    .setOrderDate(saved.getOrderDate().format(FORMATTER))
-                    .setStatus(saved.getStatus())
-                    .setTotalAmount(saved.getTotalAmount().doubleValue())
-                    // createdAt/updatedAt 필드가 엔티티에 없으므로, 우선 orderDate/now 로 매핑
-                    .setCreatedAt(saved.getOrderDate().format(FORMATTER))
-                    .setUpdatedAt(saved.getOrderDate().format(FORMATTER))
-                    .build();
-
+            PurchaseOrder po = mapToProto(saved);
             responseObserver.onNext(AddPurchaseOrderResponse.newBuilder().setPurchaseOrder(po).build());
             responseObserver.onCompleted();
         } catch (Exception e) {
@@ -65,62 +61,85 @@ public class PurchaseOrderGrpcService extends PurchaseOrderServiceGrpc.PurchaseO
         }
     }
 
-    /** 발주 단건 조회 */
+    // ==========================
+    // 단일 발주 조회 (ID or supplier+warehouse)
+    // ==========================
     @Override
-    public void selectPurchaseOrder(SelectPurchaseOrderRequest request,
-                                    StreamObserver<SelectPurchaseOrderResponse> responseObserver) {
+    public void getPurchaseOrder(GetPurchaseOrderRequest request,
+                                 StreamObserver<GetPurchaseOrderResponse> responseObserver) {
         try {
-            PurchaseOrderJpaEntity entity = purchaseOrderRepository.findById(request.getPurchaseOrderId())
-                    .orElseThrow(() -> new RuntimeException("PurchaseOrder not found: " + request.getPurchaseOrderId()));
+            PurchaseOrderJpaEntity entity;
 
-            PurchaseOrder po = PurchaseOrder.newBuilder()
-                    .setPurchaseOrderId(entity.getPurchaseOrderId())
-                    .setSupplierId(entity.getSupplier().getSupplierId())
-                    .setWarehouseId(entity.getWarehouse().getWarehouseId())
-                    .setOrderDate(entity.getOrderDate().format(FORMATTER))
-                    .setStatus(entity.getStatus())
-                    .setTotalAmount(entity.getTotalAmount().doubleValue())
-                    .setCreatedAt(entity.getOrderDate().format(FORMATTER))
-                    .setUpdatedAt(entity.getOrderDate().format(FORMATTER))
-                    .build();
+            // 1️⃣ ID로 조회
+            if (request.hasPurchaseOrderId()) {
+                entity = purchaseOrderRepository.findById(request.getPurchaseOrderId())
+                        .orElseThrow(() -> new RuntimeException("PurchaseOrder not found: " + request.getPurchaseOrderId()));
+            }
+            // 2️⃣ supplier_id + warehouse_id 복합키로 조회
+            else if (request.hasKey()) {
+                long supplierId = request.getKey().getSupplierId();
+                long warehouseId = request.getKey().getWarehouseId();
+                entity = purchaseOrderRepository
+                        .findBySupplier_SupplierIdAndWarehouse_WarehouseId(supplierId, warehouseId)
+                        .orElseThrow(() -> new RuntimeException(
+                                String.format("PurchaseOrder not found for supplier=%d, warehouse=%d", supplierId, warehouseId)
+                        ));
+            } else {
+                throw new RuntimeException("No identifier provided");
+            }
 
-            responseObserver.onNext(SelectPurchaseOrderResponse.newBuilder().setPurchaseOrder(po).build());
+            PurchaseOrder po = mapToProto(entity);
+            responseObserver.onNext(GetPurchaseOrderResponse.newBuilder().setPurchaseOrder(po).build());
             responseObserver.onCompleted();
         } catch (Exception e) {
             responseObserver.onError(e);
         }
     }
 
-    /** 다중 발주 조회 */
+    // ==========================
+    // 다중 발주 조회 (필터 지원)
+        // ==========================
     @Override
-    public void selectPurchaseOrders(SelectPurchaseOrdersRequest request,
-                                     StreamObserver<SelectPurchaseOrdersResponse> responseObserver) {
+    public void listPurchaseOrders(ListPurchaseOrdersRequest request,
+                                StreamObserver<ListPurchaseOrdersResponse> responseObserver) {
         try {
-            var entities = purchaseOrderRepository.findAllById(request.getPurchaseOrderIdsList());
-            SelectPurchaseOrdersResponse.Builder builder = SelectPurchaseOrdersResponse.newBuilder();
+            List<PurchaseOrderJpaEntity> entities = new java.util.ArrayList<>();
 
-            for (PurchaseOrderJpaEntity e : entities) {
-                PurchaseOrder po = PurchaseOrder.newBuilder()
-                        .setPurchaseOrderId(e.getPurchaseOrderId())
-                        .setSupplierId(e.getSupplier().getSupplierId())
-                        .setWarehouseId(e.getWarehouse().getWarehouseId())
-                        .setOrderDate(e.getOrderDate().format(FORMATTER))
-                        .setStatus(e.getStatus())
-                        .setTotalAmount(e.getTotalAmount().doubleValue())
-                        .setCreatedAt(e.getOrderDate().format(FORMATTER))
-                        .setUpdatedAt(e.getOrderDate().format(FORMATTER))
-                        .build();
-                builder.addPurchaseOrders(po);
+            if (!request.getPurchaseOrderIdsList().isEmpty()) {
+                entities = purchaseOrderRepository.findAllById(request.getPurchaseOrderIdsList());
+            } 
+            else if (request.getSupplierId() != 0 && request.getWarehouseId() != 0) {
+                purchaseOrderRepository
+                        .findBySupplier_SupplierIdAndWarehouse_WarehouseId(
+                                request.getSupplierId(), request.getWarehouseId()
+                        )
+                        .ifPresent(entities::add); // ✅ Optional → List 변환
+            } 
+            else if (request.getSupplierId() != 0) {
+                entities = purchaseOrderRepository.findBySupplier_SupplierId(request.getSupplierId());
+            } 
+            else if (request.getWarehouseId() != 0) {
+                entities = purchaseOrderRepository.findByWarehouse_WarehouseId(request.getWarehouseId());
+            } 
+            else {
+                entities = purchaseOrderRepository.findAll();
             }
+
+            // 결과 매핑
+            ListPurchaseOrdersResponse.Builder builder = ListPurchaseOrdersResponse.newBuilder();
+            entities.forEach(e -> builder.addPurchaseOrders(mapToProto(e)));
 
             responseObserver.onNext(builder.build());
             responseObserver.onCompleted();
+
         } catch (Exception e) {
             responseObserver.onError(e);
         }
     }
 
-    /** 발주 상태 갱신 */
+    // ==========================
+    // 발주 상태 갱신
+    // ==========================
     @Override
     public void updatePurchaseOrderStatus(UpdatePurchaseOrderStatusRequest request,
                                           StreamObserver<UpdatePurchaseOrderStatusResponse> responseObserver) {
@@ -128,20 +147,10 @@ public class PurchaseOrderGrpcService extends PurchaseOrderServiceGrpc.PurchaseO
             PurchaseOrderJpaEntity entity = purchaseOrderRepository.findById(request.getPurchaseOrderId())
                     .orElseThrow(() -> new RuntimeException("PurchaseOrder not found: " + request.getPurchaseOrderId()));
 
-            // ✅ DDD 행동 메서드로 상태 변경 (setter 금지)
             entity.updateStatus(request.getStatus());
             PurchaseOrderJpaEntity updated = purchaseOrderRepository.save(entity);
 
-            PurchaseOrder po = PurchaseOrder.newBuilder()
-                    .setPurchaseOrderId(updated.getPurchaseOrderId())
-                    .setSupplierId(updated.getSupplier().getSupplierId())
-                    .setWarehouseId(updated.getWarehouse().getWarehouseId())
-                    .setOrderDate(updated.getOrderDate().format(FORMATTER))
-                    .setStatus(updated.getStatus())
-                    .setTotalAmount(updated.getTotalAmount().doubleValue())
-                    .setCreatedAt(updated.getOrderDate().format(FORMATTER))
-                    .setUpdatedAt(LocalDateTime.now().format(FORMATTER))
-                    .build();
+            PurchaseOrder po = mapToProto(updated);
 
             responseObserver.onNext(UpdatePurchaseOrderStatusResponse.newBuilder()
                     .setSuccess(true)
@@ -151,5 +160,21 @@ public class PurchaseOrderGrpcService extends PurchaseOrderServiceGrpc.PurchaseO
         } catch (Exception e) {
             responseObserver.onError(e);
         }
+    }
+
+    // ==========================
+    // 공통 변환 메서드
+    // ==========================
+    private PurchaseOrder mapToProto(PurchaseOrderJpaEntity entity) {
+        return PurchaseOrder.newBuilder()
+                .setPurchaseOrderId(entity.getPurchaseOrderId())
+                .setSupplierId(entity.getSupplier().getSupplierId())
+                .setWarehouseId(entity.getWarehouse().getWarehouseId())
+                .setOrderDate(entity.getOrderDate().format(FORMATTER))
+                .setStatus(entity.getStatus())
+                .setTotalAmount(entity.getTotalAmount().doubleValue())
+                .setCreatedAt(entity.getOrderDate().format(FORMATTER))
+                .setUpdatedAt(LocalDateTime.now().format(FORMATTER))
+                .build();
     }
 }
