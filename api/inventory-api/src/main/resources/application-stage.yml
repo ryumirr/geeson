@@ -20,14 +20,17 @@ spring:
           connectionPoolSize: 10
         threads: 4
         nettyThreads: 4
-
+grpc:
+  server:
+    port: 6565
+    address: 0.0.0.0
+  clients:
+    shipment:
+      address: grpc-server:6565
+      negotiationType: plaintext
+      enableKeepAlive: true
 api:
   version: "2025-06-15"
 
 uuid:
   node-id: ${NODE_ID:0}
-
-grpc:
-  server:
-    port: 6565
-    address: 0.0.0.0
