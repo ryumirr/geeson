@@ -19,7 +19,7 @@ public class WarehouseGrpcClient {
     @PostConstruct
     public void init() {
         this.channel = ManagedChannelBuilder
-                .forAddress("grpc-server", 6565)
+                .forAddress("inventory-api", 6566)
                 .usePlaintext()
                 .build();
 

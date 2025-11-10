@@ -4,8 +4,7 @@ spring:
     username: root
     password: rootpass^^*
   kafka:
-    bootstrap-servers: localhost:9092
-
+    bootstrap-servers: kafka:9092
 api:
   version: '2025-05-25'
 

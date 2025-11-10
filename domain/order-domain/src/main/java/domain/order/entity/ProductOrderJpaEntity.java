@@ -34,10 +34,6 @@ public class ProductOrderJpaEntity {
     @JoinColumn(name = "shipping_address_id")
     private ShippingAddressJpaEntity shippingAddress;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "payment_id")
-    private PaymentRequestJpaEntity payment;
-
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -48,10 +44,5 @@ public class ProductOrderJpaEntity {
     public void addOrderItem(OrderItemJpaEntity item) {
         if(this.orderItems == null) this.orderItems = new ArrayList<>();
         this.orderItems.add(item);
-    }
-
-    public void registerPayment(PaymentRequestJpaEntity payment) {
-        this.payment = payment;
-        payment.registerOrder(this);
     }
 }

@@ -11,6 +11,15 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
   kafka:
     bootstrap-servers: kafka:9092
+    consumer:
+      group-id: order-consumer-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      ack-mode: record
+      missing-topics-fatal: false
+
   redis:
     redisson:
       config: |
@@ -25,8 +34,8 @@ grpc:
     port: 6565
     address: 0.0.0.0
   clients:
-    shipment:
-      address: grpc-server:6565
+    inventory-api:
+      address: inventory-api:6566
       negotiationType: plaintext
       enableKeepAlive: true
 

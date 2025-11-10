@@ -91,6 +91,46 @@ public class InventoryGrpcService extends InventoryServiceGrpc.InventoryServiceI
         }
 
         @Override
+        public void selectInventories(SelectInventoriesRequest request,
+                        StreamObserver<SelectInventoriesResponse> responseObserver) {
+                try {
+                        List<grpc.inventory.InventoryResult> results = request.getChecksList().stream().map(check -> {
+                                try {
+                                        InventoryJpaEntity entity = inventorySelectApp.findAvailableInventory(
+                                                        check.getProductId(), check.getQuantity());
+
+                                        return grpc.inventory.InventoryResult.newBuilder()
+                                                        .setProductId(check.getProductId())
+                                                        .setAvailable(true)
+                                                        .setInventory(Inventory.newBuilder()
+                                                                        .setInventoryId(entity.getInventoryId())
+                                                                        .setProductId(entity.getProduct()
+                                                                                        .getProductId())
+                                                                        .setWarehouseId(entity.getWareHouse()
+                                                                                        .getWarehouseId())
+                                                                        .setAvailableQuantity(
+                                                                                        entity.getAvailableQuantity())
+                                                                        .build())
+                                                        .build();
+                                } catch (Exception e) {
+                                        return grpc.inventory.InventoryResult.newBuilder()
+                                                        .setProductId(check.getProductId())
+                                                        .setAvailable(false)
+                                                        .build();
+                                }
+                        }).toList();
+
+                        responseObserver.onNext(SelectInventoriesResponse.newBuilder()
+                                        .addAllResults(results)
+                                        .build());
+                        responseObserver.onCompleted();
+                } catch (Exception e) {
+                        responseObserver.onError(Status.INTERNAL.withDescription("Error selecting inventories")
+                                        .asRuntimeException());
+                }
+        }
+
+        @Override
         public void reserveInventory(ReserveInventoryRequest request,
                         StreamObserver<ReserveInventoryResponse> responseObserver) {
                 try {
@@ -127,12 +167,12 @@ public class InventoryGrpcService extends InventoryServiceGrpc.InventoryServiceI
                         StreamObserver<ReserveInventoriesResponse> responseObserver) {
 
                 List<grpc.inventory.ReserveItem> items = request.getItemsList().stream()
-                        .map(i -> grpc.inventory.ReserveItem.newBuilder()
-                                .setProductId(i.getProductId())
-                                .setWarehouseId(i.getWarehouseId())
-                                .setQuantity(i.getQuantity())
-                                .build())
-                        .toList();
+                                .map(i -> grpc.inventory.ReserveItem.newBuilder()
+                                                .setProductId(i.getProductId())
+                                                .setWarehouseId(i.getWarehouseId())
+                                                .setQuantity(i.getQuantity())
+                                                .build())
+                                .toList();
 
                 Map<Long, Integer> productQuantities = items.stream()
                                 .collect(Collectors.toMap(

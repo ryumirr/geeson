@@ -22,6 +22,7 @@ public class PaymentJpaEntity {
     private Long paymentId;
 
     private String orderId;
+    private BigDecimal paymentMethodId;
     private BigDecimal amount;
     private String currency;
     @Enumerated(EnumType.STRING)

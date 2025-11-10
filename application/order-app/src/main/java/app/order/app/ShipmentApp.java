@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import module.enums.ShipmentStatus;
 import app.order.port.in.CreateShipmentUseCase;
+import app.order.port.in.CreateShipmentUseCase.CreateShipmentCommand;
+import app.order.port.in.CreateShipmentUseCase.CreateShipmentResult;
 import app.order.port.in.GetShipmentUseCase;
 
 import java.text.MessageFormat;
@@ -19,7 +21,6 @@ import domain.order.repository.ProductOrderRepository;
 
 import grpc.client.InventoryItemGrpcClient;
 import grpc.inventory.InventoryItemResponse;
-import java.text.MessageFormat;
 
 @Service
 @RequiredArgsConstructor
@@ -36,8 +37,8 @@ public class ShipmentApp implements CreateShipmentUseCase, GetShipmentUseCase {
 
         List<ShipmentJpaEntity> shipments = shipmentRepo.findByOrderId(command.orderId());
 
-        createInventoryItem(command.orderId(),
-                MessageFormat.format("SERIAL-{0}", order.getOrderId(), order.getCustomer().getCustomerId()), "PENDING");
+        // createInventoryItem(command.orderId(),
+        //         MessageFormat.format("SERIAL-{0}", order.getOrderId(), order.getCustomer().getCustomerId()), "PENDING");
 
         Optional<ShipmentJpaEntity> existing = shipments.stream()
                 .filter(s -> s.getTrackingNumber().equals(command.trackingNumber()))

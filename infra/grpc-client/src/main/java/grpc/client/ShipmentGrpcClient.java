@@ -22,7 +22,7 @@ public class ShipmentGrpcClient {
     @PostConstruct
     public void init() {
         this.channel = ManagedChannelBuilder
-                .forAddress("shipment", 6565)
+                .forAddress("order-api", 6565)
                 .usePlaintext()
                 .build();
 
@@ -43,9 +43,9 @@ public class ShipmentGrpcClient {
         }
     }
 
-    public CreateShipmentResponse createShipment(String orderId, String trackingNumber) {
+    public CreateShipmentResponse createShipment(Long orderId, String trackingNumber) {
         CreateShipmentRequest request = CreateShipmentRequest.newBuilder()
-                .setOrderId(Long.parseLong(orderId))
+                .setOrderId(orderId)
                 .setTrackingNumber(trackingNumber)
                 .build();
 
