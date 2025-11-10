@@ -5,8 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
 @SpringBootApplication(
-    scanBasePackages = { "api.inventory", "app.inventory", "domain.inventory", "storage.rdb.inventory", "kafka.inventory", "grpc.client"}
+    scanBasePackages = { "api.inventory", "app.inventory", "domain.inventory", "storage.rdb.inventory", "kafka.inventory", "grpc.client","infra.queue.inventory"}
 )
+
 public class InventoryApiMain {
     public static void main(String[] args) {
         SpringApplication.run(InventoryApiMain.class, args);

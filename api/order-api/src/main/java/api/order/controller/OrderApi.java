@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -77,11 +78,14 @@ public class OrderApi {
                                                 v.getUnitPrice(),
                                                 v.getTotalPrice())).toList(),
                                 new RegisterOrderRes.Payment(
-                                                productOrder.getPayment().getPaymentId(),
-                                                productOrder.getPayment().getAmount(),
-                                                productOrder.getPayment().getPaymentMethod(),
-                                                productOrder.getPayment().getPaymentStatus(),
-                                                productOrder.getPayment().getTransactionId()));
+                                        // @todo payment모듈이랑 연계 수정
+                                                2L,BigDecimal.valueOf(1000),"CARD","TEST","1"
+                                                // productOrder.getPayment().getPaymentId(),
+                                                // productOrder.getPayment().getAmount(),
+                                                // productOrder.getPayment().getPaymentMethod(),
+                                                // productOrder.getPayment().getPaymentStatus(),
+                                                // productOrder.getPayment().getTransactionId())
+                                        ));
         }
 
         @GetMapping("")
@@ -106,11 +110,14 @@ public class OrderApi {
                                                                                 item.getTotalPrice()))
                                                                 .toList(),
                                                 new ProductOrderRes.Payment(
-                                                                order.getPayment().getPaymentId(),
-                                                                order.getPayment().getAmount(),
-                                                                order.getPayment().getPaymentMethod(),
-                                                                order.getPayment().getPaymentStatus(),
-                                                                order.getPayment().getTransactionId())))
+                                                // @todo payment모듈이랑 연계 수정
+                                                        2L,BigDecimal.valueOf(1000),"CARD","TEST","1"
+                                                        // productOrder.getPayment().getPaymentId(),
+                                                        // productOrder.getPayment().getAmount(),
+                                                        // productOrder.getPayment().getPaymentMethod(),
+                                                        // productOrder.getPayment().getPaymentStatus(),
+                                                        // productOrder.getPayment().getTransactionId())
+                                        )))
                                 .toList();
         }
 
@@ -133,11 +140,14 @@ public class OrderApi {
                                                                                 item.getTotalPrice()))
                                                                 .toList(),
                                                 new ProductOrderRes.Payment(
-                                                                order.getPayment().getPaymentId(),
-                                                                order.getPayment().getAmount(),
-                                                                order.getPayment().getPaymentMethod(),
-                                                                order.getPayment().getPaymentStatus(),
-                                                                order.getPayment().getTransactionId())))
+                                                // @todo payment모듈이랑 연계 수정
+                                                        2L,BigDecimal.valueOf(1000),"CARD","TEST","1"
+                                                        // productOrder.getPayment().getPaymentId(),
+                                                        // productOrder.getPayment().getAmount(),
+                                                        // productOrder.getPayment().getPaymentMethod(),
+                                                        // productOrder.getPayment().getPaymentStatus(),
+                                                        // productOrder.getPayment().getTransactionId())
+                                        )))
                                 .toList();
         }
 }

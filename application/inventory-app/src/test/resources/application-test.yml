@@ -14,7 +14,7 @@ spring:
     console:
       enabled: true
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9092
     consumer:
       auto-offset-reset: earliest
     listener:
