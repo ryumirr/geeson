@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import support.messaging.command.OrderStartPayload;
+import support.messaging.command.ShipmentReadyPayload;
 
 @Service
 @RequiredArgsConstructor
@@ -19,12 +20,33 @@ public class KafkaOrderEventProducer implements OrderEventPublisher {
     public void publishOrderCreated(OrderStartPayload event) {
         String topic = "ord-ord-req-succ-event";
         try {
-            kafkaTemplate.send(topic, String.valueOf(event.orderId()), mapper.writeValueAsString(event)).whenComplete((recordMetadata, ex) -> {
-                log.info("published message to topic: {}, offset: {}, partition: {}", topic, recordMetadata.getRecordMetadata().offset(), recordMetadata.getRecordMetadata().partition());
-                if(ex != null) {
-                    log.error("failed to publish message to topic: {}", topic, ex);
-                }
-            });
+            kafkaTemplate.send(topic, String.valueOf(event.orderId()), mapper.writeValueAsString(event))
+                    .whenComplete((recordMetadata, ex) -> {
+                        log.info("published message to topic: {}, offset: {}, partition: {}", topic,
+                                recordMetadata.getRecordMetadata().offset(),
+                                recordMetadata.getRecordMetadata().partition());
+                        if (ex != null) {
+                            log.error("failed to publish message to topic: {}", topic, ex);
+                        }
+                    });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void publishOrderShipped(ShipmentReadyPayload event) {
+        String topic = "ord-ord-ship-succ-event";
+        try {
+            kafkaTemplate.send(topic, String.valueOf(event.orderId()), mapper.writeValueAsString(event))
+                    .whenComplete((recordMetadata, ex) -> {
+                        log.info("published message to topic: {}, offset: {}, partition: {}", topic,
+                                recordMetadata.getRecordMetadata().offset(),
+                                recordMetadata.getRecordMetadata().partition());
+                        if (ex != null) {
+                            log.error("failed to publish message to topic: {}", topic, ex);
+                        }
+                    });
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

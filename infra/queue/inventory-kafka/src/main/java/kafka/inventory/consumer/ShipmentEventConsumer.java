@@ -5,6 +5,7 @@ import grpc.client.InventoryGrpcClient;
 import grpc.client.InventoryReservationGrpcClient;
 import grpc.client.StockMovementGrpcClient;
 import grpc.client.WarehouseGrpcClient;
+import grpc.client.PurchaseOrderGrpcClient;
 import grpc.inventory.AddStockMovementRequest;
 import grpc.inventory.InventoryReservation;
 import grpc.inventory.SelectInventoryResponse;
@@ -13,7 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import support.messaging.command.OrderStartPayload;
-
+import support.messaging.command.ShipmentReadyPayload;
+import domain.inventory.domain.message.InventoryEventPublisher;
 import java.util.List;
 
 @Slf4j
@@ -26,7 +28,8 @@ public class ShipmentEventConsumer {
     private final StockMovementGrpcClient stockMovementGrpcClient;
     private final InventoryGrpcClient inventoryGrpcClient;
     private final WarehouseGrpcClient warehouseGrpcClient;
-    // 필요하면 여기서 Inventory 이벤트 Publisher 주입해서 성공/실패 이벤트 발행
+    private final PurchaseOrderGrpcClient purchaseOrderGrpcClient;
+    private final InventoryEventPublisher inventoryEventPublisher;
 
     /**
      * 주문 생성 성공 이벤트 (ord-ord-req-succ-event)를 consume 해서
@@ -95,23 +98,25 @@ public class ShipmentEventConsumer {
                 // 5. 창고 정보 조회 (감사/로그 용도)
                 warehouseGrpcClient.getWarehouse(inventory.getWarehouseId());
 
-                log.info("✅ Inventory reserved successfully. orderId={}, reservationId={}",
-                        orderId, reservationResult.getReservationId());
+                // @todo reorder_threshold 임계값 이하로 내려가면 이벤트 발생
+                // PurchaseOrder 재고 조회 (재고 조회)
 
-                // 6. TODO: 여기서 "재고 예약 성공" 이벤트 발행 (ord-inv-dec-succ-event 등)
-                // inventoryEventPublisher.publish(new InventoryReserveSucceedEvent(...));
+                log.info("✅ Inventory reserved successfully. orderId={}, reservationId={}",
+                        orderId, reservationResult.getReservationId(), inventory.getWarehouseId());
+
+                inventoryEventPublisher.publishShipmentReady(new ShipmentReadyPayload(orderId));
 
             } else {
                 log.warn("⚠️ Inventory reservation failed. orderId={}, status={}",
                         orderId, reservationResult.getStatus());
 
-                // TODO: 재고 부족/예약 실패 이벤트 발행
-                // inventoryEventPublisher.publish(new InventoryReserveFailedEvent(orderId, ...));
+                // @todo 재고 부족/예약 실패 이벤트 발행
+                // InventoryReserveFailedEvent
             }
 
         } catch (Exception e) {
             log.error("❌ [Inventory] Failed to handle order-created event", e);
-            // TODO: 실패 이벤트 발행 등의 보상 로직
+            // @todo  실패 이벤트 발행 등의 보상 로직
         }
     }
 }
