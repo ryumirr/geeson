@@ -1,12 +1,15 @@
 package domain.order.entity;
 
-import lombok.Getter;
 import jakarta.persistence.*;
-
-import java.time.LocalDateTime;
+import lombok.*;
 import module.enums.ShipmentStatus;
 
+import java.time.LocalDateTime;
+
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "shipments", schema = "order_db")
 public class ShipmentJpaEntity {
@@ -38,17 +41,31 @@ public class ShipmentJpaEntity {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public static ShipmentJpaEntity from(String trackingNumber, ProductOrderJpaEntity order) {
-        ShipmentJpaEntity entity = new ShipmentJpaEntity();
-        entity.order = order;
-        entity.trackingNumber = trackingNumber;
-        entity.status = ShipmentStatus.READY.name();
-        entity.shippedDate = LocalDateTime.now();
-        entity.createdAt = LocalDateTime.now();
-        entity.updatedAt = LocalDateTime.now();
-        return entity;
+    /**
+     * ✅ orderId 접근용 getter (편의 메서드)
+     * ShipmentRes.from(entity) 에서 entity.getOrderId() 바로 사용 가능
+     */
+    public Long getOrderId() {
+        return (order != null) ? order.getOrderId() : null;
     }
 
+    /**
+     * 생성 팩토리 메서드
+     */
+    public static ShipmentJpaEntity from(String trackingNumber, ProductOrderJpaEntity order) {
+        return ShipmentJpaEntity.builder()
+                .order(order)
+                .trackingNumber(trackingNumber)
+                .status(ShipmentStatus.READY.name())
+                .shippedDate(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    /**
+     * 상태 업데이트
+     */
     public void updateStatus(ShipmentStatus status) {
         this.status = status.name();
         this.updatedAt = LocalDateTime.now();

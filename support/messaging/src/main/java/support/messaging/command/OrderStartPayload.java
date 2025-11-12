@@ -16,6 +16,7 @@ public record OrderStartPayload(
     String currency,
     List<OrderItem> items
 ) {
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record OrderItem(
         String productId,
         int quantity,

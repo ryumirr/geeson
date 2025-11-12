@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package grpc.warehouse;
+option java_package = "grpc.warehouse";
+option java_multiple_files = true;
+
+service WarehouseService {
+  // 창고 생성
+  rpc CreateWarehouse (CreateWarehouseRequest) returns (CreateWarehouseResponse);
+
+  // 창고 정보 조회
+  rpc GetWarehouse (GetWarehouseRequest) returns (GetWarehouseResponse);
+
+  // 창고 정보 수정
+  rpc UpdateWarehouse (UpdateWarehouseRequest) returns (UpdateWarehouseResponse);
+}
+
+message CreateWarehouseRequest {
+  string name = 1;
+  string location = 2;
+  int32 capacity = 3;
+}
+
+message CreateWarehouseResponse {
+  int64 warehouseId = 1;
+  string name = 2;
+  string location = 3;
+  int32 capacity = 4;
+  string createdAt = 5;
+  string updatedAt = 6;
+}
+
+message GetWarehouseRequest {
+  int64 warehouseId = 1;
+}
+
+message GetWarehouseResponse {
+  int64 warehouseId = 1;
+  string name = 2;
+  string location = 3;
+  int32 capacity = 4;
+  string createdAt = 5;
+  string updatedAt = 6;
+}
+
+message UpdateWarehouseRequest {
+  int64 warehouseId = 1;
+  string name = 2;
+  string location = 3;
+  int32 capacity = 4;
+}
+
+message UpdateWarehouseResponse {
+  int64 warehouseId = 1;
+  string name = 2;
+  string location = 3;
+  int32 capacity = 4;
+  string createdAt = 5;
+  string updatedAt = 6;
+}

@@ -22,7 +22,7 @@ public class InventoryItemGrpcClient {
     @PostConstruct
     public void init() {
         this.channel = ManagedChannelBuilder
-                .forAddress("grpc-server", 6565)  // docker-compose alias 또는 inventory-api
+                .forAddress("inventory-api", 6566)  // docker-compose alias 또는 inventory-api
                 .usePlaintext()
                 .build();
 

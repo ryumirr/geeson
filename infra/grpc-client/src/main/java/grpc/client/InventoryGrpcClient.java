@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import java.util.concurrent.TimeUnit;
+
 @Service
 public class InventoryGrpcClient {
 
@@ -23,11 +25,12 @@ public class InventoryGrpcClient {
     @PostConstruct
     public void init() {
         this.channel = ManagedChannelBuilder
-                .forAddress("grpc-server", 6565)
+                .forAddress("inventory-api", 6566)
                 .usePlaintext()
                 .build();
 
         this.inventoryStub = InventoryServiceGrpc.newBlockingStub(channel);
+                                                 //.withDeadlineAfter(10, TimeUnit.SECONDS);
     }
 
     /** gRPC 서버에 새로운 Inventory 추가 */
@@ -85,8 +88,10 @@ public class InventoryGrpcClient {
 
         return response.getResultsList().stream()
                 .collect(Collectors.toMap(
-                        InventoryResult::getProductId,
-                        InventoryResult::getAvailable));
+                    InventoryResult::getProductId,
+                    InventoryResult::getAvailable,
+                    (a, b) -> a && b
+                ));
     }
 
     public boolean reserveInventory(Long productId, int quantity) {

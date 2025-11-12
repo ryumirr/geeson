@@ -109,7 +109,7 @@ INSERT INTO inventory_db.inventory (
 ) VALUES (
     1,
     1,
-    100,
+    1000000,
     2,
     0,
     0,

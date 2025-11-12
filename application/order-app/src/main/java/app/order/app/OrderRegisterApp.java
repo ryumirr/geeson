@@ -3,7 +3,9 @@ package app.order.app;
 import app.order.app.OrderListApp;
 import app.order.command.OrderRegisterCommand;
 import app.order.command.OrderRegisterCommand.OrderItem;
+import app.order.event.OrderCreatedEvent;
 import domain.order.entity.*;
+import domain.payment.entity.PaymentJpaEntity;
 import domain.order.message.OrderEventPublisher;
 import app.order.exception.CustomerNotFoundException;
 import app.order.exception.ShippingAddressNotFoundException;
@@ -13,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import support.messaging.command.OrderStartPayload;
 import support.uuid.UuidGenerator;
+import grpc.client.InventoryGrpcClient;
+import grpc.inventory.InventoryItemResponse;
+import grpc.inventory.ReserveInventoriesResponse;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,12 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.context.ApplicationEventPublisher;
+import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 
-import grpc.client.InventoryGrpcClient;
-import grpc.client.InventoryItemGrpcClient;
-import grpc.inventory.InventoryItemResponse;
-import grpc.inventory.ReserveInventoriesResponse;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -34,10 +38,10 @@ public class OrderRegisterApp {
     private final CustomerRepository customerRepository;
     private final ShippingAddressRepository shippingAddressRepository;
     private final UuidGenerator uuidGenerator;
-    private final InventoryItemGrpcClient inventoryItemGrpcClient;
     private final InventoryGrpcClient inventoryGrpcClient;
     private final OrderEventPublisher orderEventPublisher;
     private final OrderListApp orderListApp;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public ProductOrderJpaEntity registerOrder(OrderRegisterCommand command) {
         CustomerJpaEntity customer = customerRepository.findByCustomerId(command.customerId())
@@ -46,6 +50,9 @@ public class OrderRegisterApp {
                 .findByShippingAddressId(command.shippingAddressId())
                 .orElseThrow(() -> new ShippingAddressNotFoundException("shipping address not found"));
 
+        // PaymentJpaEntity payment = paymentRepository.findByOrderId(command.paymentKey())
+        //                 .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
+
         ProductOrderJpaEntity productOrderEntity = ProductOrderJpaEntity.builder()
                 .orderId(uuidGenerator.nextId())
                 .customer(customer)
@@ -53,7 +60,7 @@ public class OrderRegisterApp {
                 .status("ORDERED")
                 .orderDate(LocalDateTime.now())
                 .shippingAddress(shippingAddress)
-                .payment(null)
+               // .payment(payment)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .orderItems(new ArrayList<>())
@@ -70,37 +77,24 @@ public class OrderRegisterApp {
                         .build())
                 .toList();
 
-        PaymentRequestJpaEntity paymentRequestEntity = PaymentRequestJpaEntity.builder()
-                .paymentId(uuidGenerator.nextId())
-                .orderId(productOrderEntity.getOrderId())
-                .order(productOrderEntity)
-                .amount(productOrderEntity.getTotalPrice())
-                .paymentMethod(String.valueOf(command.paymentMethodId()))
-                .transactionId(command.paymentKey())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-
         productOrderEntity.getOrderItems().addAll(orderItemEntityList); // 양방향 세팅
-
-        productOrderEntity.registerPayment(paymentRequestEntity); // 등록
 
         // 이제 모두 설정된 상태로 한번에 save
         productOrderRepository.save(productOrderEntity); // cascade 설정되어 있어야 제대로 동작
 
-        orderEventPublisher.publishOrderCreated(new OrderStartPayload(
+        applicationEventPublisher.publishEvent(new OrderCreatedEvent(new OrderStartPayload(
                 String.valueOf(productOrderEntity.getOrderId()),
                 String.valueOf(customer.getCustomerId()),
-                paymentRequestEntity.getPaymentMethod(),
-                paymentRequestEntity.getTransactionId(),
-                String.valueOf(paymentRequestEntity.getTransactionId()),
+                "1",// String.valueOf(payment.getPaymentId()),
+                "transactionId-test",
+                //String.valueOf(paymentEntity.getTransactionId()),
+                "paymentKey-test",
                 productOrderEntity.getTotalPrice(),
                 "KRW",
                 orderItemEntityList.stream().map(v -> new OrderStartPayload.OrderItem(
                         String.valueOf(v.getProductId()),
                         v.getQuantity(),
-                        v.getUnitPrice())).toList()));
-
+                        v.getUnitPrice())).toList())));
         return productOrderEntity;
     }
 
@@ -110,7 +104,8 @@ public class OrderRegisterApp {
             // 재고 확인
             Map<Long, Boolean> checked = orderListApp.checkInventories(productQuantities);
             if (checked.values().stream().anyMatch(avail -> !avail)) {
-                throw new IllegalArgumentException("재고 부족 상품 존재");
+               // log.warn("재고 부족 상품 존재: {}", avail);
+                // throw new IllegalArgumentException("재고 부족 상품 존재");
             }
             Map<Long, Integer> newProductQuantities = productQuantities.stream()
                     .collect(Collectors.toMap(

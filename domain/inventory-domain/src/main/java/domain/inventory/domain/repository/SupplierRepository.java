@@ -1,7 +1,8 @@
 package domain.inventory.domain.repository;
 
-import org.springframework.stereotype.Repository;
+import domain.inventory.domain.entity.SupplierJpaEntity;
+import java.util.Optional;
 
-@Repository
 public interface SupplierRepository {
+    Optional<SupplierJpaEntity> findById(Long id);
 }

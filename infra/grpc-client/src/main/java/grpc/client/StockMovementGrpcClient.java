@@ -8,7 +8,9 @@ import grpc.inventory.GetStockMovementByReferenceRequest;
 import grpc.inventory.GetStockMovementByReferenceResponse;
 import grpc.inventory.StockMovementServiceGrpc;
 import grpc.inventory.StockMovementServiceGrpc.StockMovementServiceBlockingStub;
+import support.messaging.command.StockOutCreatedPayload;
 
+//import domain.inventory.domain.message.StockOutCreatedEventPublisher;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -23,11 +25,12 @@ public class StockMovementGrpcClient {
 
     private ManagedChannel channel;
     private StockMovementServiceBlockingStub stockMovementStub;
+   // private StockOutCreatedEventPublisher stockOutCreatedEventPublisher;
 
     @PostConstruct
     public void init() {
         this.channel = ManagedChannelBuilder
-                .forAddress("grpc-server", 6565)
+                .forAddress("inventory-api", 6566)
                 .usePlaintext()
                 .build();
 
@@ -46,7 +49,19 @@ public class StockMovementGrpcClient {
     // ===== Add =====
     public AddStockMovementResponse addStockMovement(AddStockMovementRequest request) {
         try {
-            return stockMovementStub.addStockMovement(request);
+            AddStockMovementResponse response = stockMovementStub.addStockMovement(request);
+            // test
+            // stockOutCreatedEventPublisher.publishStockOutCreatedEvent(
+            //         new StockOutCreatedPayload(
+            //                 response.getStockMovement().getMovementId(), // ✅ nested getter
+            //                 request.getInventoryId(),
+            //                 "OUT",
+            //                 request.getQuantity(),
+            //                 request.getReferenceId(),
+            //                 request.getDescription()
+            //         )
+            // );
+            return response;
         } catch (StatusRuntimeException e) {
             log.error("gRPC call addStockMovement failed: {}", e.getStatus(), e);
             throw e;
