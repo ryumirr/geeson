@@ -17,6 +17,7 @@ spring:
     listener:
       ack-mode: record
       missing-topics-fatal: false
+      concurrency: 1
   redis:
     redisson:
       config: |

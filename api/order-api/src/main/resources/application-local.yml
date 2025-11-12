@@ -12,14 +12,12 @@ spring:
   kafka:
     bootstrap-servers: kafka:9092
     consumer:
-      group-id: order-consumer-group
+      group-id: order-consumer-group-v2
       auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     listener:
       ack-mode: record
       missing-topics-fatal: false
-
+      concurrency: 1
   redis:
     redisson:
       config: |

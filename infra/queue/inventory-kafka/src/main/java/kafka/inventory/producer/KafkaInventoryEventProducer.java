@@ -45,7 +45,9 @@ public class KafkaInventoryEventProducer implements InventoryEventPublisher {
                         } else {
                             System.out.println("[Kafka] Published event: " + event);
                         }
-                    });
+                    })
+                    .get();
+            kafkaTemplate.flush(); 
         } catch (Exception e) {
             throw new RuntimeException("Failed to serialize ShipmentReadyPayload", e);
         }
