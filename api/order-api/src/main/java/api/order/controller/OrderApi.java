@@ -78,14 +78,11 @@ public class OrderApi {
                                                 v.getUnitPrice(),
                                                 v.getTotalPrice())).toList(),
                                 new RegisterOrderRes.Payment(
-                                        // @todo payment모듈이랑 연계 수정
-                                                2L,BigDecimal.valueOf(1000),"CARD","TEST","1"
-                                                // productOrder.getPayment().getPaymentId(),
-                                                // productOrder.getPayment().getAmount(),
-                                                // productOrder.getPayment().getPaymentMethod(),
-                                                // productOrder.getPayment().getPaymentStatus(),
-                                                // productOrder.getPayment().getTransactionId())
-                                        ));
+                                                productOrder.getPayment().getPaymentId(),
+                                                productOrder.getPayment().getAmount(),
+                                                productOrder.getPayment().getPaymentMethod(),
+                                                productOrder.getPayment().getPaymentStatus(),
+                                                productOrder.getPayment().getTransactionId()));
         }
 
         @GetMapping("")
@@ -110,14 +107,11 @@ public class OrderApi {
                                                                                 item.getTotalPrice()))
                                                                 .toList(),
                                                 new ProductOrderRes.Payment(
-                                                // @todo payment모듈이랑 연계 수정
-                                                        2L,BigDecimal.valueOf(1000),"CARD","TEST","1"
-                                                        // productOrder.getPayment().getPaymentId(),
-                                                        // productOrder.getPayment().getAmount(),
-                                                        // productOrder.getPayment().getPaymentMethod(),
-                                                        // productOrder.getPayment().getPaymentStatus(),
-                                                        // productOrder.getPayment().getTransactionId())
-                                        )))
+                                                                order.getPayment().getPaymentId(),
+                                                                order.getPayment().getAmount(),
+                                                                order.getPayment().getPaymentMethod(),
+                                                                order.getPayment().getPaymentStatus(),
+                                                                order.getPayment().getTransactionId())))
                                 .toList();
         }
 
@@ -140,14 +134,11 @@ public class OrderApi {
                                                                                 item.getTotalPrice()))
                                                                 .toList(),
                                                 new ProductOrderRes.Payment(
-                                                // @todo payment모듈이랑 연계 수정
-                                                        2L,BigDecimal.valueOf(1000),"CARD","TEST","1"
-                                                        // productOrder.getPayment().getPaymentId(),
-                                                        // productOrder.getPayment().getAmount(),
-                                                        // productOrder.getPayment().getPaymentMethod(),
-                                                        // productOrder.getPayment().getPaymentStatus(),
-                                                        // productOrder.getPayment().getTransactionId())
-                                        )))
+                                                                order.getPayment().getPaymentId(),
+                                                                order.getPayment().getAmount(),
+                                                                order.getPayment().getPaymentMethod(),
+                                                                order.getPayment().getPaymentStatus(),
+                                                                order.getPayment().getTransactionId())))
                                 .toList();
         }
 }
