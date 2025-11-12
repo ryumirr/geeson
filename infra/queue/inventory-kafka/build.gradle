@@ -11,6 +11,7 @@ dependencies {
 
     implementation project(":application:inventory-app")
     implementation project(":domain:inventory-domain")
+    implementation project(":domain:order-domain")
 
     implementation project(":proto")
     implementation project(":infra:grpc-client")

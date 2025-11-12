@@ -3,6 +3,7 @@ package app.order.app;
 import app.order.app.OrderListApp;
 import app.order.command.OrderRegisterCommand;
 import app.order.command.OrderRegisterCommand.OrderItem;
+import app.order.event.OrderCreatedEvent;
 import domain.order.entity.*;
 import domain.payment.entity.PaymentJpaEntity;
 import domain.order.message.OrderEventPublisher;
@@ -14,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import support.messaging.command.OrderStartPayload;
 import support.uuid.UuidGenerator;
+import grpc.client.InventoryGrpcClient;
+import grpc.inventory.InventoryItemResponse;
+import grpc.inventory.ReserveInventoriesResponse;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -21,11 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.context.ApplicationEventPublisher;
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
-import grpc.client.InventoryGrpcClient;
-import grpc.inventory.InventoryItemResponse;
-import grpc.inventory.ReserveInventoriesResponse;
 
 @Slf4j
 @Service
@@ -39,6 +41,7 @@ public class OrderRegisterApp {
     private final InventoryGrpcClient inventoryGrpcClient;
     private final OrderEventPublisher orderEventPublisher;
     private final OrderListApp orderListApp;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public ProductOrderJpaEntity registerOrder(OrderRegisterCommand command) {
         CustomerJpaEntity customer = customerRepository.findByCustomerId(command.customerId())
@@ -79,7 +82,7 @@ public class OrderRegisterApp {
         // 이제 모두 설정된 상태로 한번에 save
         productOrderRepository.save(productOrderEntity); // cascade 설정되어 있어야 제대로 동작
 
-        orderEventPublisher.publishOrderCreated(new OrderStartPayload(
+        applicationEventPublisher.publishEvent(new OrderCreatedEvent(new OrderStartPayload(
                 String.valueOf(productOrderEntity.getOrderId()),
                 String.valueOf(customer.getCustomerId()),
                 "1",// String.valueOf(payment.getPaymentId()),
@@ -91,8 +94,7 @@ public class OrderRegisterApp {
                 orderItemEntityList.stream().map(v -> new OrderStartPayload.OrderItem(
                         String.valueOf(v.getProductId()),
                         v.getQuantity(),
-                        v.getUnitPrice())).toList()));
-
+                        v.getUnitPrice())).toList())));
         return productOrderEntity;
     }
 
