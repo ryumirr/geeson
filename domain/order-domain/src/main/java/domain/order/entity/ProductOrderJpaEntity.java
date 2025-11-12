@@ -1,12 +1,8 @@
 package domain.order.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Builder;
-
+import lombok.*;
+import org.springframework.data.domain.Persistable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,12 +14,14 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Builder
-public class ProductOrderJpaEntity {
+public class ProductOrderJpaEntity implements Persistable<Long> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
     private Long orderId;
+
+    @Version
+    private long version; // 낙관적 에러 방지용
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
@@ -43,26 +41,23 @@ public class ProductOrderJpaEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItemJpaEntity> orderItems = new ArrayList<>();
 
-    // ✅ 도메인 생성자 (Builder로 대체)
-    @Builder(builderMethodName = "createBuilder")
-    public static ProductOrderJpaEntity create(
-            CustomerJpaEntity customer,
-            BigDecimal totalPrice,
-            String status,
-            LocalDateTime orderDate,
-            ShippingAddressJpaEntity shippingAddress,
-            List<OrderItemJpaEntity> orderItems
-    ) {
-        ProductOrderJpaEntity order = new ProductOrderJpaEntity();
-        order.customer = customer;
-        order.totalPrice = totalPrice;
-        order.status = status;
-        order.orderDate = orderDate;
-        order.shippingAddress = shippingAddress;
-        if (orderItems != null) order.orderItems.addAll(orderItems);
-        order.createdAt = LocalDateTime.now();
-        order.updatedAt = LocalDateTime.now();
-        return order;
+    // Persistable 구현 부분(Snowflake id사용 위하여 임시추가)
+    @Transient
+    private boolean isNew = true;
+
+    @Override
+    public Long getId() {
+        return this.orderId;
+    }
+
+    @Override
+    public boolean isNew() {
+        return this.isNew;
+    }
+
+    @PostPersist
+    public void markNotNew() {
+        this.isNew = false;
     }
 
     public void changeStatus(String newStatus) {
@@ -75,7 +70,8 @@ public class ProductOrderJpaEntity {
     }
 
     public void addOrderItem(OrderItemJpaEntity item) {
-        if(this.orderItems == null) this.orderItems = new ArrayList<>();
+        if (this.orderItems == null)
+            this.orderItems = new ArrayList<>();
         this.orderItems.add(item);
     }
 }

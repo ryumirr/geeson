@@ -42,7 +42,7 @@ public class ShipmentRes {
     public static ShipmentRes from(ShipmentJpaEntity entity) {
         return new ShipmentRes(
                 entity.getShipmentId(),
-                entity.getOrder().getOrderId(),
+                entity.getOrderId(),
                 entity.getTrackingNumber(),
                 entity.getStatus(),
                 entity.getShippedDate(),

@@ -9,6 +9,8 @@ import org.springframework.kafka.annotation.EnableKafka;
   scanBasePackages = {
     "api.order",
     "app.order",
+    "app.order.event",
+    "app.order.event.handlers",
     "domain.order",
     "storage.rdb.order",
     "kafka.order",              

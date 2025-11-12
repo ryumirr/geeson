@@ -104,7 +104,8 @@ public class ShipmentEventConsumer {
                 log.info("✅ Inventory reserved successfully. orderId={}, reservationId={}",
                         orderId, reservationResult.getReservationId(), inventory.getWarehouseId());
 
-                inventoryEventPublisher.publishShipmentReady(new ShipmentReadyPayload(orderId));
+                // @todo Outbox테이블 추가하여 교체 필요할 듯 ㅋㅋ
+                //inventoryEventPublisher.publishShipmentReady(new ShipmentReadyPayload(orderId));
 
             } else {
                 log.warn("⚠️ Inventory reservation failed. orderId={}, status={}",
