@@ -108,18 +108,25 @@ public class ShipmentEventConsumer {
                                 .build()
                 );
 
-                // 5. 창고 정보 조회 (감사/로그 용도)
-                warehouseGrpcClient.getWarehouse(inventory.getWarehouseId());
+                // 5. 창고 정보 조회
+                var warehouseResponse = warehouseGrpcClient.getWarehouse(inventory.getWarehouseId());
+                log.info("🏭 Warehouse info. warehouseId={}, name={}, location={}",
+                        warehouseResponse.getWarehouseId(), warehouseResponse.getName(), warehouseResponse.getLocation());
 
-                // @todo reorder_threshold 임계값 이하로 내려가면 이벤트 발생
-                // PurchaseOrder 재고 조회 (재고 조회)
+                // 6. 해당 창고의 발주 정보 조회
+                var purchaseOrdersResponse = purchaseOrderGrpcClient.listPurchaseOrders(
+                        null, null, warehouseResponse.getWarehouseId(), null);
+                log.info("📋 Purchase orders for warehouseId={}. count={}",
+                        warehouseResponse.getWarehouseId(), purchaseOrdersResponse.getPurchaseOrdersCount());
 
                 idempotencyService.markAsCompleted(idempotencyKey);
                 log.info("✅ Inventory reserved successfully. orderId={}, reservationId={}",
                         orderId, reservationResult.getReservationId(), inventory.getWarehouseId());
 
-                // @todo Outbox테이블 추가하여 교체 필요할 듯 ㅋㅋ
-                //inventoryEventPublisher.publishShipmentReady(new ShipmentReadyPayload(orderId));
+                // 7. OrderShippedEvent 발행 → Order 서비스가 주문 상태를 SHIPPED로 업데이트
+                // @todo Outbox 패턴으로 교체 필요
+                inventoryEventPublisher.publishShipmentReady(new ShipmentReadyPayload(orderId));
+                log.info("🚀 ShipmentReady event published. orderId={}", orderId);
 
             } else {
                 log.warn("⚠️ Inventory reservation failed. orderId={}, status={}",
