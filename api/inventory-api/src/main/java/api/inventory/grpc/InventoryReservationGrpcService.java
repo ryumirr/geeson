@@ -1,5 +1,6 @@
 package api.inventory.grpc;
 
+import app.inventory.app.IdempotencyService;
 import app.inventory.app.InventoryReservationApp;
 import app.inventory.command.InventoryReservationCommand;
 import domain.inventory.domain.entity.InventoryReservationJpaEntity;
@@ -21,12 +22,26 @@ public class InventoryReservationGrpcService extends InventoryReservationService
 
     private final InventoryReservationApp reservationApp;
     private final UuidGenerator uuidGenerator;
+    private final IdempotencyService idempotencyService;
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     @Override
     public void createReservation(CreateReservationRequest request,
                                   StreamObserver<CreateReservationResponse> responseObserver) {
+        String idempotencyKey = "RESERVATION-ORDER-" + request.getOrderId();
         try {
+            if (idempotencyService.isAlreadyProcessed(idempotencyKey)) {
+                var existing = reservationApp.getByOrderId(request.getOrderId());
+                if (!existing.isEmpty()) {
+                    responseObserver.onNext(CreateReservationResponse.newBuilder()
+                        .setReservation(toProto(existing.get(0)))
+                        .build());
+                    responseObserver.onCompleted();
+                    return;
+                }
+            }
+
+            idempotencyService.markAsProcessing(idempotencyKey, "grpc-createReservation");
 
             Integer ttlSeconds = request.getTtlSeconds() > 0 ? request.getTtlSeconds() : null;
 
@@ -40,15 +55,19 @@ public class InventoryReservationGrpcService extends InventoryReservationService
                 )
             );
 
+            idempotencyService.markAsCompleted(idempotencyKey);
+
             CreateReservationResponse response = CreateReservationResponse.newBuilder()
                 .setReservation(toProto(entity))
                 .build();
             responseObserver.onNext(response);
             responseObserver.onCompleted();
         } catch (NotEnoughInventoryException e) {
+            idempotencyService.markAsFailed(idempotencyKey, e.getMessage());
             responseObserver.onError(Status.FAILED_PRECONDITION
                 .withDescription(e.getMessage()).asRuntimeException());
         } catch (Exception e) {
+            idempotencyService.markAsFailed(idempotencyKey, e.getMessage());
             responseObserver.onError(Status.INTERNAL
                 .withDescription("Failed to create reservation").asRuntimeException());
         }

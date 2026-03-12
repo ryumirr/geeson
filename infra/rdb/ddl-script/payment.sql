@@ -97,6 +97,15 @@ CREATE TABLE settlements (
                              FOREIGN KEY (payment_id) REFERENCES payments(payment_id)
 );
 
+CREATE TABLE idempotency_log (
+    idempotency_key VARCHAR(128) PRIMARY KEY,
+    endpoint VARCHAR(255) NOT NULL,
+    request_hash TEXT,
+    status VARCHAR(32) NOT NULL,
+    response_data TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 CREATE TABLE receipts (
                           receipt_id BIGINT  PRIMARY KEY,
                           payment_id BIGINT NOT NULL,

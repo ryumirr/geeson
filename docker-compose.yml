@@ -137,7 +137,7 @@ services:
 
   order-api:
     container_name: order-api
-    image: ryumirr1/order-api:0.0.1
+    image: jeongjin984/order-api:0.0.1
     environment:
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     ports:
@@ -161,7 +161,6 @@ services:
       - ./logs:/logs
 
   payment-api:
-    platform: linux/amd64
     image: jeongjin984/payment-api:0.0.1
     container_name: payment-api
     depends_on:
@@ -181,7 +180,6 @@ services:
       - ./logs:/logs
 
   auth-api:
-    platform: linux/amd64
     image: jeongjin984/auth-api:0.0.1
     container_name: auth-api
     environment:
@@ -209,7 +207,7 @@ services:
       - ./logs:/app/logs
 
   inventory-api:
-    image: ryumirr1/inventory-api:0.0.1
+    image: jeongjin984/inventory-api:0.0.1
     container_name: inventory-api
     ports:
       - "9095:9095"

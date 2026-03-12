@@ -1,3 +1,207 @@
+# Geeson – Microservice-Based E-Commerce Platform
+
+Comment : I’m always experimenting and committing for personal development purposes (still a work in progress).
+Thanks for stopping by! ~_~
+
+## 📋 Overview
+
+**Geeson** is a microservice-based e-commerce platform that separates core business domains — such as order, payment, inventory, and product — into independent, self-contained services.  
+Each service communicates asynchronously via **Apache Kafka** and synchronously via **gRPC** to ensure consistency and scalability.
+
+---
+
+## Architecture
+
+### Tech Stack
+| Category | Stack |
+|-----------|--------|
+| **Language** | Java 21 |
+| **Frameworks** | Spring Boot 3.4.5, Spring Cloud 2023.0.1 |
+| **Build Tool** | Gradle 8.x (Wrapper included) |
+| **Database** | MySQL 8.0 |
+| **Messaging** | Apache Kafka 3.8.1 |
+| **Cache** | Redis 7.x |
+| **Logging & Monitoring** | Fluentd + Elasticsearch + Kibana (EFK Stack) |
+| **Containerization** | Docker & Docker Compose |
+| **Protocol** | REST & gRPC |
+
+---
+
+### Service Structure
+```
+geeson/
+├── api/                     # API Services
+│   ├── inventory-api/       # Inventory Management API
+│   ├── order-api/           # Order Management API
+│   ├── payment-api/         # Payment Management API
+│   └── product-api/         # Product Management API
+│
+├── application/             # Application Services (Use Cases)
+│   ├── inventory-app/
+│   ├── order-app/
+│   └── payment-app/
+│
+├── domain/                  # Domain Models & Entities
+│   ├── inventory-domain/
+│   ├── order-domain/
+│   ├── payment-domain/
+│   └── product-domain/
+│
+├── infra/                   # Infrastructure Modules
+│   ├── rdb/                 # MySQL & JPA
+│   ├── queue/               # Kafka Producer/Consumer
+│   ├── redis/               # Redis & Redisson Lock
+│   └── fluentd/             # Logging Aggregator (EFK)
+│
+├── support/                 # Shared Utilities
+│   ├── messaging/           # Kafka DTOs & Commands
+│   ├── logging/             # Log Formatters / Interceptors
+│   ├── web-api/             # Exception Handling / Filters
+│   └── uuid/                # Distributed UUID Generator
+│
+└── commander/               # Admin Dashboard (Spring + Thymeleaf)
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Java 21+
+- Docker & Docker Compose
+- Gradle Wrapper (`./gradlew`)
+
+---
+
+### 1️⃣ Clone Repository
+```bash
+git clone <repository-url>
+cd geeson
+```
+
+---
+
+### 2️⃣ Build the Project
+```bash
+./gradlew clean build
+```
+
+This generates all service jars under each `build/libs/` folder.
+
+---
+
+### 3️⃣ Launch with Docker Compose
+```bash
+docker compose up -d
+```
+
+This command starts the entire system including:
+-  **MySQL 8.0** — port `3306`
+-  **Apache Kafka + Zookeeper** — ports `9092`, `2181`
+-  **Redis 7.x** — port `6379`
+-  **Microservices (Inventory, Order, Payment, Product)** — each with its own port
+-  **Elasticsearch 8.15.3**
+-  **Kibana 8.15.3**
+-  **Fluentd (EFK Logging Pipeline)**
+
+---
+
+## Local Development
+
+### 1️⃣ Create Schemas
+Run `.sql` DDL files for each domain:
+```bash
+source infra/rdb/ddl-script/*.sql
+```
+
+### 2️⃣ Run Individual Services
+```bash
+./gradlew :api:order-api:bootRun --spring.profiles.active=local
+./gradlew :api:payment-api:bootRun --spring.profiles.active=local
+./gradlew :api:inventory-api:bootRun --spring.profiles.active=local
+```
+
+---
+
+## 🔄 Messaging & gRPC Architecture
+
+| Interaction Type | Protocol | Example |
+|------------------|-----------|----------|
+| Asynchronous Event | **Kafka** | `ord-inv-dec-cmd`, `inv-stock-out-event` |
+| Synchronous RPC | **gRPC** | `WarehouseGrpcService`, `StockMovementGrpcService` |
+
+Each service defines its `.proto` contract in `support/messaging/` and communicates through generated stubs.
+
+---
+
+## 📊 Logging & Monitoring
+
+### EFK Stack
+| Component | Role |
+|------------|------|
+| **Fluentd** | Collects structured logs from all containers |
+| **Elasticsearch** | Stores logs for search & analytics |
+| **Kibana** | Visualizes system and service logs |
+
+Access Kibana UI:  
+**http://localhost:5601**
+
+> Note: Fluentd is customized to support Elasticsearch 7.x via Faraday 1.10.3 and elasticsearch-ruby 7.17.8.
+
+---
+
+## Databases
+Each domain owns its own schema for isolation:
+
+| Schema | Purpose |
+|---------|----------|
+| `order_db` | Order details & events |
+| `payment_db` | Payment transactions |
+| `inventory_db` | Warehouses & stock movements |
+| `product_db` | Product catalog |
+
+---
+
+## Testing
+```bash
+# Run all tests
+./gradlew test
+
+# Run tests for specific service
+./gradlew :api:inventory-api:test
+```
+
+---
+
+## Deployment Notes
+
+- Each service runs on its own **dedicated port** (e.g., Order 9091, Inventory 9095, Payment 9097).
+- For production, use environment-specific profiles (`--spring.profiles.active=prod`).
+- Persistent data is stored in Docker volumes.
+
+> To preserve data:  
+> use `docker compose down` (without `-v`).  
+>  
+> To fully reset:  
+> use `docker compose down -v`.
+
+---
+
+## License
+Distributed under the **MIT License**.
+
+---
+
+## Support
+For issues or questions, please open a GitHub issue.  
+PRs for new modules or architecture improvements are always welcome 💡
+
+
+
+--------------
+
+
+
 # Geeson - 마이크로서비스 기반 이커머스 플랫폼
 
 ## 📋 프로젝트 개요

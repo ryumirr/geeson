@@ -1,5 +1,6 @@
 package kafka.payment.consumer;
 
+import app.payment.app.IdempotencyService;
 import app.payment.app.PaymentConfirmApp;
 import app.payment.app.PaymentMethodRegisterApp;
 import app.payment.app.PaymentMethodSelectApp;
@@ -28,6 +29,7 @@ import java.util.UUID;
 public class KafkaOrderEventConsumer {
     private final PaymentRegisterApp paymentRegisterApp;
     private final PaymentConfirmApp paymentConfirmApp;
+    private final IdempotencyService idempotencyService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final KafkaTemplate<String, String> kafkaTemplate;
@@ -52,6 +54,13 @@ public class KafkaOrderEventConsumer {
             return;
         }
 
+        if (idempotencyService.isAlreadyProcessed(payload.getSagaId())) {
+            log.info("Duplicate payment request, skip. sagaId={}", payload.getSagaId());
+            return;
+        }
+
+        idempotencyService.markAsProcessing(payload.getSagaId(), "ord-pay-req-cmd");
+
         try {
             PaymentMethodJpaEntity paymentMethod = paymentMethodSelectApp.getByPaymentMethodId(Long.valueOf(payload.getPaymentMethodId()));
             TransactionJpaEntity transaction = paymentConfirmApp.tossPaymentRequest(payload.getPaymentKey(), payload.getOrderId(), payload.getAmount());
@@ -67,6 +76,7 @@ public class KafkaOrderEventConsumer {
             );
 
             kafkaTemplate.send("ord-pay-req-succ-evt", objectMapper.writeValueAsString(paymentSucceed));
+            idempotencyService.markAsCompleted(payload.getSagaId());
         } catch (Exception e) {
             log.error("failed to register payment: {}", e.getMessage());
             PaymentFailedEvent paymentFailed = new PaymentFailedEvent(
@@ -80,6 +90,7 @@ public class KafkaOrderEventConsumer {
 
             try {
                 kafkaTemplate.send("ord-pay-req-fail-evt", objectMapper.writeValueAsString(paymentFailed));
+                idempotencyService.markAsFailed(payload.getSagaId(), e.getMessage());
             } catch (JsonProcessingException ex) {
                 log.error("failed to send failed event: {}", ex.getMessage());
             }

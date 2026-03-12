@@ -6,5 +6,5 @@ public interface GetStockMovementByReferenceUseCase {
     /**
      * referenceId 기준으로 이동 내역 단건 조회
      */
-    StockMovementJpaEntity findByReferenceId(Long referenceId);
+    StockMovementJpaEntity findByReferenceId(String referenceId);
 }

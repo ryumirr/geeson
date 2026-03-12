@@ -22,5 +22,5 @@ public interface StockMovementRepository {
      */
     List<StockMovementJpaEntity> findByInventory_InventoryId(Long referenceId);
 
-    public StockMovementJpaEntity findByReferenceId(Long referenceId);
+    public StockMovementJpaEntity findByReferenceId(String referenceId);
 }
