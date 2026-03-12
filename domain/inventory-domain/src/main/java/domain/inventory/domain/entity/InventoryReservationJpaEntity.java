@@ -6,12 +6,9 @@ import module.enums.ReservationStatus;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.cglib.core.Local;
-
 @Entity
 @Table(name = "inventory_reservations")
+@Access(AccessType.FIELD)
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,6 +16,7 @@ import org.springframework.cglib.core.Local;
 public class InventoryReservationJpaEntity {
 
     @Id
+    @Column(name = "reservation_id")
     private Long reservationId;
 
     @ManyToOne(fetch = FetchType.LAZY)

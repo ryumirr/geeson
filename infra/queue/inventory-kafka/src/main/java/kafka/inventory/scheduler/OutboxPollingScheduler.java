@@ -19,7 +19,7 @@ public class OutboxPollingScheduler {
     private final InventoryEventPublisher inventoryEventPublisher;
     private final ObjectMapper objectMapper;
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 5000) // @todo 분산락(ShedLock or CDC등) 변경 필요 !!! 현재 서버 하나에만 적용되는 (2026.03.13) 
     @Transactional
     public void pollAndPublish() {
         var events = outboxRepository.findPendingEvents();

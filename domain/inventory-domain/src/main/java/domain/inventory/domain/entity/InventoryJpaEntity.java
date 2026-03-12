@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "inventory")
+@Access(AccessType.FIELD)
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -66,6 +67,7 @@ public class InventoryJpaEntity {
     }
 
     /** 가용 재고 계산 */
+    @Transient
     public int getAvailableQuantity() {
         return (this.totalQuantity != null ? this.totalQuantity.intValue() : 0)
              - (this.reservedQuantity != null ? this.reservedQuantity.intValue() : 0);
