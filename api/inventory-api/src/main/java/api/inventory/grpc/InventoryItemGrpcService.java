@@ -1,5 +1,6 @@
 package api.inventory.grpc;
 
+import app.inventory.app.IdempotencyService;
 import app.inventory.port.in.CreateInventoryItemUseCase;
 import app.inventory.port.in.GetInventoryItemUseCase;
 import grpc.inventory.CreateInventoryItemRequest;
@@ -19,11 +20,33 @@ public class InventoryItemGrpcService extends InventoryItemServiceGrpc.Inventory
 
     private final CreateInventoryItemUseCase createInventoryItemUseCase;
     private final GetInventoryItemUseCase getInventoryItemUseCase;
+    private final IdempotencyService idempotencyService;
 
     @Override
     public void createInventoryItem(CreateInventoryItemRequest request,
                                     StreamObserver<InventoryItemResponse> responseObserver) {
+        String idempotencyKey = "INVENTORY-ITEM-" + request.getSerialNumber();
         try {
+            if (idempotencyService.isAlreadyProcessed(idempotencyKey)) {
+                var existing = getInventoryItemUseCase.getBySerialNumber(
+                    new GetInventoryItemUseCase.GetInventoryItemBySerialCommand(request.getSerialNumber())
+                );
+                InventoryItem item = InventoryItem.newBuilder()
+                        .setInventoryItemId(existing.inventoryItemId())
+                        .setInventoryId(existing.inventoryId())
+                        .setBatchLotId(existing.batchLotId() != null ? existing.batchLotId() : 0)
+                        .setSerialNumber(existing.serialNumber())
+                        .setStatus(existing.status())
+                        .setCreatedAt(existing.createdAt())
+                        .setUpdatedAt(existing.updatedAt())
+                        .build();
+                responseObserver.onNext(InventoryItemResponse.newBuilder().setItem(item).build());
+                responseObserver.onCompleted();
+                return;
+            }
+
+            idempotencyService.markAsProcessing(idempotencyKey, "grpc-createInventoryItem");
+
             var result = createInventoryItemUseCase.handle(
                 new CreateInventoryItemUseCase.CreateInventoryItemCommand(
                     request.getInventoryId(),
@@ -31,6 +54,8 @@ public class InventoryItemGrpcService extends InventoryItemServiceGrpc.Inventory
                     request.getStatus()
                 )
             );
+
+            idempotencyService.markAsCompleted(idempotencyKey);
 
             InventoryItem item = InventoryItem.newBuilder()
                     .setInventoryItemId(result.inventoryItemId())
@@ -45,8 +70,10 @@ public class InventoryItemGrpcService extends InventoryItemServiceGrpc.Inventory
             responseObserver.onNext(InventoryItemResponse.newBuilder().setItem(item).build());
             responseObserver.onCompleted();
         } catch (IllegalArgumentException e) {
+            idempotencyService.markAsFailed(idempotencyKey, e.getMessage());
             responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
         } catch (Exception e) {
+            idempotencyService.markAsFailed(idempotencyKey, e.getMessage());
             responseObserver.onError(Status.INTERNAL.withDescription("Unexpected server error").asRuntimeException());
         }
     }

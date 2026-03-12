@@ -30,8 +30,8 @@ public class StockMovementJpaRepository implements StockMovementRepository {
     }
 
     @Override
-    public StockMovementJpaEntity findByReferenceId(Long referenceId) {
-        return repository.findByReferenceId(Long.toString(referenceId));
+    public StockMovementJpaEntity findByReferenceId(String referenceId) {
+        return repository.findByReferenceId(referenceId);
     }
 }
 

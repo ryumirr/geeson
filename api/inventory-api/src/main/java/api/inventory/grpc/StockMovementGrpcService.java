@@ -15,14 +15,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import module.enums.MovementType;
 
-import java.util.List;
-
+import app.inventory.app.IdempotencyService;
 import app.inventory.dto.AddStockMovementCommand;
 import app.inventory.dto.StockMovementResult;
 import app.inventory.port.in.AddStockMovementUseCase;
 import app.inventory.port.in.GetStockMovementsByInventoryUseCase;
 import domain.inventory.domain.entity.StockMovementJpaEntity;
+import domain.inventory.domain.message.InventoryEventPublisher;
 import app.inventory.port.in.GetStockMovementByReferenceUseCase;
+import support.messaging.command.StockOutCreatedPayload;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -32,11 +33,25 @@ public class StockMovementGrpcService extends StockMovementServiceGrpc.StockMove
     private final AddStockMovementUseCase addStockMovementUseCase;
     private final GetStockMovementsByInventoryUseCase getStockMovementsByInventoryUseCase;
     private final GetStockMovementByReferenceUseCase getStockMovementByReferenceUseCase;
+    private final IdempotencyService idempotencyService;
+    private final InventoryEventPublisher inventoryEventPublisher;
 
     @Override
     public void addStockMovement(AddStockMovementRequest request,
             StreamObserver<AddStockMovementResponse> responseObserver) {
+        String idempotencyKey = "STOCK-MOVEMENT-" + request.getReferenceId();
         try {
+            if (idempotencyService.isAlreadyProcessed(idempotencyKey)) {
+                StockMovementJpaEntity existing = getStockMovementByReferenceUseCase.findByReferenceId(request.getReferenceId());
+                responseObserver.onNext(AddStockMovementResponse.newBuilder()
+                        .setStockMovement(toEntityStockMovement(existing))
+                        .build());
+                responseObserver.onCompleted();
+                return;
+            }
+
+            idempotencyService.markAsProcessing(idempotencyKey, "grpc-addStockMovement");
+
             var command = new AddStockMovementCommand(
                     request.getInventoryId(),
                     MovementType.valueOf(request.getMovementType().name()),
@@ -46,6 +61,17 @@ public class StockMovementGrpcService extends StockMovementServiceGrpc.StockMove
 
             StockMovementResult result = addStockMovementUseCase.add(command);
 
+            idempotencyService.markAsCompleted(idempotencyKey);
+
+            inventoryEventPublisher.publishStockOutCreatedEvent(new StockOutCreatedPayload(
+                    result.getMovementId(),
+                    result.getInventoryId(),
+                    result.getMovementType().name(),
+                    result.getQuantity(),
+                    result.getReferenceId(),
+                    result.getDescription()
+            ));
+
             AddStockMovementResponse response = AddStockMovementResponse.newBuilder()
                     .setStockMovement(toGrpcStockMovement(result))
                     .build();
@@ -54,6 +80,7 @@ public class StockMovementGrpcService extends StockMovementServiceGrpc.StockMove
             responseObserver.onCompleted();
         } catch (Exception e) {
             log.error("Error while adding stock movement", e);
+            idempotencyService.markAsFailed(idempotencyKey, e.getMessage());
             responseObserver.onError(
                     Status.INTERNAL.withDescription("Failed to add stock movement").withCause(e).asRuntimeException());
         }
@@ -84,7 +111,7 @@ public class StockMovementGrpcService extends StockMovementServiceGrpc.StockMove
     public void getStockMovementByReference(GetStockMovementByReferenceRequest request,
             StreamObserver<GetStockMovementByReferenceResponse> responseObserver) {
         try {
-            StockMovementJpaEntity result = getStockMovementByReferenceUseCase.findByReferenceId(request.getReferenceId());
+            StockMovementJpaEntity result = getStockMovementByReferenceUseCase.findByReferenceId(String.valueOf(request.getReferenceId()));
 
             GetStockMovementByReferenceResponse response = GetStockMovementByReferenceResponse.newBuilder()
                     .setStockMovement(toEntityStockMovement(result))

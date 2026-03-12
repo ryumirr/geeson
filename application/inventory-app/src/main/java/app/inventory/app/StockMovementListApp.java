@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import app.inventory.dto.StockMovementResult;
 import app.inventory.port.in.GetStockMovementByReferenceUseCase;
 import app.inventory.port.in.GetStockMovementsByInventoryUseCase;
 
@@ -24,7 +23,7 @@ public class StockMovementListApp implements GetStockMovementsByInventoryUseCase
     }
 
     @Override
-    public StockMovementJpaEntity findByReferenceId(Long referenceId) {
+    public StockMovementJpaEntity findByReferenceId(String referenceId) {
         return stockMovementRepo.findByReferenceId(referenceId);
     }
 }
