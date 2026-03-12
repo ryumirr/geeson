@@ -88,7 +88,7 @@ public class ShipmentEventConsumer {
             log.info("🔎 Inventory selected. productId={}, inventoryId={}, availableQty={}",
                     productId, inventory.getInventoryId(), inventory.getAvailableQuantity());
 
-             // @todo 2025/11/10 윗줄까지 테스트 완료       
+             // @todo 2025/11/10 윗줄까지 테스트 완료
             // 3-2. 재고 예약 생성
             InventoryReservation reservationResult =
                     inventoryReservationGrpcClient.createReservation(
