@@ -20,12 +20,18 @@ public class StockMovementJpaRepository implements StockMovementRepository {
 
     @Override
     public StockMovementJpaEntity saveInMovement(StockMovementJpaEntity movement) {
-         movement.markAsStockIn();
+        movement.markAsStockIn();
         return repository.save(movement);
     }
 
     @Override
-    public List<StockMovementJpaEntity> findByProductId(Long productId) {
-        return repository.findByProductId(productId);
+    public List<StockMovementJpaEntity> findByInventory_InventoryId(Long inventoryId) {
+        return repository.findByInventory_InventoryId(inventoryId);
+    }
+
+    @Override
+    public StockMovementJpaEntity findByReferenceId(Long referenceId) {
+        return repository.findByReferenceId(Long.toString(referenceId));
     }
 }
+

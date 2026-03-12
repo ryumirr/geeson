@@ -31,9 +31,10 @@ public class InventoryReservationApi {
     public ResponseEntity<InventoryReservationRes> reserve(@RequestBody @Valid InventoryReservationReq req) {
         InventoryReservationJpaEntity entity = reservationApp.reserveInventory(new InventoryReservationCommand(
             uuidGenerator.nextId(),
-            req.productId(),
+            req.inventoryId(),
             req.orderId(),
-            req.reservedQuantity()
+            req.reservedQuantity(),
+            req.ttlSeconds()
         ));
 
         InventoryReservationRes res = new InventoryReservationRes(

@@ -11,10 +11,12 @@ public record OrderStartPayload(
     String customerId,
     String paymentMethodId,
     String transactionId,
+    String paymentKey,
     BigDecimal totalPrice,
     String currency,
     List<OrderItem> items
 ) {
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record OrderItem(
         String productId,
         int quantity,

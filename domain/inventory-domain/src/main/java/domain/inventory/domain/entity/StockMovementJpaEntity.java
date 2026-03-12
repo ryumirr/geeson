@@ -7,10 +7,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
-@Getter
 @Entity
 @Table(name = "stock_movements")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class StockMovementJpaEntity {
 
     @Id
@@ -29,27 +29,36 @@ public class StockMovementJpaEntity {
     @Column(nullable = false)
     private Integer quantity;
 
+    @Lob
+    @Column(columnDefinition = "text")
     private String description;
 
-    @Column(name = "movement_date", nullable = false)
+    @Column(name = "movement_date", nullable = true,
+            columnDefinition = "timestamp default current_timestamp")
     private LocalDateTime movementDate;
+
+    @Column(name = "reference_id", nullable = false, unique = true, length = 128)
+    private String referenceId;
 
     @PrePersist
     protected void onCreate() {
-        this.movementDate = LocalDateTime.now();
+        if (this.movementDate == null) {
+            this.movementDate = LocalDateTime.now();
+        }
     }
 
-    // 정적 팩토리 메서드
-    public static StockMovementJpaEntity create(
-            Long inventoryId,
-            MovementType movementType,
-            Integer quantity,
-            String description) {
+    // 팩토리 메서드
+    public static StockMovementJpaEntity create(Long inventoryId,
+                                                MovementType movementType,
+                                                Integer quantity,
+                                                String description,
+                                                String referenceId) {
         StockMovementJpaEntity entity = new StockMovementJpaEntity();
-        entity.inventory = InventoryJpaEntity.withId(inventoryId); // FK 연관 객체 세팅
+        entity.inventory = InventoryJpaEntity.withId(inventoryId);
         entity.movementType = movementType;
         entity.quantity = quantity;
         entity.description = description;
+        entity.referenceId = referenceId;
         return entity;
     }
 

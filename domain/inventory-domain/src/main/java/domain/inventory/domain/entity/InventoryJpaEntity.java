@@ -27,10 +27,10 @@ public class InventoryJpaEntity {
     private WarehouseJpaEntity wareHouse;
 
     @Column(name = "total_quantity")
-    private Long totalQuantity;
+    private Integer totalQuantity;
 
     @Column(name = "reserved_quantity")
-    private Long reservedQuantity;
+    private Integer reservedQuantity;
 
     @Column(name = "reorder_level")
     private Integer reorderLevel;
@@ -50,15 +50,24 @@ public class InventoryJpaEntity {
         return entity;
     }
 
+    /** 예약 가능 여부 확인 */
     public boolean canReserve(Integer quantity) {
-        return this.totalQuantity >= quantity;
+        return getAvailableQuantity() >= quantity;
     }
 
+    /** 예약 처리 */
     public void reserve(Integer quantity) {
-        this.reservedQuantity += quantity;
+        this.reservedQuantity = (this.reservedQuantity != null ? this.reservedQuantity : 0) + quantity;
     }
 
+    /** 예약 해제 */
     public void release(Integer quantity) {
-        this.reservedQuantity -= quantity;
+        this.reservedQuantity = (this.reservedQuantity != null ? this.reservedQuantity : 0) - quantity;
+    }
+
+    /** 가용 재고 계산 */
+    public int getAvailableQuantity() {
+        return (this.totalQuantity != null ? this.totalQuantity.intValue() : 0)
+             - (this.reservedQuantity != null ? this.reservedQuantity.intValue() : 0);
     }
 }

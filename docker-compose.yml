@@ -1,6 +1,4 @@
-# IMPORTANT: To preserve MySQL data, always use 'docker compose down' without the '-v' flag
-# Using 'docker compose down -v' will remove volumes and cause data loss
-
+# Mac M1 Version Docker-Compose File(If you use Linux, please remove platform options)
 services:
   mysql:
     image: mysql:8.0.36
@@ -13,37 +11,43 @@ services:
       - mysql-net
     env_file:
       - .env
+    command: --default-authentication-plugin=mysql_native_password
     healthcheck:
-      test: ["CMD-SHELL", "mysql -h localhost -u root -p$$MYSQL_ROOT_PASSWORD -e 'SELECT 1' || exit 1"]
-      interval: 5s
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$MYSQL_ROOT_PASSWORD || exit 1"]
+      interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
   kafka:
-    image: bitnami/kafka:4.0.0
-    networks:
-      - kafka-net
+    image: apache/kafka:3.7.0
     container_name: kafka
     ports:
       - "9092:9092"
+    networks:
+      - kafka-net
+      - grpc-net
     environment:
-      - KAFKA_KRAFT_MODE=yes
-      - KAFKA_CFG_PROCESS_ROLES=broker,controller
-      - KAFKA_CFG_NODE_ID=1
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,INTERNAL://:29092
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092,INTERNAL://kafka:29092
-      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT
-      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
-      - ALLOW_PLAINTEXT_LISTENER=yes
-    volumes:
-      - kafka_data:/bitnami/kafka
+      # --- 필수 설정 ---
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LOG_DIRS: /tmp/kafka-logs
+      # --- 선택 ---
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true # 토픽자동생성옵션 :> 개발용
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
     healthcheck:
-      test: ["CMD-SHELL", "/opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server localhost:29092 --list || exit 1"]
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list || exit 1"]
       interval: 10s
       timeout: 10s
       retries: 5
-      start_period: 15s
+      start_period: 20s
   redis:
     container_name: redis
     image: redis:7
@@ -59,8 +63,62 @@ services:
       interval: 5s
       timeout: 3s
       retries: 3
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g -XX:+UseG1GC
+    ports:
+      - "9200:9200"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 2g
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - api-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.3
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - api-net
+  fluentd:
+    build: ./infra/fluentd
+    container_name: fluentd
+    volumes:
+      - ./infra/fluentd/conf:/fluentd/etc
+      - ./logs:/var/log/app
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - api-net
+      - kafka-net
+      - mysql-net
+      - redis-net
+      - grpc-net
+
   geeson-commander:
     image: jeongjin984/commander:0.0.1
+    container_name: geeson-commander
     ports:
       - "8080:8080"
     depends_on:
@@ -70,8 +128,14 @@ services:
       - api-net
     volumes:
       - ./logs:/logs
+
   order-api:
+    container_name: order-api
     image: jeongjin984/order-api:0.0.1
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    ports:
+      - "9093:9093"
     depends_on:
       mysql:
         condition: service_healthy
@@ -80,14 +144,19 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - api-net
-      - kafka-net
-      - mysql-net
-      - redis-net
+      grpc-net:
+        aliases:
+          - order-api
+          - shipment
+      kafka-net:
+      mysql-net:
+      redis-net:
     volumes:
       - ./logs:/logs
+
   payment-api:
     image: jeongjin984/payment-api:0.0.1
+    container_name: payment-api
     depends_on:
       mysql:
         condition: service_healthy
@@ -100,10 +169,13 @@ services:
       - kafka-net
       - mysql-net
       - redis-net
+      - grpc-net
     volumes:
       - ./logs:/logs
+
   auth-api:
     image: jeongjin984/auth-api:0.0.1
+    container_name: auth-api
     environment:
       - PORT=8080
       - DB_HOST=mysql
@@ -124,10 +196,39 @@ services:
       - kafka-net
       - mysql-net
       - redis-net
+      - grpc-net
     volumes:
       - ./logs:/app/logs
+
   inventory-api:
     image: jeongjin984/inventory-api:0.0.1
+    container_name: inventory-api
+    ports:
+      - "9095:9095"
+      - "6566:6566"
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      grpc-net:
+        aliases:
+          - inventory-api
+      kafka-net:
+      mysql-net:
+      redis-net:
+    volumes:
+      - ./logs:/logs
+
+  order-saga:
+    platform: linux/amd64
+    image: jeongjin984/order-saga:0.0.1
+    container_name: order-saga
     depends_on:
       mysql:
         condition: service_healthy
@@ -142,6 +243,7 @@ services:
       - redis-net
     volumes:
       - ./logs:/logs
+
 volumes:
   kafka_data:
     driver: local
@@ -149,6 +251,9 @@ volumes:
     driver: local
   redis_data:
     driver: local
+  es_data:
+    driver: local
+
 networks:
   kafka-net:
     driver: bridge
@@ -157,4 +262,6 @@ networks:
   mysql-net:
     driver: bridge
   redis-net:
+    driver: bridge
+  grpc-net:
     driver: bridge

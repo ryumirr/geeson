@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 @Table(name = "order_status_history")
 public class OrderStatusHistoryJpaEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long historyId;
 
     @ManyToOne(fetch = FetchType.LAZY)

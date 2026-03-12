@@ -1,18 +1,3 @@
-CREATE DATABASE inventory_db;
-
-USE inventory_db;
-
-CREATE TABLE products (
-    product_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    sku VARCHAR(50) UNIQUE NOT NULL,
-    category_id BIGINT,
-    price DECIMAL(10, 2),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
 CREATE TABLE warehouses (
     warehouse_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -33,8 +18,8 @@ CREATE TABLE inventory (
     reorder_quantity INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (product_id) REFERENCES products(product_id),
-    FOREIGN KEY (warehouse_id) REFERENCES warehouses(warehouse_id)
+    FOREIGN KEY (warehouse_id) REFERENCES warehouses(warehouse_id),
+    CONSTRAINT uq_product_warehouse UNIQUE (product_id, warehouse_id)
 );
 
 CREATE TABLE inventory_items (
@@ -112,14 +97,20 @@ CREATE TABLE inventory_adjustments (
     FOREIGN KEY (inventory_id) REFERENCES inventory(inventory_id)
 );
 
-<<<<<<< HEAD
+CREATE TABLE idempotency_log (
+    idempotency_key VARCHAR(128) PRIMARY KEY,
+    endpoint VARCHAR(255) NOT NULL,
+    request_hash TEXT,
+    status VARCHAR(32) NOT NULL,
+    response_data TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 INSERT INTO inventory_db.inventory (
     inventory_id,
-    product_id,
     warehouse_id,
     total_quantity,
     reserved_quantity,
-    available_quantity,
     reorder_level,
     reorder_quantity,
     created_at,
@@ -127,16 +118,10 @@ INSERT INTO inventory_db.inventory (
 ) VALUES (
     1,
     1,
-    1,
-    100,
+    1000000,
     2,
-    98,
     0,
     0,
     '2025-07-02 11:28:31',
     '2025-07-02 11:28:31'
 );
-=======
--- reference_id 검색 최적화를 위한 인덱스 추가
-CREATE INDEX idx_stock_movements_reference ON stock_movements(reference_id);
->>>>>>> 52492ef ([soy-04:feat]stock_movement_register_api default엔드포인트 추가)

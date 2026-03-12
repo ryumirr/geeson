@@ -1,25 +1,30 @@
-package app.inventory;
+package app.inventory.app;
 
 import domain.inventory.domain.entity.StockMovementJpaEntity;
 import domain.inventory.domain.repository.StockMovementRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import app.inventory.dto.StockMovementResult;
+import app.inventory.port.in.GetStockMovementByReferenceUseCase;
+import app.inventory.port.in.GetStockMovementsByInventoryUseCase;
+
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class StockMovementListApp {
+public class StockMovementListApp implements GetStockMovementsByInventoryUseCase, GetStockMovementByReferenceUseCase {
     private final StockMovementRepository stockMovementRepo;
 
-    /**
-     * 특정 상품의 재고 이동 이력 조회
-     * @param productId
-     * @return List<StockMovementJpaEntity>
-     */
-    @Transactional(readOnly = true)
-    public List<StockMovementJpaEntity> getMovementHistory(Long productId) {
-        return stockMovementRepo.findByProductId(productId);
+    @Override
+    public List<StockMovementJpaEntity> findByInventory_InventoryId(Long inventoryId) {
+        return stockMovementRepo.findByInventory_InventoryId(inventoryId);
+    }
+
+    @Override
+    public StockMovementJpaEntity findByReferenceId(Long referenceId) {
+        return stockMovementRepo.findByReferenceId(referenceId);
     }
 }

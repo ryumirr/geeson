@@ -12,19 +12,9 @@ dependencies {
 
     implementation "jakarta.persistence:jakarta.persistence-api:3.1.0"
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'com.fasterxml.jackson.core:jackson-databind'
-    testImplementation 'com.h2database:h2'
-}
 
-test {
-    useJUnitPlatform()
-    testLogging {
-        events "passed", "skipped", "failed"
-        showStandardStreams = true
-    }
-    // 버전 업데이트 경고 로그 삭제를 위해 추가
-    jvmArgs += ["-XX:+EnableDynamicAgentLoading"]
-
-    systemProperty "spring.profiles.active", "local"
+    // grpc-server
+    implementation project(":proto")
+    implementation "net.devh:grpc-server-spring-boot-starter:2.15.0.RELEASE"
+    implementation "net.devh:grpc-client-spring-boot-starter:2.15.0.RELEASE"
 }

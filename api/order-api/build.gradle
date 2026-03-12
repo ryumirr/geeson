@@ -1,11 +1,25 @@
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation project(':api:api-commons')
     implementation project(':application:order-app')
     implementation project(':domain:order-domain')
     implementation project(':infra:rdb:order-db')
-    implementation project(':infra:queue:order-kafka')
+    implementation project(":infra:queue:order-kafka")
+
     implementation project(':infra:uuid-impl')
+    implementation project(':infra:client:pgClient')
+    implementation project(':module:enum')
 
     implementation project(":support:web-api")
     implementation project(":support:uuid")
+
+    implementation "jakarta.persistence:jakarta.persistence-api:3.1.0"
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    implementation project(":proto")
+    implementation "net.devh:grpc-server-spring-boot-starter:2.15.0.RELEASE"
+    implementation "net.devh:grpc-client-spring-boot-starter:2.15.0.RELEASE"
+
+    implementation 'org.springframework.kafka:spring-kafka'
+    implementation 'org.springframework.data:spring-data-commons' // Persistable
 }

@@ -11,45 +11,45 @@ import module.enums.ReservationStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class InventoryReservationApp {
 
-    private final InventoryReservationRepository reservationRepository;
     private final InventoryRepository inventoryRepository;
-    private final InventoryReservationRepository inventoryReservationRepository;
+    private final InventoryReservationRepository reservationRepository;
 
     /**
      * 재고 예약 생성
      */
     public InventoryReservationJpaEntity reserveInventory(InventoryReservationCommand command) {
-        List<InventoryJpaEntity> inventories = inventoryRepository.findByProductId(command.productId());
+        InventoryJpaEntity inventory = inventoryRepository.findById(command.inventoryId())
+                .orElseThrow(() -> new NotEnoughInventoryException("Inventory not found: " + command.inventoryId()));
 
-        if(inventories.isEmpty()) throw new NotEnoughInventoryException("Not Enough Inventory product : " + command.productId());
+        if (!inventory.canReserve(command.reservedQuantity())) {
+            throw new NotEnoughInventoryException("Not enough inventory for ID: " + command.inventoryId());
+        }
 
-        // 예: 가장 재고가 양이 많은 warehouse
-        InventoryJpaEntity selectedInventory = inventories.stream()
-            .filter(inv -> inv.canReserve(command.reservedQuantity()))
-            .max(Comparator.comparing(inv -> inv.getWareHouse().getCapacity()))
-            .orElseThrow(() -> new NotEnoughInventoryException("Not Enough Inventory product : " + command.productId()));
+        // 수량 차감
+        inventory.reserve(command.reservedQuantity());
 
-        selectedInventory.reserve(command.reservedQuantity());
+        // TTL(초 단위) 기반 expiresAt 계산
+        LocalDateTime expiresAt = (command.ttlSeconds() != null)
+            ? LocalDateTime.now().plusSeconds(command.ttlSeconds())
+            : null;
 
-        return inventoryReservationRepository.save(InventoryReservationJpaEntity.create(
-            command.reservationId(),
-            selectedInventory,
-            command.orderId(),
-            command.reservedQuantity(),
-            LocalDateTime.now().plusDays(7)
-        ));
+        // 예약 엔티티 저장
+        return reservationRepository.save(
+                InventoryReservationJpaEntity.create(
+                        command.reservationId(),
+                        inventory,
+                        command.orderId(),
+                        command.reservedQuantity(),
+                        expiresAt));
     }
 
     /**
@@ -57,7 +57,7 @@ public class InventoryReservationApp {
      */
     public InventoryReservationJpaEntity getById(Long id) {
         return reservationRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Reservation not found: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found: " + id));
     }
 
     /**
@@ -72,7 +72,14 @@ public class InventoryReservationApp {
      */
     public void updateStatus(Long id, ReservationStatus status) {
         InventoryReservationJpaEntity entity = reservationRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Reservation not found: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found: " + id));
         entity.changeStatus(status);
+    }
+
+    /**
+     * 특정 주문 ID의 예약 전체 조회
+     */
+    public List<InventoryReservationJpaEntity> getByOrderId(Long orderId) {
+        return reservationRepository.findByOrderId(orderId);
     }
 }

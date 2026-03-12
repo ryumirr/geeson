@@ -2,7 +2,7 @@
 <configuration>
 
     <!-- 로그 경로 및 파일명 설정 -->
-    <property name="LOG_PATH" value="./logs"/>
+    <property name="LOG_PATH" value="/logs"/>
     <property name="LOG_FILE" value="${LOG_PATH}/payment.log"/>
 
     <!-- 콘솔 로그 -->

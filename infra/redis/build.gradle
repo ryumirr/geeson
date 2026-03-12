@@ -4,16 +4,6 @@ dependencies {
     testImplementation 'org.awaitility:awaitility:4.2.0'
 }
 
-test {
-    useJUnitPlatform()
-    testLogging {
-        events "passed", "skipped", "failed"
-        showStandardStreams = true
-    }
-    // 버전 업데이트 경고 로그 삭제를 위해 추가
-    jvmArgs += ["-XX:+EnableDynamicAgentLoading"]
-}
-
 sourceSets {
     main {
         resources {

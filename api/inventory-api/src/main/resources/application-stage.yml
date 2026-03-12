@@ -2,9 +2,21 @@ spring:
   datasource:
     url: jdbc:mysql://mysql:3306/inventory_db
     username: root
-    password: rootpass^^*
+    password: "rootpass^^*"
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
   kafka:
-    bootstrap-servers: kafka:29092
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: inventory-consumer-group
+      auto-offset-reset: earliest
+    listener:
+      ack-mode: record
+      missing-topics-fatal: false
   redis:
     redisson:
       config: |
@@ -14,9 +26,21 @@ spring:
           connectionPoolSize: 10
         threads: 4
         nettyThreads: 4
+grpc:
+  server:
+    port: 6565
+    address: 0.0.0.0
+  clients:
+    order-api:
+      address: order-api:6565
+      negotiationType: plaintext
+      enableKeepAlive: true
 
 api:
   version: "2025-06-15"
 
 uuid:
   node-id: ${NODE_ID:0}
+
+server:
+  port: 9095

@@ -1,9 +1,9 @@
 package domain.order.message;
 
-import org.springframework.stereotype.Component;
 import support.messaging.command.OrderStartPayload;
+import support.messaging.command.ShipmentReadyPayload;
 
-@Component
 public interface OrderEventPublisher {
     void publishOrderCreated(OrderStartPayload event);
+    void publishOrderShipped(ShipmentReadyPayload event);
 }

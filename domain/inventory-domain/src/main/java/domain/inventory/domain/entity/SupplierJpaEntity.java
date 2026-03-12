@@ -1,9 +1,13 @@
 package domain.inventory.domain.entity;
 
 import jakarta.persistence.*;
-
+import lombok.*;
 import java.time.LocalDateTime;
 
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 @Entity
 @Table(name = "suppliers")
 public class SupplierJpaEntity {

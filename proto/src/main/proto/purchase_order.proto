@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package grpc.purchaseorder;
+option java_package = "grpc.purchaseorder";
+option java_multiple_files = true;
+
+// ===== Service =====
+service PurchaseOrderService {
+  // 신규 발주 등록
+  rpc AddPurchaseOrder(AddPurchaseOrderRequest) returns (AddPurchaseOrderResponse);
+
+  // 단일 발주 조회 (ID 또는 복합키로)
+  rpc GetPurchaseOrder(GetPurchaseOrderRequest) returns (GetPurchaseOrderResponse);
+
+  // 다중 발주 조회 (조건 기반)
+  rpc ListPurchaseOrders(ListPurchaseOrdersRequest) returns (ListPurchaseOrdersResponse);
+
+  // 발주 상태 갱신 (예: APPROVED, CANCELLED)
+  rpc UpdatePurchaseOrderStatus(UpdatePurchaseOrderStatusRequest) returns (UpdatePurchaseOrderStatusResponse);
+}
+
+// ===== Entity =====
+message PurchaseOrder {
+  int64 purchaseOrderId = 1;
+  int64 supplierId = 2;
+  int64 warehouseId = 3;
+  string orderDate = 4;     // ISO8601 timestamp (e.g. 2025-11-04T09:00:00Z)
+  string status = 5;        // e.g. PENDING, APPROVED, CANCELLED
+  double totalAmount = 6;
+  string createdAt = 7;
+  string updatedAt = 8;
+}
+
+// ===== Add =====
+message AddPurchaseOrderRequest {
+  int64 supplierId = 1;
+  int64 warehouseId = 2;
+  string orderDate = 3;     // optional, default: current timestamp
+  double totalAmount = 4;
+}
+
+message AddPurchaseOrderResponse {
+  PurchaseOrder purchaseOrder = 1;
+}
+
+// ===== Get (단일 조회) =====
+message GetPurchaseOrderRequest {
+  oneof selector {
+    int64 purchaseOrderId = 1;   // 기본키로 조회
+    PurchaseOrderKey key = 2;    // supplier_id + warehouse_id 조합으로 조회
+  }
+}
+
+message GetPurchaseOrderResponse {
+  PurchaseOrder purchaseOrder = 1;
+}
+
+// 복합키 구조체
+message PurchaseOrderKey {
+  int64 supplierId = 1;
+  int64 warehouseId = 2;
+}
+
+// ===== List (다중 조회) =====
+message ListPurchaseOrdersRequest {
+  repeated int64 purchaseOrderIds = 1;
+  int64 supplierId = 2;   // optional filter
+  int64 warehouseId = 3;  // optional filter
+  string status = 4;      // optional filter
+}
+
+message ListPurchaseOrdersResponse {
+  repeated PurchaseOrder purchaseOrders = 1;
+}
+
+// ===== Update Status =====
+message UpdatePurchaseOrderStatusRequest {
+  int64 purchaseOrderId = 1;
+  string status = 2;
+}
+
+message UpdatePurchaseOrderStatusResponse {
+  bool success = 1;
+  PurchaseOrder purchaseOrder = 2;
+}

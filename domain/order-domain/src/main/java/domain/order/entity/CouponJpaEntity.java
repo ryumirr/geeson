@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 @Table(name = "coupons")
 public class CouponJpaEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long couponId;
 
     @Column(name = "code")

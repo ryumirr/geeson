@@ -6,6 +6,7 @@ public record RegisterOrderReq(
         Long customerId,
         Long shippingAddressId,
         Long paymentMethodId,
+        String paymentKey,
         List<OrderItem> items
 ) {
     public record OrderItem(
