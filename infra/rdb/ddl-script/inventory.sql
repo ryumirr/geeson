@@ -97,6 +97,15 @@ CREATE TABLE inventory_adjustments (
     FOREIGN KEY (inventory_id) REFERENCES inventory(inventory_id)
 );
 
+CREATE TABLE idempotency_log (
+    idempotency_key VARCHAR(128) PRIMARY KEY,
+    endpoint VARCHAR(255) NOT NULL,
+    request_hash TEXT,
+    status VARCHAR(32) NOT NULL,
+    response_data TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 INSERT INTO inventory_db.inventory (
     inventory_id,
     warehouse_id,

@@ -35,6 +35,10 @@ public class ProductOrderJpaEntity implements Persistable<Long> {
     @JoinColumn(name = "shipping_address_id")
     private ShippingAddressJpaEntity shippingAddress;
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "payment_id")
+    private PaymentRequestJpaEntity payment;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

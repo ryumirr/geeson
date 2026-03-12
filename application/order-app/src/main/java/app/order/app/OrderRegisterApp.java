@@ -5,18 +5,17 @@ import app.order.command.OrderRegisterCommand;
 import app.order.command.OrderRegisterCommand.OrderItem;
 import app.order.event.OrderCreatedEvent;
 import domain.order.entity.*;
-import domain.payment.entity.PaymentJpaEntity;
-import domain.order.message.OrderEventPublisher;
+import domain.order.repository.*;
 import app.order.exception.CustomerNotFoundException;
 import app.order.exception.ShippingAddressNotFoundException;
-import domain.order.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import support.messaging.command.OrderStartPayload;
 import support.uuid.UuidGenerator;
 import grpc.client.InventoryGrpcClient;
-import grpc.inventory.InventoryItemResponse;
 import grpc.inventory.ReserveInventoriesResponse;
 
 import java.math.BigDecimal;
@@ -25,9 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.springframework.context.ApplicationEventPublisher;
-import lombok.extern.slf4j.Slf4j;
-import lombok.RequiredArgsConstructor;
 
 @Slf4j
 @Service
@@ -39,7 +35,6 @@ public class OrderRegisterApp {
     private final ShippingAddressRepository shippingAddressRepository;
     private final UuidGenerator uuidGenerator;
     private final InventoryGrpcClient inventoryGrpcClient;
-    private final OrderEventPublisher orderEventPublisher;
     private final OrderListApp orderListApp;
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -50,17 +45,27 @@ public class OrderRegisterApp {
                 .findByShippingAddressId(command.shippingAddressId())
                 .orElseThrow(() -> new ShippingAddressNotFoundException("shipping address not found"));
 
-        // PaymentJpaEntity payment = paymentRepository.findByOrderId(command.paymentKey())
-        //                 .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
+        long orderId = uuidGenerator.nextId();
+
+        PaymentRequestJpaEntity paymentRequest = PaymentRequestJpaEntity.builder()
+                .paymentId(uuidGenerator.nextId())
+                .orderId(orderId)
+                .amount(command.getTotalPrice())
+                .paymentMethod(command.paymentMethodId().toString())
+                .paymentStatus("PENDING")
+                .transactionId(command.paymentKey())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
 
         ProductOrderJpaEntity productOrderEntity = ProductOrderJpaEntity.builder()
-                .orderId(uuidGenerator.nextId())
+                .orderId(orderId)
                 .customer(customer)
                 .totalPrice(command.getTotalPrice())
                 .status("ORDERED")
                 .orderDate(LocalDateTime.now())
                 .shippingAddress(shippingAddress)
-               // .payment(payment)
+                .payment(paymentRequest)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .orderItems(new ArrayList<>())
@@ -85,10 +90,9 @@ public class OrderRegisterApp {
         applicationEventPublisher.publishEvent(new OrderCreatedEvent(new OrderStartPayload(
                 String.valueOf(productOrderEntity.getOrderId()),
                 String.valueOf(customer.getCustomerId()),
-                "1",// String.valueOf(payment.getPaymentId()),
-                "transactionId-test",
-                //String.valueOf(paymentEntity.getTransactionId()),
-                "paymentKey-test",
+                String.valueOf(paymentRequest.getPaymentId()),
+                paymentRequest.getTransactionId(),
+                command.paymentKey(),
                 productOrderEntity.getTotalPrice(),
                 "KRW",
                 orderItemEntityList.stream().map(v -> new OrderStartPayload.OrderItem(
