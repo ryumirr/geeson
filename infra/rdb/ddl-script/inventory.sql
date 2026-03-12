@@ -106,6 +106,17 @@ CREATE TABLE idempotency_log (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE outbox (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    event_type VARCHAR(64) NOT NULL,
+    topic VARCHAR(128) NOT NULL,
+    payload TEXT NOT NULL,
+    status VARCHAR(16) NOT NULL DEFAULT 'PENDING',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    sent_at TIMESTAMP NULL,
+    INDEX idx_outbox_status (status, created_at)
+);
+
 INSERT INTO inventory_db.inventory (
     inventory_id,
     warehouse_id,
