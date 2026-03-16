@@ -207,13 +207,19 @@ services:
       - ./logs:/app/logs
 
   inventory-api:
-    image: jeongjin984/inventory-api:0.0.1
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        JAR_FILE: api/inventory-api/build/libs/inventory-api-0.0.1.jar
+    image: ryumirr1/inventory-api:0.0.1 # 개발용
     container_name: inventory-api
     ports:
       - "9095:9095"
       - "6566:6566"
     environment:
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_CONFIG_LOCATION=file:/app/config/
     depends_on:
       mysql:
         condition: service_healthy
@@ -230,6 +236,7 @@ services:
       redis-net:
     volumes:
       - ./logs:/logs
+      - ./api/inventory-api/src/main/resources/application-local.yml:/app/config/application-local.yml
 
   order-saga:
     platform: linux/amd64

@@ -2,8 +2,10 @@ package api.inventory;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 
+@EnableScheduling
 @SpringBootApplication(
     scanBasePackages = { "api.inventory", "app.inventory", "domain.inventory", "storage.rdb.inventory", "kafka.inventory", "grpc.client","infra.queue.inventory"}
 )

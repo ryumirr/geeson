@@ -2,6 +2,8 @@ package kafka.inventory.consumer;
 
 import app.inventory.app.IdempotencyService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import domain.inventory.domain.entity.OutboxJpaEntity;
+import domain.inventory.domain.repository.OutboxRepository;
 import grpc.client.InventoryGrpcClient;
 import grpc.client.InventoryReservationGrpcClient;
 import grpc.client.StockMovementGrpcClient;
@@ -16,7 +18,6 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import support.messaging.command.OrderStartPayload;
 import support.messaging.command.ShipmentReadyPayload;
-import domain.inventory.domain.message.InventoryEventPublisher;
 import java.util.List;
 
 @Slf4j
@@ -26,12 +27,12 @@ public class ShipmentEventConsumer {
 
     private final IdempotencyService idempotencyService;
     private final ObjectMapper objectMapper;
+    private final OutboxRepository outboxRepository;
     private final InventoryReservationGrpcClient inventoryReservationGrpcClient;
     private final StockMovementGrpcClient stockMovementGrpcClient;
     private final InventoryGrpcClient inventoryGrpcClient;
     private final WarehouseGrpcClient warehouseGrpcClient;
     private final PurchaseOrderGrpcClient purchaseOrderGrpcClient;
-    private final InventoryEventPublisher inventoryEventPublisher;
 
     /**
      * 주문 생성 성공 이벤트 (ord-ord-req-succ-event)를 consume 해서
@@ -123,10 +124,14 @@ public class ShipmentEventConsumer {
                 log.info("✅ Inventory reserved successfully. orderId={}, reservationId={}",
                         orderId, reservationResult.getReservationId(), inventory.getWarehouseId());
 
-                // 7. OrderShippedEvent 발행 → Order 서비스가 주문 상태를 SHIPPED로 업데이트
-                // @todo Outbox 패턴으로 교체 필요
-                inventoryEventPublisher.publishShipmentReady(new ShipmentReadyPayload(orderId));
-                log.info("🚀 ShipmentReady event published. orderId={}", orderId);
+                // 7. Outbox 테이블에 저장 → 스케줄러가 Kafka로 발행
+                ShipmentReadyPayload shipmentPayload = new ShipmentReadyPayload(orderId);
+                outboxRepository.save(OutboxJpaEntity.create(
+                        "SHIPMENT_READY",
+                        "ord-ord-ship-succ-event",
+                        objectMapper.writeValueAsString(shipmentPayload)
+                ));
+                log.info("📥 Outbox event saved. orderId={}", orderId);
 
             } else {
                 log.warn("⚠️ Inventory reservation failed. orderId={}, status={}",
