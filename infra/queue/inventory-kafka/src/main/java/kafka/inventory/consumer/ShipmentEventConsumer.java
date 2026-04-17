@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import support.messaging.command.OrderStartPayload;
 import support.messaging.command.ShipmentReadyPayload;
 import java.util.List;
@@ -38,6 +39,7 @@ public class ShipmentEventConsumer {
      * 주문 생성 성공 이벤트 (ord-ord-req-succ-event)를 consume 해서
      * 재고 예약 및 관련 처리만 수행한다.
      */
+    @Transactional
     @KafkaListener(
             topics = "ord-ord-req-succ-event",
             groupId = "inventory-consumer-group"
@@ -143,10 +145,10 @@ public class ShipmentEventConsumer {
 
         } catch (Exception e) {
             log.error("❌ [Inventory] Failed to handle order-created event", e);
-            if (idempotencyKey != null) {
-                idempotencyService.markAsFailed(idempotencyKey, e.getMessage());
-            }
-            // @todo  실패 이벤트 발행 등의 보상 로직
+            // @todo 실패 이벤트 발행 등의 보상 로직
+            // @Transactional로 인해 idempotency/outbox DB 변경이 롤백됨
+            // 예외를 재발생시켜 Kafka offset 미커밋 → 메시지 재시도
+            throw new RuntimeException("Inventory reservation failed, will retry", e);
         }
     }
 }
