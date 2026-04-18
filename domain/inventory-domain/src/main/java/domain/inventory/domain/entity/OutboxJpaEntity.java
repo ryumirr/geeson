@@ -40,6 +40,12 @@ public class OutboxJpaEntity {
     @Column(name = "sent_at")
     private LocalDateTime sentAt;
 
+    @Builder.Default
+    @Column(name = "retry_count", nullable = false)
+    private int retryCount = 0;
+
+    private static final int MAX_RETRIES = 3;
+
     public static OutboxJpaEntity create(String eventType, String topic, String payload) {
         return OutboxJpaEntity.builder()
                 .eventType(eventType)
@@ -54,7 +60,17 @@ public class OutboxJpaEntity {
         this.sentAt = LocalDateTime.now();
     }
 
-    public void markAsFailed() {
-        this.status = OutboxStatus.FAILED;
+    // retryCount를 올리고, 최대 재시도 초과 시 FAILED로 마킹 후 true 반환
+    public boolean incrementRetry() {
+        this.retryCount++;
+        if (this.retryCount >= MAX_RETRIES) {
+            this.status = OutboxStatus.FAILED;
+            return true;
+        }
+        return false;
+    }
+
+    public int getMaxRetries() {
+        return MAX_RETRIES;
     }
 }
