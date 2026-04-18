@@ -4,12 +4,11 @@ import app.inventory.app.IdempotencyService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import domain.inventory.domain.entity.OutboxJpaEntity;
 import domain.inventory.domain.repository.OutboxRepository;
-import grpc.client.InventoryGrpcClient;
 import grpc.client.InventoryReservationGrpcClient;
+import grpc.client.InventoryGrpcClient;
+import grpc.client.PurchaseOrderGrpcClient;
 import grpc.client.StockMovementGrpcClient;
 import grpc.client.WarehouseGrpcClient;
-import grpc.client.PurchaseOrderGrpcClient;
-import grpc.inventory.AddStockMovementRequest;
 import grpc.inventory.InventoryReservation;
 import grpc.inventory.SelectInventoryResponse;
 import lombok.RequiredArgsConstructor;
@@ -74,8 +73,8 @@ public class ShipmentEventConsumer {
                 return;
             }
 
-            // 4. (간단 버전) 첫 번째 아이템 기준으로 재고 선택 및 예약
-            //    필요하면 payload.items() 전체 loop 돌리도록 확장 가능
+            // 현재는 첫 번째 아이템 기준으로 오케스트레이션한다.
+            // 여러 아이템 처리로 확장하더라도 orderId 기준 idempotency는 유지한다.
             var item = payload.items().get(0);
 
             long productId = Long.parseLong(item.productId());
@@ -94,37 +93,47 @@ public class ShipmentEventConsumer {
             InventoryReservation reservationResult =
                     inventoryReservationGrpcClient.createReservation(
                             inventory.getInventoryId(),
-                            inventory.getProductId(),
+                            orderId,
                             quantity,
                             300 // TTL seconds (예시)
                     );
 
             if ("RESERVED".equals(reservationResult.getStatus())) {
+                String stockOutReference = "ORDER-" + orderId;
+
                 // 4. 재고 이동(StockMovement) 등록
-                stockMovementGrpcClient.addStockMovement(
-                        AddStockMovementRequest.newBuilder()
-                                .setInventoryId(inventory.getInventoryId())
-                                .setQuantity(quantity)
-                                .setReferenceId("ORDER-" + orderId)
-                                .build()
+                stockMovementGrpcClient.recordStockOut(
+                        inventory.getInventoryId(),
+                        quantity,
+                        stockOutReference,
+                        "Shipment stock-out for order " + orderId
                 );
 
-                // 5. 창고 정보 조회
+                // 5. 출고 성공 이후 예약을 확정 상태로 전이한다.
+                boolean reservationCompleted = inventoryReservationGrpcClient
+                        .completeReservation(reservationResult.getReservationId());
+                if (!reservationCompleted) {
+                    throw new IllegalStateException(
+                            "Reservation completion failed after stock-out. reservationId="
+                                    + reservationResult.getReservationId());
+                }
+
+                // 6. 창고 정보 조회
                 var warehouseResponse = warehouseGrpcClient.getWarehouse(inventory.getWarehouseId());
                 log.info("🏭 Warehouse info. warehouseId={}, name={}, location={}",
                         warehouseResponse.getWarehouseId(), warehouseResponse.getName(), warehouseResponse.getLocation());
 
-                // 6. 해당 창고의 발주 정보 조회
+                // 7. 해당 창고의 발주 정보 조회
                 var purchaseOrdersResponse = purchaseOrderGrpcClient.listPurchaseOrders(
                         null, null, warehouseResponse.getWarehouseId(), null);
                 log.info("📋 Purchase orders for warehouseId={}. count={}",
                         warehouseResponse.getWarehouseId(), purchaseOrdersResponse.getPurchaseOrdersCount());
 
                 idempotencyService.markAsCompleted(idempotencyKey);
-                log.info("✅ Inventory reserved successfully. orderId={}, reservationId={}",
+                log.info("✅ Shipment stock-out completed. orderId={}, reservationId={}, warehouseId={}",
                         orderId, reservationResult.getReservationId(), inventory.getWarehouseId());
 
-                // 7. Outbox 테이블에 저장 → 스케줄러가 Kafka로 발행
+                // 8. Outbox 테이블에 저장 → 스케줄러가 Kafka로 발행
                 ShipmentReadyPayload shipmentPayload = new ShipmentReadyPayload(orderId);
                 outboxRepository.save(OutboxJpaEntity.create(
                         "SHIPMENT_READY",
