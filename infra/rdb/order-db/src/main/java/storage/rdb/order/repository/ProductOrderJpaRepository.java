@@ -20,7 +20,11 @@ public class ProductOrderJpaRepository implements ProductOrderRepository {
     }
 
     @Override
-    public List<ProductOrderJpaEntity> getAllOrders(int page, int size) {
+    public List<ProductOrderJpaEntity> getAllOrders(int page, int size, String status) {
+        if (status != null) {
+            return repository.findByStatus(status);
+        }
+
         return repository.findAll();
     }
 
@@ -30,7 +34,11 @@ public class ProductOrderJpaRepository implements ProductOrderRepository {
     }
     
     @Override
-    public List<ProductOrderJpaEntity> findByCustomerId(Long customerId) {
+    public List<ProductOrderJpaEntity> findByCustomerId(Long customerId, String status) {
+        if (status != null) {
+            return repository.findByCustomer_CustomerIdAndStatus(customerId, status);
+        }
+
         return repository.findByCustomer_CustomerId(customerId);
     }
 }

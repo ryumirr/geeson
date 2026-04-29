@@ -10,9 +10,9 @@ import java.util.Optional;
 public interface ProductOrderRepository {
     ProductOrderJpaEntity save(ProductOrderJpaEntity entity);
 
-    List<ProductOrderJpaEntity> getAllOrders(int page, int size);
+    List<ProductOrderJpaEntity> getAllOrders(int page, int size, String status);
 
     Optional<ProductOrderJpaEntity> findById(Long id);
     
-    List<ProductOrderJpaEntity> findByCustomerId(Long customerId);
+    List<ProductOrderJpaEntity> findByCustomerId(Long customerId, String status);
 }

@@ -49,3 +49,12 @@ out/
 logs
 
 .env
+.env.local
+.env.*.local
+.history
+.history.env.local
+.review-artifacts/
+.harness/ouroboros/session.db
+.harness.env.local
+.claude
+.codex

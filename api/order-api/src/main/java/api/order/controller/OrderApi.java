@@ -91,10 +91,11 @@ public class OrderApi {
         @GetMapping("")
         public List<ProductOrderRes> test(
                         @RequestParam(required = false, defaultValue = "0") int page,
-                        @RequestParam(required = false, defaultValue = "10") int size
+                        @RequestParam(required = false, defaultValue = "10") int size,
+                        @RequestParam(required = false) String status
 
         ) {
-                return orderListApp.getAllOrders(page, size)
+                return orderListApp.getAllOrders(page, size, status)
                                 .stream().map(order -> new ProductOrderRes(
                                                 order.getOrderId(),
                                                 order.getStatus(),
@@ -123,8 +124,9 @@ public class OrderApi {
 
         @GetMapping("/")
         public List<ProductOrderRes> getOrdersByCustomerId(
-                        @RequestParam Long customerId) {
-                return orderListApp.getOrdersByCustomerId(customerId)
+                        @RequestParam Long customerId,
+                        @RequestParam(required = false) String status) {
+                return orderListApp.getOrdersByCustomerId(customerId, status)
                                 .stream().map(order -> new ProductOrderRes(
                                                 order.getOrderId(),
                                                 order.getStatus(),

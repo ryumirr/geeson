@@ -8,6 +8,7 @@ import api.inventory.response.InventoryReservationRes;
 import domain.inventory.domain.entity.InventoryReservationJpaEntity;
 
 import lombok.RequiredArgsConstructor;
+import module.enums.ReservationStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -71,8 +72,11 @@ public class InventoryReservationApi {
      * 특정 재고의 예약 목록 조회
      */
     @GetMapping
-    public ResponseEntity<List<InventoryReservationRes>> getByInventoryId(@RequestParam Long inventoryId) {
-        List<InventoryReservationRes> result = reservationApp.getByInventoryId(inventoryId).stream()
+    public ResponseEntity<List<InventoryReservationRes>> getByInventoryId(
+        @RequestParam Long inventoryId,
+        @RequestParam(required = false) ReservationStatus status
+    ) {
+        List<InventoryReservationRes> result = reservationApp.getByInventoryId(inventoryId, status).stream()
             .map(entity -> new InventoryReservationRes(
                 entity.getReservationId(),
                 entity.getInventory().getInventoryId(),

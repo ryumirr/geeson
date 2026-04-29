@@ -113,7 +113,7 @@ public class InventoryReservationGrpcService extends InventoryReservationService
     public void getReservationsByInventory(GetReservationsByInventoryRequest request,
                                            StreamObserver<GetReservationsByInventoryResponse> responseObserver) {
         try {
-            var reservations = reservationApp.getByInventoryId(request.getInventoryId())
+            var reservations = reservationApp.getByInventoryId(request.getInventoryId(), null)
                 .stream()
                 .map(this::toProto)
                 .collect(Collectors.toList());

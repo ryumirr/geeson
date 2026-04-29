@@ -3,6 +3,7 @@ package storage.rdb.inventory.repository;
 import domain.inventory.domain.entity.InventoryReservationJpaEntity;
 import domain.inventory.domain.repository.InventoryReservationRepository;
 import lombok.RequiredArgsConstructor;
+import module.enums.ReservationStatus;
 import org.springframework.stereotype.Repository;
 import storage.rdb.inventory.repository.adapter.SpringDataInventoryReservationJpaRepository;
 
@@ -18,6 +19,11 @@ public class InventoryReservationJpaRepository implements InventoryReservationRe
     @Override
     public List<InventoryReservationJpaEntity> findByInventory_InventoryId(Long inventoryId) {
         return repository.findByInventory_InventoryId(inventoryId);
+    }
+
+    @Override
+    public List<InventoryReservationJpaEntity> findByInventoryIdAndStatus(Long inventoryId, ReservationStatus status) {
+        return repository.findByInventory_InventoryIdAndStatus(inventoryId, status);
     }
 
     @Override
