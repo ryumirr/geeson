@@ -2,11 +2,10 @@ package api.inventory.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import java.time.LocalDateTime;
 
 public record InventoryReservationReq(
-    @NotNull Long inventoryId,
-    @NotNull Long orderId,
-    @Positive int reservedQuantity,
+    @NotNull @Positive Long inventoryId,
+    @NotNull @Positive Long orderId,
+    @NotNull @Positive Integer reservedQuantity,
     @Positive int ttlSeconds
 ) {}

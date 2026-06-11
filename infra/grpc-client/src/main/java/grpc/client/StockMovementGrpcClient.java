@@ -6,11 +6,10 @@ import grpc.inventory.GetStockMovementsByInventoryRequest;
 import grpc.inventory.GetStockMovementsByInventoryResponse;
 import grpc.inventory.GetStockMovementByReferenceRequest;
 import grpc.inventory.GetStockMovementByReferenceResponse;
+import grpc.inventory.MovementType;
 import grpc.inventory.StockMovementServiceGrpc;
 import grpc.inventory.StockMovementServiceGrpc.StockMovementServiceBlockingStub;
-import support.messaging.command.StockOutCreatedPayload;
 
-//import domain.inventory.domain.message.StockOutCreatedEventPublisher;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -49,23 +48,25 @@ public class StockMovementGrpcClient {
     // ===== Add =====
     public AddStockMovementResponse addStockMovement(AddStockMovementRequest request) {
         try {
-            AddStockMovementResponse response = stockMovementStub.addStockMovement(request);
-            // test
-            // stockOutCreatedEventPublisher.publishStockOutCreatedEvent(
-            //         new StockOutCreatedPayload(
-            //                 response.getStockMovement().getMovementId(), // ✅ nested getter
-            //                 request.getInventoryId(),
-            //                 "OUT",
-            //                 request.getQuantity(),
-            //                 request.getReferenceId(),
-            //                 request.getDescription()
-            //         )
-            // );
-            return response;
+            return stockMovementStub.addStockMovement(request);
         } catch (StatusRuntimeException e) {
             log.error("gRPC call addStockMovement failed: {}", e.getStatus(), e);
             throw e;
         }
+    }
+
+    /**
+     * 출고 흐름에서 내부 movementType 조립 책임을 감춘다.
+     */
+    public AddStockMovementResponse recordStockOut(long inventoryId, int quantity, String referenceId, String description) {
+        AddStockMovementRequest request = AddStockMovementRequest.newBuilder()
+                .setInventoryId(inventoryId)
+                .setMovementType(MovementType.OUT)
+                .setQuantity(quantity)
+                .setReferenceId(referenceId)
+                .setDescription(description != null ? description : "")
+                .build();
+        return addStockMovement(request);
     }
 
     // ===== Get by Inventory =====

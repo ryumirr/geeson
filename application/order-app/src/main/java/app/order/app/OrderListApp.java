@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import app.order.command.OrderRegisterCommand;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -27,12 +28,12 @@ public class OrderListApp {
     private final ProductOrderRepository productOrderRepository;
     private final InventoryGrpcClient inventoryGrpcClient;
 
-    public List<ProductOrderJpaEntity> getAllOrders(int page, int size) {
-        return productOrderRepository.getAllOrders(page, size);
+    public List<ProductOrderJpaEntity> getAllOrders(int page, int size, String status) {
+        return productOrderRepository.getAllOrders(page, size, normalizeStatus(status));
     }
 
-    public List<ProductOrderJpaEntity> getOrdersByCustomerId(Long customerId) {
-        return productOrderRepository.findByCustomerId(customerId);
+    public List<ProductOrderJpaEntity> getOrdersByCustomerId(Long customerId, String status) {
+        return productOrderRepository.findByCustomerId(customerId, normalizeStatus(status));
     }
 
     /**
@@ -60,5 +61,13 @@ public class OrderListApp {
                 .toList();
 
         return inventoryGrpcClient.checkInventories(params);
+    }
+
+    private String normalizeStatus(String status) {
+        if (!StringUtils.hasText(status)) {
+            return null;
+        }
+
+        return status.trim().toUpperCase();
     }
 }

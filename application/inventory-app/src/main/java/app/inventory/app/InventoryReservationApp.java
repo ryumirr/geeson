@@ -63,7 +63,11 @@ public class InventoryReservationApp {
     /**
      * 특정 재고 ID의 예약 목록 조회
      */
-    public List<InventoryReservationJpaEntity> getByInventoryId(Long inventoryId) {
+    public List<InventoryReservationJpaEntity> getByInventoryId(Long inventoryId, ReservationStatus status) {
+        if (status != null) {
+            return reservationRepository.findByInventoryIdAndStatus(inventoryId, status);
+        }
+
         return reservationRepository.findByInventory_InventoryId(inventoryId);
     }
 

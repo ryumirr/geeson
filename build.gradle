@@ -41,6 +41,17 @@ subprojects {
         options.release = 21
     }
 
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
+        testLogging {
+            events "passed", "skipped", "failed"
+            showStandardStreams = true
+        }
+        // 버전 업데이트 경고 로그 삭제를 위해 추가
+        jvmArgs += ["-XX:+EnableDynamicAgentLoading"]
+        systemProperty "spring.profiles.active", "local"
+    }
+
     dependencies {
         implementation("org.springframework.boot:spring-boot-starter")
         implementation("com.googlecode.json-simple:json-simple:1.1.1")
@@ -48,15 +59,4 @@ subprojects {
         annotationProcessor("org.projectlombok:lombok")
         testImplementation ("org.springframework.boot:spring-boot-starter-test")
     }
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
-        testLogging {
-            events "passed", "skipped", "failed"
-            showStandardStreams = true
-    }
-    // 버전 업데이트 경고 로그 삭제를 위해 추가
-    jvmArgs += ["-XX:+EnableDynamicAgentLoading"]
-    systemProperty "spring.profiles.active", "local"
 }
