@@ -39,8 +39,12 @@ public class OutboxPollingScheduler {
                 log.info("✅ Outbox event published. id={}, eventType={}", event.getId(), event.getEventType());
 
             } catch (Exception e) {
-                log.error("❌ Failed to publish outbox event. id={}", event.getId(), e);
-                event.markAsFailed();
+                boolean exhausted = event.incrementRetry();
+                if (exhausted) {
+                    log.error("🚨 Outbox event permanently failed after {} retries. id={}", event.getMaxRetries(), event.getId(), e);
+                } else {
+                    log.warn("⚠️ Outbox publish failed, will retry. id={}, retryCount={}", event.getId(), event.getRetryCount(), e);
+                }
                 outboxRepository.save(event);
             }
         }

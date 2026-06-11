@@ -112,6 +112,7 @@ CREATE TABLE outbox (
     topic VARCHAR(128) NOT NULL,
     payload TEXT NOT NULL,
     status VARCHAR(16) NOT NULL DEFAULT 'PENDING',
+    retry_count INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     sent_at TIMESTAMP NULL,
     INDEX idx_outbox_status (status, created_at)
