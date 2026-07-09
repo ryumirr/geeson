@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import support.messaging.command.ShipmentReadyPayload;
 
 @Slf4j
@@ -18,6 +19,7 @@ public class OrderShippedReadyEventConsumer {
     private final OrderUpdateApp OrderUpdateApp;
     private final IdempotencyService idempotencyService;
 
+    @Transactional
     @KafkaListener(
             topics = "ord-ord-ship-succ-event",
             groupId = "order-consumer-group"
@@ -37,11 +39,13 @@ public class OrderShippedReadyEventConsumer {
             idempotencyService.markAsProcessing(idempotencyKey, "ord-ord-ship-succ-event");
             OrderUpdateApp.updateOrderStatus(payload.orderId());
             idempotencyService.markAsCompleted(idempotencyKey);
+
+            log.info("📨 [Order shipped Success :)] orderId={}", payload.orderId());
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("❌ [Order] Failed to handle order-shipped event", e);
+            // @Transactional로 인해 idempotency/order 상태 변경이 롤백됨
+            // 예외를 재발생시켜 Kafka offset 미커밋 → 메시지 재시도
+            throw new RuntimeException("Order shipped processing failed, will retry", e);
         }
-
-        log.info("📨 [Order shipped Success :)] Received Kafka message: {}", message);
-
     }
 }
